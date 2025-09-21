@@ -43,7 +43,7 @@ export const StockPilotLogo = React.memo(function StockPilotLogo({ className }: 
             100% { offset-distance: 100%; }
           }
           .path-follower {
-            offset-path: path("${graphPath}");
+            offset-path: path(${graphPath});
             animation: followPath 4s linear infinite;
           }
           .clock-face {
