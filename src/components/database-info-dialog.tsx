@@ -22,9 +22,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from '@/components/ui/button';
 import { useAppData } from '@/hooks/use-app-data';
-import { Database, Upload, Download, Loader2, AlertTriangle } from 'lucide-react';
+import { Database, Upload, Download, Loader2, AlertTriangle, ShieldAlert } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { exportAllData, importAllData } from '@/lib/actions/data-actions';
+import { useUser } from '@/hooks/use-user';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 interface DatabaseInfoDialogProps {
   open: boolean;
@@ -32,7 +34,8 @@ interface DatabaseInfoDialogProps {
 }
 
 export function DatabaseInfoDialog({ open, onOpenChange }: DatabaseInfoDialogProps) {
-  const { isDbConnected, isAppDataLoading, addMultipleProducts } = useAppData();
+  const { isDbConnected } = useAppData();
+  const { user } = useUser();
   const { toast } = useToast();
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -40,7 +43,10 @@ export function DatabaseInfoDialog({ open, onOpenChange }: DatabaseInfoDialogPro
   const [fileToImport, setFileToImport] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const isAdmin = user?.role === 'admin';
+
   const handleExport = async () => {
+    if (!isAdmin) return;
     setIsExporting(true);
     try {
       const data = await exportAllData();
@@ -58,6 +64,7 @@ export function DatabaseInfoDialog({ open, onOpenChange }: DatabaseInfoDialogPro
   };
   
   const handleImportClick = () => {
+    if (!isAdmin) return;
     fileInputRef.current?.click();
   }
 
@@ -76,7 +83,7 @@ export function DatabaseInfoDialog({ open, onOpenChange }: DatabaseInfoDialogPro
   };
   
   const confirmImport = () => {
-    if(!fileToImport) return;
+    if(!fileToImport || !isAdmin) return;
     setIsImporting(true);
     setConfirmImportOpen(false);
     
@@ -109,6 +116,49 @@ export function DatabaseInfoDialog({ open, onOpenChange }: DatabaseInfoDialogPro
     reader.readAsText(fileToImport);
   }
 
+  const renderButton = (action: 'export' | 'import') => {
+    const isDisabled = isExporting || isImporting || !isDbConnected || !isAdmin;
+    const buttonContent = action === 'export' ? (
+      <>
+        {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Download className="mr-2 h-4 w-4" />}
+        Export All Data
+      </>
+    ) : (
+      <>
+        {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Upload className="mr-2 h-4 w-4" />}
+        Import Data
+      </>
+    );
+    const buttonAction = action === 'export' ? handleExport : handleImportClick;
+    const variant = action === 'export' ? 'default' : 'outline';
+
+    if (!isAdmin) {
+      return (
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    {/* The div wrapper is necessary for the tooltip to work on a disabled button */}
+                    <div className='w-full'> 
+                        <Button variant={variant as any} onClick={buttonAction} disabled={true} className="w-full">
+                            {buttonContent}
+                        </Button>
+                    </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                    <p className="flex items-center gap-2"><ShieldAlert className="h-4 w-4" /> Admin access required.</p>
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
+      );
+    }
+
+    return (
+        <Button variant={variant as any} onClick={buttonAction} disabled={isDisabled}>
+            {buttonContent}
+        </Button>
+    );
+  }
+
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -132,21 +182,15 @@ export function DatabaseInfoDialog({ open, onOpenChange }: DatabaseInfoDialogPro
                 </div>
             </div>
              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                 <Button onClick={handleExport} disabled={isExporting || isImporting || !isDbConnected}>
-                    {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Download className="mr-2 h-4 w-4" />}
-                    Export All Data
-                 </Button>
-                  <input
+                {renderButton('export')}
+                 <input
                     type="file"
                     ref={fileInputRef}
                     onChange={handleFileChange}
                     className="hidden"
                     accept=".json"
                   />
-                 <Button variant="outline" onClick={handleImportClick} disabled={isImporting || isExporting || !isDbConnected}>
-                     {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Upload className="mr-2 h-4 w-4" />}
-                    Import Data
-                 </Button>
+                {renderButton('import')}
              </div>
              {!isDbConnected && (
                 <p className="text-xs text-center text-muted-foreground">Data management is only available when connected to a database.</p>
@@ -165,13 +209,15 @@ export function DatabaseInfoDialog({ open, onOpenChange }: DatabaseInfoDialogPro
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2"><AlertTriangle className="text-destructive"/> Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently <strong className="text-destructive">DELETE ALL</strong> current data in your database and replace it with the data from the backup file.
+              This is a **Full Restore** action. It cannot be undone. This will permanently **DELETE ALL** current data in the database and replace it with the data from your backup file.
+              <br/><br/>
+              Any data created after this backup was made will be lost.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={confirmImport} className="bg-destructive hover:bg-destructive/90">
-              Yes, import data
+              Yes, delete all and import
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
