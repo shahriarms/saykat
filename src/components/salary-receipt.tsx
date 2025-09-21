@@ -31,13 +31,13 @@ export const SalaryReceipt = React.memo(React.forwardRef<HTMLDivElement, SalaryR
           }}
         >
           {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-2 text-left">
-              <StockPilotLogo className="w-12 h-12" />
-              <div>
-                <h1 className="text-2xl font-bold text-gray-800 tracking-wider">{t('shop_name')}</h1>
-                <p className="text-sm text-gray-500">Dhaka, Bangladesh</p>
-              </div>
+          <div className="flex justify-between items-start mb-6">
+             <div className="flex items-center gap-2">
+                <StockPilotLogo className="w-12 h-12" />
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-800 tracking-wider">{t('shop_name')}</h1>
+                    <p className="text-sm text-gray-500">Dhaka, Bangladesh</p>
+                </div>
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-500 uppercase">{t('date_label')}</p>
