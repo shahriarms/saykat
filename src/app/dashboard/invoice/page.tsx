@@ -133,7 +133,6 @@ function InvoicePage() {
 
       window.addEventListener('afterprint', handleAfterPrint);
       
-      // We still need a small delay to ensure the state has propagated and the DOM is ready.
       const timer = setTimeout(() => {
         window.print();
       }, 100);
@@ -460,7 +459,7 @@ function InvoicePage() {
                     </div>
                 </CardFooter>
               </Card>
-               <Card>
+              <Card>
                   <CardHeader>
                       <CardTitle>{t('live_print_preview_title')}</CardTitle>
                   </CardHeader>

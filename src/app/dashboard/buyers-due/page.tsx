@@ -36,7 +36,7 @@ import { useUser } from '@/hooks/use-user';
 
 
 export default function BuyersDuePage() {
-  const { invoices: allInvoices, buyers, getInvoicesForBuyer, addPayment, getPaymentsForInvoice, deleteInvoice } from useAppData();
+  const { invoices: allInvoices, buyers, getInvoicesForBuyer, addPayment, getPaymentsForInvoice, deleteInvoice } from 'useAppData();
   const { user } = useUser();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -129,11 +129,10 @@ export default function BuyersDuePage() {
             const originalTitle = document.title;
             document.title = `payment-receipt-for-invoice-${lastSuccessfulPayment.invoice.id}`;
             
-            // Allow state to update and content to render before printing
             const timer = setTimeout(() => {
                 window.print();
                 document.title = originalTitle;
-                setLastSuccessfulPayment(null); // Clean up after printing
+                setLastSuccessfulPayment(null);
             }, 100);
 
             return () => clearTimeout(timer);

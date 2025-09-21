@@ -100,11 +100,9 @@ export default function BuyersPage() {
             const originalTitle = document.title;
             document.title = `invoice-${invoiceToPrint.id}`;
             
-            // Allow state to update and content to render before printing
             const timer = setTimeout(() => {
                 window.print();
                 document.title = originalTitle;
-                // Clean up after printing
                 setInvoiceToPrint(null);
                 setIsPrinting(false);
             }, 100); 
