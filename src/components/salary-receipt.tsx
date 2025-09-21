@@ -72,14 +72,14 @@ export const SalaryReceipt = React.memo(React.forwardRef<HTMLDivElement, SalaryR
               </div>
 
               {/* Account Number and Signature */}
-              <div className="mt-12 flex justify-between items-end">
-                <div>
+              <div className="mt-12 flex flex-col md:flex-row md:justify-between items-end gap-4">
+                <div className="w-full md:w-auto">
                   <span className="text-sm text-gray-600 font-semibold">{t('phone_number_label')}:</span>
                   <div className="font-mono border border-gray-300 px-3 py-1 inline-block ml-2">
                     {employee.phone}
                   </div>
                 </div>
-                <div className="w-64 text-center">
+                <div className="w-full md:w-64 text-center mt-4 md:mt-0">
                   <div className="border-t border-gray-400 pt-1 text-xs text-gray-600">
                     {t('please_sign_above_label')}
                   </div>
