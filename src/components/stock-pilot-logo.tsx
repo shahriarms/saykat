@@ -87,9 +87,9 @@ export const StockPilotLogo = React.memo(function StockPilotLogo({ className }: 
           {/* Real Clock */}
           <g transform="translate(75, 65)">
               <circle className="clock-face" r="14" />
-              <line y1="-8" stroke="#22C55E" strokeWidth="4" strokeLinecap="round" style={{ transform: `rotate(${rotation.h}deg)`, transformOrigin: 'center' }} />
-              <line y1="-11" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" style={{ transform: `rotate(${rotation.m}deg)`, transformOrigin: 'center' }} />
-              <line y1="-12" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" style={{ transform: `rotate(${rotation.s}deg)`, transformOrigin: 'center' }} />
+              <line y1="-8" stroke="#22C55E" strokeWidth="4" strokeLinecap="round" style={{ transform: `rotate(${rotation.h}deg)`, transformOrigin: '0 0' }} />
+              <line y1="-11" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" style={{ transform: `rotate(${rotation.m}deg)`, transformOrigin: '0 0' }} />
+              <line y1="-12" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" style={{ transform: `rotate(${rotation.s}deg)`, transformOrigin: '0 0' }} />
               <circle r="1.5" fill="#22C55E" />
           </g>
         </svg>
