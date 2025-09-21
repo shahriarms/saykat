@@ -208,21 +208,23 @@ export default function SalariesPage() {
                 {selectedEmployee ? t('for_employee_subtitle', { name: selectedEmployee.name }) : t('select_employee_from_list')}
              </CardDescription>
           </CardHeader>
-          <CardContent className="flex-1 flex flex-col gap-6">
+          <CardContent className="flex-1 flex flex-col gap-6 min-h-0">
             {!selectedEmployee ? (
                 <div className="text-center text-muted-foreground py-12 flex-1 flex flex-col justify-center items-center">
                     <Users className="mx-auto h-12 w-12 text-muted-foreground/50"/>
                     <p className="mt-4">{t('please_select_employee')}</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-0">
                     {/* Payment Input & History Section */}
                     <div className="space-y-4 flex flex-col">
-                        <h3 className="font-semibold text-lg">{t('payment_details_title')}</h3>
-                        <div className="p-4 rounded-lg bg-muted/50 space-y-2">
-                            <div className="flex justify-between text-sm"><span>{t('monthly_salary_label')}:</span> <span className="font-mono">৳ {selectedEmployee.salary.toFixed(2)}</span></div>
-                            <div className="flex justify-between text-sm"><span>{t('paid_this_month_label')}:</span> <span className="font-mono">৳ {paidThisMonth.toFixed(2)}</span></div>
-                            <div className="flex justify-between font-bold text-base border-t pt-2 mt-2"><span>{t('due_this_month_label')}:</span> <span className="font-mono text-primary">৳ {dueSalary.toFixed(2)}</span></div>
+                        <div>
+                          <h3 className="font-semibold text-lg">{t('payment_details_title')}</h3>
+                          <div className="p-4 rounded-lg bg-muted/50 space-y-2">
+                              <div className="flex justify-between text-sm"><span>{t('monthly_salary_label')}:</span> <span className="font-mono">৳ {selectedEmployee.salary.toFixed(2)}</span></div>
+                              <div className="flex justify-between text-sm"><span>{t('paid_this_month_label')}:</span> <span className="font-mono">৳ {paidThisMonth.toFixed(2)}</span></div>
+                              <div className="flex justify-between font-bold text-base border-t pt-2 mt-2"><span>{t('due_this_month_label')}:</span> <span className="font-mono text-primary">৳ {dueSalary.toFixed(2)}</span></div>
+                          </div>
                         </div>
 
                         <div className="relative">
@@ -286,15 +288,17 @@ export default function SalariesPage() {
                     </div>
 
                     {/* Receipt Preview Section */}
-                    <div className="space-y-4">
+                    <div className="space-y-4 flex flex-col min-h-0">
                         <h3 className="font-semibold text-lg">{t('live_receipt_preview_title')}</h3>
-                        <div className="bg-muted/50 p-4 rounded-lg">
-                           <SalaryReceipt 
-                                employee={selectedEmployee}
-                                paymentAmount={typeof paymentAmount === 'number' ? paymentAmount : 0}
-                                paymentDate={new Date()}
-                           />
-                        </div>
+                        <ScrollArea className="flex-1">
+                            <div className="bg-muted/50 p-4 rounded-lg">
+                               <SalaryReceipt 
+                                    employee={selectedEmployee}
+                                    paymentAmount={typeof paymentAmount === 'number' ? paymentAmount : 0}
+                                    paymentDate={new Date()}
+                               />
+                            </div>
+                        </ScrollArea>
                     </div>
                 </div>
             )}
@@ -331,3 +335,5 @@ export default function SalariesPage() {
     </>
   );
 }
+
+    
