@@ -24,8 +24,8 @@ export const SalaryReceipt = React.memo(React.forwardRef<HTMLDivElement, SalaryR
     return (
       <div ref={ref} className={cn("bg-white p-6 font-sans print:p-0", isBn ? 'font-bangla' : '')}>
         <div 
-          className="w-full max-w-4xl mx-auto border-2 border-gray-400 p-8 relative isolate"
-          style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'80\' height=\'80\' viewBox=\'0 0 80 80\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23e0e7f1\' fill-opacity=\'0.4\'%3E%3Cpath d=\'M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zm0-40c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zM10 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zm0-40c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}
+          className="w-full max-w-4xl mx-auto border-2 border-dashed border-gray-400 p-8 relative isolate"
+           style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'80\' height=\'80\' viewBox=\'0 0 80 80\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23e0e7f1\' fill-opacity=\'0.4\'%3E%3Cpath d=\'M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zm0-40c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zM10 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zm0-40c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}
         >
 
             <div className="bg-white/80 backdrop-blur-sm p-4">
@@ -75,11 +75,6 @@ export const SalaryReceipt = React.memo(React.forwardRef<HTMLDivElement, SalaryR
                   <p className="text-xs text-gray-600">{t('please_sign_above_label')}</p>
                 </div>
               </div>
-
-              <div className="mt-6">
-                <p className="font-mono text-xs text-gray-400 tracking-widest">⑈567890⑈1234567890⑆1234</p>
-              </div>
-              
             </div>
         </div>
       </div>
