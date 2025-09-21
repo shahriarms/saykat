@@ -305,13 +305,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
         } else {
             // --- Local Storage Logic ---
             const newId = lastInvoiceId + 1;
-            const newInvoice: Invoice = { ...invoiceToSave, id: newId };
+            let newInvoice: Omit<Invoice, 'id'> = { ...invoiceToSave };
+            
             let newBuyers = [...buyers];
-            let buyerToUpdate = buyers.find(b => b.id === newInvoice.buyerId);
+            let buyerToUpdate = buyers.find(b => b.name.toLowerCase() === newInvoice.customerName.toLowerCase());
     
             if (buyerToUpdate) {
                 // Update existing buyer
                 newBuyers = newBuyers.map(b => b.id === buyerToUpdate!.id ? { ...b, invoiceIds: [...b.invoiceIds, String(newId)] } : b);
+                newInvoice.buyerId = buyerToUpdate.id;
             } else if (newInvoice.customerName) {
                 // Create new buyer
                 const newBuyerId = `buyer-${Date.now()}`;
@@ -329,7 +331,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
             setBuyers(newBuyers);
             saveDataToLocalStorage('buyers', newBuyers);
     
-            const newInvoices = [newInvoice, ...invoices];
+            const finalInvoice: Invoice = { ...newInvoice, id: newId };
+
+            const newInvoices = [finalInvoice, ...invoices];
             setInvoices(newInvoices);
             saveDataToLocalStorage('invoices', newInvoices);
             
@@ -337,7 +341,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
             saveDataToLocalStorage('lastInvoiceId', newId);
 
             // Update stock locally
-            const stockUpdates = newInvoice.items.map(item => ({ id: item.id, stockChange: -item.quantity }));
+            const stockUpdates = finalInvoice.items.map(item => ({ id: item.id, stockChange: -item.quantity }));
             const newProducts = products.map(p => {
                 const update = stockUpdates.find(u => u.id === p.id);
                 return update ? { ...p, stock: p.stock + update.stockChange } : p;
@@ -348,7 +352,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
             toast({ title: "Invoice Saved (Local)", description: `Invoice #${newId} saved locally.` });
             
             if (settings.printFormat === 'pos' && settings.posPrinterType !== 'disabled') {
-                await printInvoice(newInvoice);
+                await printInvoice(finalInvoice);
             }
             return newId;
         }
@@ -668,5 +672,3 @@ export function useAppData() {
     }
     return context;
 }
-
-    

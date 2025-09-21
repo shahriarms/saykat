@@ -79,7 +79,7 @@ class PostgresDataService {
             const lastIdResult = await client.query('SELECT id FROM invoices ORDER BY id DESC LIMIT 1');
             const newId = lastIdResult.rows.length > 0 ? lastIdResult.rows[0].id + 1 : 1;
             
-            const newInvoice = { ...invoiceData, id: newId };
+            let finalInvoiceData = { ...invoiceData, id: newId };
 
             // Upsert buyer and get their ID
             let buyerId = invoiceData.buyerId;
@@ -91,8 +91,8 @@ class PostgresDataService {
                         [JSON.stringify(newId), buyerId]
                     );
                 } else {
-                    // Check if buyer exists by name/phone, otherwise create new.
-                    let buyerResult = await client.query('SELECT id FROM buyers WHERE name = $1 AND phone = $2', [invoiceData.customerName, invoiceData.customerPhone]);
+                    // Check if buyer exists by name, otherwise create new.
+                    let buyerResult = await client.query('SELECT id FROM buyers WHERE name = $1', [invoiceData.customerName]);
                     if (buyerResult.rows.length > 0) {
                         buyerId = buyerResult.rows[0].id;
                         await client.query(
@@ -107,13 +107,13 @@ class PostgresDataService {
                         );
                     }
                 }
-                newInvoice.buyerId = buyerId;
+                finalInvoiceData.buyerId = buyerId;
             }
 
             // Insert invoice
             await client.query(
                 'INSERT INTO invoices (id, buyer_id, customer_name, customer_address, customer_phone, items, subtotal, paid_amount, due_amount, date) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
-                [newInvoice.id, newInvoice.buyerId, newInvoice.customerName, newInvoice.customerAddress, newInvoice.customerPhone, JSON.stringify(items), newInvoice.subtotal, newInvoice.paidAmount, newInvoice.dueAmount, newInvoice.date]
+                [finalInvoiceData.id, finalInvoiceData.buyerId, finalInvoiceData.customerName, finalInvoiceData.customerAddress, finalInvoiceData.customerPhone, JSON.stringify(items), finalInvoiceData.subtotal, finalInvoiceData.paidAmount, finalInvoiceData.dueAmount, finalInvoiceData.date]
             );
 
             // Update product stock
@@ -124,7 +124,7 @@ class PostgresDataService {
             await PostgresProductService.updateMultipleStocks(stockUpdates, client);
             
             await client.query('COMMIT');
-            return formatRow(newInvoice) as Invoice;
+            return formatRow(finalInvoiceData) as Invoice;
 
         } catch (e) {
             await client.query('ROLLBACK');
@@ -347,5 +347,3 @@ class PostgresDataService {
 }
 
 export default PostgresDataService;
-
-    

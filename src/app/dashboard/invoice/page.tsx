@@ -59,39 +59,14 @@ function InvoicePage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isPrintConfirmOpen, setPrintConfirmOpen] = useState(false);
   const [invoiceToPrint, setInvoiceToPrint] = useState<DraftInvoice | null>(null);
-  const [buyerSearchTerm, setBuyerSearchTerm] = useState("");
-  const [isBuyerPopoverOpen, setBuyerPopoverOpen] = useState(false);
-
   
   const { id: draftId, customerName, customerAddress, customerPhone, paidAmount, subtotal, dueAmount, items, cashReceived, changeAmount } = activeDraft || {};
 
-  const filteredBuyers = useMemo(() => {
-    if (!buyerSearchTerm) return [];
-    const lowercasedTerm = buyerSearchTerm.toLowerCase();
-    return buyers.filter(
-      (buyer) =>
-        buyer.name.toLowerCase().includes(lowercasedTerm) ||
-        (buyer.phone && buyer.phone.includes(lowercasedTerm))
-    );
-  }, [buyerSearchTerm, buyers]);
-
-  const handleBuyerSelect = (buyer: Buyer) => {
-    updateActiveDraft({
-      customerName: buyer.name,
-      customerAddress: buyer.address,
-      customerPhone: buyer.phone,
-      buyerId: buyer.id,
-    });
-    setBuyerSearchTerm(buyer.name);
-    setBuyerPopoverOpen(false);
-  };
-  
   const handleCustomerNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value;
-    updateActiveDraft({ customerName: name, buyerId: undefined });
-    setBuyerSearchTerm(name);
-    setBuyerPopoverOpen(true);
+    updateActiveDraft({ customerName: name });
   };
+
 
   const validateInvoice = () => {
     if (!customerName) {
@@ -117,7 +92,8 @@ function InvoicePage() {
     setIsProcessing(true);
 
     try {
-        const newInvoiceId = await addInvoice(activeDraft);
+        const updatedDraftWithId = await updateActiveDraft({ id: activeDraft.id }); // Ensure latest state is used.
+        const newInvoiceId = await addInvoice(updatedDraftWithId);
         
         if (newInvoiceId) {
             toast({
@@ -125,13 +101,12 @@ function InvoicePage() {
               description: t('invoice_saved_toast_description', { invoiceId: newInvoiceId }),
             });
             
-            const updatedDraftWithId = await updateActiveDraft({ id: newInvoiceId });
+            const finalDraft = await updateActiveDraft({ id: newInvoiceId });
             
             const timer = setTimeout(() => {
-                setInvoiceToPrint(updatedDraftWithId);
+                setInvoiceToPrint(finalDraft);
             }, 100);
             
-            // Cleanup timer if component unmounts
             return () => clearTimeout(timer);
         }
     } catch (error: any) {
@@ -155,7 +130,6 @@ function InvoicePage() {
         document.title = originalTitle;
         setInvoiceToPrint(null);
         resetActiveDraft();
-        setBuyerSearchTerm("");
         toast({
             title: "Memo Ready",
             description: "A new, empty memo is ready for you.",
@@ -337,35 +311,13 @@ function InvoicePage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="customerName">{t('customer_name_label')}</Label>
-                           <Popover open={isBuyerPopoverOpen} onOpenChange={setBuyerPopoverOpen}>
-                              <PopoverTrigger asChild>
-                                  <Input
-                                    id="customerName"
-                                    placeholder={t('customer_name_placeholder')}
-                                    value={customerName || ''}
-                                    onChange={handleCustomerNameChange}
-                                    autoComplete="off"
-                                  />
-                              </PopoverTrigger>
-                              <PopoverContent className="w-[--radix-popover-trigger-width] max-h-60 overflow-y-auto p-0">
-                                {filteredBuyers.length > 0 ? (
-                                  <div className="divide-y">
-                                    {filteredBuyers.map((buyer) => (
-                                      <button
-                                        key={buyer.id}
-                                        onClick={() => handleBuyerSelect(buyer)}
-                                        className="w-full text-left p-2 hover:bg-muted"
-                                      >
-                                        <p className="font-semibold">{buyer.name}</p>
-                                        <p className="text-sm text-muted-foreground">{buyer.phone}</p>
-                                      </button>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <p className="p-4 text-sm text-muted-foreground">No existing buyers found. A new one will be created.</p>
-                                )}
-                              </PopoverContent>
-                            </Popover>
+                           <Input
+                              id="customerName"
+                              placeholder={t('customer_name_placeholder')}
+                              value={customerName || ''}
+                              onChange={handleCustomerNameChange}
+                              autoComplete="off"
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="customerPhone">{t('customer_phone_label')}</Label>
@@ -606,5 +558,3 @@ export default function InvoicePageWrapper() {
     </InvoiceFormProvider>
   );
 }
-
-    
