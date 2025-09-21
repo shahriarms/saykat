@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
@@ -32,7 +33,7 @@ import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { useTranslation } from '@/hooks/use-translation';
 
 export default function SalariesPage() {
-  const { employees, getPaymentsForMonth, addSalaryPayment, getDueSalaryForMonth, isAppDataLoading } = useAppData();
+  const { employees, getPaymentsForMonth, addSalaryPayment, getDueSalaryForMonth } = useAppData();
   const { user } = useUser();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -126,10 +127,6 @@ export default function SalariesPage() {
   const confirmPayment = () => {
     handleAddPayment();
     setConfirmingPayment(false);
-  }
-
-  if (isAppDataLoading) {
-    return <div className="flex h-full w-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
 
   return (

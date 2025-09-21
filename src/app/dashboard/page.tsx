@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -31,7 +32,7 @@ import type { Invoice, Expense, SalaryPayment, Attendance, Product } from '@/lib
 
 
 export default function Dashboard() {
-  const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, isAppDataLoading: isLoading, getAttendanceForDate, invoices: allInvoices } = useAppData();
+  const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, getAttendanceForDate, invoices: allInvoices } = useAppData();
   const { t } = useTranslation();
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
@@ -71,12 +72,12 @@ export default function Dashboard() {
 
   // This useEffect updates the date range data when the range changes.
   useEffect(() => {
-    if (!isLoading && dateRange?.from && dateRange?.to) {
+    if (dateRange?.from && dateRange?.to) {
       setRangeInvoices(getInvoicesForDateRange(dateRange.from, dateRange.to));
       setRangeExpenses(getExpensesForDateRange(dateRange.from, dateRange.to));
       setRangeSalaries(getSalaryPaymentsForDateRange(dateRange.from, dateRange.to));
     }
-  }, [isLoading, dateRange, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange]);
+  }, [dateRange, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange]);
 
 
   const calculateUnitsSold = useCallback((invoices: Invoice[], products: Product[]) => {
@@ -170,7 +171,7 @@ export default function Dashboard() {
     return format(dateRange.from, 'PPP');
   }, [dateRange]);
 
-  if (isLoading || !dateRange) {
+  if (!dateRange) {
     return <div className="flex h-full w-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
 
@@ -485,5 +486,3 @@ export default function Dashboard() {
     </>
   );
 }
-
-    

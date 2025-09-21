@@ -66,7 +66,7 @@ interface SummaryStats {
 
 
 export default function ExpensesPage() {
-    const { expenses, isAppDataLoading: isLoading, deleteExpense } = useAppData();
+    const { expenses, deleteExpense } = useAppData();
     const { user } = useUser();
     const { t } = useTranslation();
     const [isDialogOpen, setDialogOpen] = useState(false);
@@ -131,8 +131,6 @@ export default function ExpensesPage() {
 
 
     useEffect(() => {
-        if (isLoading) return;
-
         const now = new Date();
         const todayExpenses = expenses.filter(e => isSameDay(new Date(e.date), now));
         const todayTotal = todayExpenses.reduce((sum, e) => sum + e.amount, 0);
@@ -160,7 +158,7 @@ export default function ExpensesPage() {
         })).filter(d => d.value > 0);
         
         setSummaryStats({ todayTotal, monthTotal, todayCategoryData });
-    }, [expenses, isLoading, t]);
+    }, [expenses, t]);
     
     const chartConfig: ChartConfig = {
       Expense: { label: t('expense_label'), color: "hsl(var(--primary))" },
@@ -194,10 +192,6 @@ export default function ExpensesPage() {
             XLSX.writeFile(workbook, `expenses.${fileType}`);
         }
     };
-
-    if (isLoading) {
-      return <div className="flex h-full w-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
-    }
 
     return (
       <div className="flex flex-col gap-6">
@@ -374,5 +368,3 @@ export default function ExpensesPage() {
       </div>
     );
 }
-
-    

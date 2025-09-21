@@ -41,7 +41,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
-      setIsLoading(true);
       if (firebaseUser) {
         const isUserAdmin = firebaseUser.email === ADMIN_EMAIL;
         let userRole: Role = isUserAdmin ? 'admin' : 'employee';
@@ -65,7 +64,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             }
         }
          // If user is on login/signup page, redirect to dashboard
-        if (pathname === '/login' || pathname === '/signup') {
+        if (pathname === '/login' || pathname === '/signup' || pathname === '/') {
             router.replace('/dashboard');
         }
 
@@ -84,14 +83,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
 
   const logout = useCallback(async () => {
-    setIsLoading(true);
     await auth.signOut();
-    setUser(null);
-    setAdminCode(null); 
-    sessionStorage.removeItem('user-role');
-    router.push('/login');
-    setIsLoading(false);
-  }, [auth, router]);
+  }, [auth]);
 
   const generateAdminCode = useCallback(() => {
     if (user?.email === ADMIN_EMAIL) {
@@ -144,16 +137,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
         </div>
     );
   }
-
-  // Prevent dashboard rendering for unauthenticated users, even for a flash
-  if (!user && pathname !== '/login' && pathname !== '/signup') {
-    return (
-        <div className="flex h-screen w-full items-center justify-center bg-background">
-            <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-    );
-  }
-
 
   return (
     <UserContext.Provider value={value}>
