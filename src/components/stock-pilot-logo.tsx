@@ -16,16 +16,47 @@ export const StockPilotLogo = React.memo(function StockPilotLogo({ className }: 
       <style>
         {`
           @keyframes followPath {
-            0% {
-              offset-distance: 0%;
-            }
-            100% {
-              offset-distance: 100%;
-            }
+            0% { offset-distance: 0%; }
+            100% { offset-distance: 100%; }
           }
           .path-follower {
             offset-path: path("${graphPath}");
             animation: followPath 4s linear infinite;
+          }
+          .clock-face {
+            stroke: #22C55E;
+            stroke-width: 4;
+            fill: #22C55E1A;
+          }
+          .clock-hand {
+            stroke: #22C55E;
+            stroke-linecap: round;
+            transform-origin: center;
+          }
+          .hour-hand {
+            stroke-width: 4;
+            animation: hours 43200s linear infinite;
+          }
+          .minute-hand {
+            stroke-width: 3;
+            animation: minutes 3600s linear infinite;
+          }
+          .second-hand {
+            stroke: #22C55E;
+            stroke-width: 2;
+            animation: seconds 60s steps(60, end) infinite;
+          }
+          @keyframes seconds {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+          @keyframes minutes {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+          @keyframes hours {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
           }
         `}
       </style>
@@ -60,10 +91,13 @@ export const StockPilotLogo = React.memo(function StockPilotLogo({ className }: 
           {/* Animated Circle */}
           <circle className="path-follower" r="5" fill="#22C55E" />
 
-          {/* Clock */}
-          <g stroke="#22C55E">
-            <circle cx="75" cy="65" r="14" fill="#22C55E" fillOpacity="0.1" />
-            <path d="M75 60 V65 H79" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          {/* Real Clock */}
+          <g transform="translate(75, 65)">
+              <circle className="clock-face" r="14" />
+              <line y1="-8" className="clock-hand hour-hand" />
+              <line y1="-11" className="clock-hand minute-hand" />
+              <line y1="-12" className="clock-hand second-hand" />
+              <circle r="1.5" fill="#22C55E" />
           </g>
         </svg>
       </div>
