@@ -213,8 +213,8 @@ export default function Dashboard() {
                   onSelect={setDateRange}
                   numberOfMonths={1}
                   captionLayout="dropdown-buttons"
-                  fromYear={2019}
-                  toYear={new Date().getFullYear() + 5}
+                  fromYear={2025}
+                  toYear={2050}
                 />
               </PopoverContent>
             </Popover>
