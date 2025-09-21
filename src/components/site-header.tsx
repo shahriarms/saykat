@@ -76,15 +76,15 @@ export function SiteHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b bg-card px-4 sm:px-6">
+      <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-b bg-card px-4 sm:px-6">
         {/* Left Section: Empty for spacing, but maintains balance */}
         <div className="flex-1"></div>
 
         {/* Center Section: Logo and Title */}
-        <div className="flex flex-1 items-center justify-center">
-            <Link href="/dashboard" className="flex items-center gap-2">
+        <div className="flex flex-1 items-center justify-center overflow-hidden">
+            <Link href="/dashboard" className="flex flex-shrink-0 items-center gap-2">
                 <StockPilotLogo className="w-10 h-10" />
-                <h1 className="text-lg sm:text-2xl font-bold">
+                <h1 className="whitespace-nowrap text-lg font-bold sm:text-2xl">
                     <span className="text-foreground">Mahmud Engineering Shop</span>
                 </h1>
             </Link>
