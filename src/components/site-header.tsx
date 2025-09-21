@@ -1,5 +1,4 @@
 
-
 'use client';
 import { Button } from '@/components/ui/button';
 import { UserCircle, LogOut, Settings, KeyRound, Languages } from 'lucide-react';
@@ -77,14 +76,14 @@ export function SiteHeader() {
   return (
     <>
       <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-b bg-card px-4 sm:px-6">
-        {/* Left Section: Empty for spacing, but maintains balance */}
+        {/* Left Section: Empty for spacing */}
         <div className="flex-1"></div>
 
         {/* Center Section: Logo and Title */}
-        <div className="flex flex-1 items-center justify-center overflow-hidden">
-            <Link href="/dashboard" className="flex flex-shrink-0 items-center gap-2">
-                <StockPilotLogo className="w-10 h-10" />
-                <h1 className="whitespace-nowrap text-lg font-bold sm:text-2xl">
+        <div className="flex flex-1 items-center justify-center min-w-0">
+            <Link href="/dashboard" className="flex flex-shrink-0 items-center gap-2 min-w-0">
+                <StockPilotLogo className="w-10 h-10 flex-shrink-0" />
+                <h1 className="overflow-hidden text-ellipsis whitespace-nowrap text-lg font-bold sm:text-2xl">
                     <span className="text-foreground">Mahmud Engineering Shop</span>
                 </h1>
             </Link>
