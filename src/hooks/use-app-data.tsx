@@ -12,6 +12,19 @@ import * as productActions from '@/lib/actions/product-actions';
 import * as dataActions from '@/lib/actions/data-actions';
 import { Loader2 } from 'lucide-react';
 
+const LOCAL_STORAGE_KEYS = {
+    products: 'stockpilot-products',
+    invoices: 'stockpilot-invoices',
+    buyers: 'stockpilot-buyers',
+    expenses: 'stockpilot-expenses',
+    employees: 'stockpilot-employees',
+    attendance: 'stockpilot-attendance',
+    salaryPayments: 'stockpilot-salaryPayments',
+    payments: 'stockpilot-payments',
+    lastInvoiceId: 'stockpilot-lastInvoiceId',
+};
+
+
 interface AppDataContextType {
     products: Product[];
     invoices: Invoice[];
@@ -84,6 +97,38 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const [isDbConnected, setIsDbConnected] = useState(false);
     const [lastInvoiceId, setLastInvoiceId] = useState(0);
 
+    const loadDataFromLocalStorage = useCallback(() => {
+        try {
+            const localProducts = localStorage.getItem(LOCAL_STORAGE_KEYS.products);
+            const localInvoices = localStorage.getItem(LOCAL_STORAGE_KEYS.invoices);
+            const localBuyers = localStorage.getItem(LOCAL_STORAGE_KEYS.buyers);
+            const localExpenses = localStorage.getItem(LOCAL_STORAGE_KEYS.expenses);
+            const localEmployees = localStorage.getItem(LOCAL_STORAGE_KEYS.employees);
+            const localAttendance = localStorage.getItem(LOCAL_STORAGE_KEYS.attendance);
+            const localSalaryPayments = localStorage.getItem(LOCAL_STORAGE_KEYS.salaryPayments);
+            const localPayments = localStorage.getItem(LOCAL_STORAGE_KEYS.payments);
+            const localLastInvoiceId = localStorage.getItem(LOCAL_STORAGE_KEYS.lastInvoiceId);
+
+            setProducts(localProducts ? JSON.parse(localProducts) : []);
+            setInvoices(localInvoices ? JSON.parse(localInvoices) : []);
+            setBuyers(localBuyers ? JSON.parse(localBuyers) : []);
+            setExpenses(localExpenses ? JSON.parse(localExpenses) : []);
+            setEmployees(localEmployees ? JSON.parse(localEmployees) : []);
+            setAttendance(localAttendance ? JSON.parse(localAttendance) : []);
+            setSalaryPayments(localSalaryPayments ? JSON.parse(localSalaryPayments) : []);
+            setPayments(localPayments ? JSON.parse(localPayments) : []);
+            setLastInvoiceId(localLastInvoiceId ? JSON.parse(localLastInvoiceId) : 0);
+            toast({ title: 'Running Offline', description: 'Using local storage for data. Changes will not be saved to the database.' });
+        } catch (error) {
+            console.error("Failed to load data from local storage:", error);
+            toast({ variant: 'destructive', title: 'Local Storage Error', description: 'Could not load data from local storage.' });
+        }
+    }, [toast]);
+
+    const saveDataToLocalStorage = useCallback((key: keyof typeof LOCAL_STORAGE_KEYS, data: any) => {
+        localStorage.setItem(LOCAL_STORAGE_KEYS[key], JSON.stringify(data));
+    }, []);
+
     const loadAllData = useCallback(async () => {
         setIsAppDataLoading(true);
         try {
@@ -105,15 +150,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
                 setPayments(serverData.payments);
                 setLastInvoiceId(serverData.invoices[0]?.id || 0);
             } else {
-                toast({ variant: 'destructive', title: 'Database Connection Failed', description: 'Could not connect to the database. Please ensure it is running and accessible.' });
+                loadDataFromLocalStorage();
             }
         } catch (error) {
             console.error("Failed to load app data:", error);
-            toast({ variant: 'destructive', title: 'Loading Error', description: 'Failed to load application data.' });
+            loadDataFromLocalStorage();
         } finally {
             setIsAppDataLoading(false);
         }
-    }, [toast]);
+    }, [toast, loadDataFromLocalStorage]);
     
     useEffect(() => {
         loadAllData();
@@ -152,47 +197,83 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
 
     const addProduct = useCallback(async (productData: Omit<Product, 'id' | 'sellingPrice'>) => {
-        try {
-            await productActions.addProduct(productData);
-            await loadAllData();
-            toast({ title: "Product Added", description: `${productData.name} has been added.` });
-        } catch (error) {
-            console.error("Failed to add product:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to add product. Check DB connection.' });
+        if (isDbConnected) {
+            try {
+                await productActions.addProduct(productData);
+                await loadAllData();
+                toast({ title: "Product Added", description: `${productData.name} has been added.` });
+            } catch (error) {
+                console.error("Failed to add product:", error);
+                toast({ variant: 'destructive', title: 'Error', description: 'Failed to add product. Check DB connection.' });
+            }
+        } else {
+            const sellingPrice = productData.buyingPrice + (productData.buyingPrice * productData.profitMargin / 100);
+            const newProduct = { ...productData, sellingPrice, id: `prod-${Date.now()}` };
+            const newProducts = [...products, newProduct];
+            setProducts(newProducts);
+            saveDataToLocalStorage('products', newProducts);
+            toast({ title: "Product Added (Local)", description: `${productData.name} has been added locally.` });
         }
-    }, [toast, loadAllData]);
+    }, [isDbConnected, toast, loadAllData, products, saveDataToLocalStorage]);
 
     const addMultipleProducts = useCallback(async (productsData: Omit<Product, 'id' | 'sellingPrice'>[]) => {
-        try {
-            await productActions.addMultipleProducts(productsData);
-            await loadAllData();
-        } catch (error) {
-             console.error("Failed to add multiple products:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to add products in bulk. Check DB connection.' });
+        if (isDbConnected) {
+            try {
+                await productActions.addMultipleProducts(productsData);
+                await loadAllData();
+            } catch (error) {
+                 console.error("Failed to add multiple products:", error);
+                toast({ variant: 'destructive', title: 'Error', description: 'Failed to add products in bulk. Check DB connection.' });
+            }
+        } else {
+            const newProducts = productsData.map(p => ({
+                ...p,
+                sellingPrice: p.buyingPrice + (p.buyingPrice * p.profitMargin / 100),
+                id: `prod-${Date.now()}-${Math.random()}`
+            }));
+            const updatedProducts = [...products, ...newProducts];
+            setProducts(updatedProducts);
+            saveDataToLocalStorage('products', updatedProducts);
+            toast({ title: "Products Added (Local)", description: `${newProducts.length} products added locally.` });
         }
-    }, [toast, loadAllData]);
+    }, [isDbConnected, toast, loadAllData, products, saveDataToLocalStorage]);
 
     const updateProduct = useCallback(async (productId: string, updatedData: Omit<Product, 'id' | 'sellingPrice'>) => {
-        try {
-            await productActions.updateProduct(productId, updatedData);
-            await loadAllData();
-            toast({ title: "Product Updated", description: `Details for ${updatedData.name} have been updated.` });
-        } catch (error) {
-            console.error("Failed to update product:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to update product. Check DB connection.' });
+        if (isDbConnected) {
+            try {
+                await productActions.updateProduct(productId, updatedData);
+                await loadAllData();
+                toast({ title: "Product Updated", description: `Details for ${updatedData.name} have been updated.` });
+            } catch (error) {
+                console.error("Failed to update product:", error);
+                toast({ variant: 'destructive', title: 'Error', description: 'Failed to update product. Check DB connection.' });
+            }
+        } else {
+            const sellingPrice = updatedData.buyingPrice + (updatedData.buyingPrice * updatedData.profitMargin / 100);
+            const newProducts = products.map(p => p.id === productId ? { ...p, ...updatedData, sellingPrice } : p);
+            setProducts(newProducts);
+            saveDataToLocalStorage('products', newProducts);
+            toast({ title: "Product Updated (Local)", description: `Details for ${updatedData.name} updated locally.` });
         }
-    }, [toast, loadAllData]);
+    }, [isDbConnected, toast, loadAllData, products, saveDataToLocalStorage]);
 
     const deleteProduct = useCallback(async (productId: string) => {
-        try {
-            await productActions.deleteProduct(productId);
-            await loadAllData();
-            toast({ title: "Product Deleted", description: `The product has been removed.` });
-        } catch (error) {
-             console.error("Failed to delete product:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete product. Check DB connection.' });
+        if (isDbConnected) {
+            try {
+                await productActions.deleteProduct(productId);
+                await loadAllData();
+                toast({ title: "Product Deleted", description: `The product has been removed.` });
+            } catch (error) {
+                 console.error("Failed to delete product:", error);
+                toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete product. Check DB connection.' });
+            }
+        } else {
+            const newProducts = products.filter(p => p.id !== productId);
+            setProducts(newProducts);
+            saveDataToLocalStorage('products', newProducts);
+            toast({ title: "Product Deleted (Local)", description: `The product has been removed locally.` });
         }
-    }, [toast, loadAllData]);
+    }, [isDbConnected, toast, loadAllData, products, saveDataToLocalStorage]);
 
     const getProductById = useCallback((productId: string) => products.find(p => p.id === productId), [products]);
 
@@ -209,31 +290,76 @@ export function DataProvider({ children }: { children: ReactNode }) {
           date: new Date().toISOString(),
         };
         
-        try {
-            const newInvoice = await dataActions.addInvoice(invoiceToSave, invoiceToSave.items);
-            await loadAllData();
+        if (isDbConnected) {
+            try {
+                const newInvoice = await dataActions.addInvoice(invoiceToSave, invoiceToSave.items);
+                await loadAllData();
+                if (settings.printFormat === 'pos' && settings.posPrinterType !== 'disabled') {
+                   await printInvoice(newInvoice);
+                }
+                return newInvoice.id;
+            } catch (error) {
+                console.error("Failed to save invoice:", error);
+                throw error; // Re-throw to be caught by the calling function
+            }
+        } else {
+            const newId = lastInvoiceId + 1;
+            const newInvoice = { ...invoiceToSave, id: newId };
+            const newInvoices = [newInvoice, ...invoices];
+            setInvoices(newInvoices);
+            setLastInvoiceId(newId);
+            saveDataToLocalStorage('invoices', newInvoices);
+            saveDataToLocalStorage('lastInvoiceId', newId);
+
+            // Update stock locally
+            const stockUpdates = newInvoice.items.map(item => ({ id: item.id, stockChange: -item.quantity }));
+            const newProducts = products.map(p => {
+                const update = stockUpdates.find(u => u.id === p.id);
+                return update ? { ...p, stock: p.stock + update.stockChange } : p;
+            });
+            setProducts(newProducts);
+            saveDataToLocalStorage('products', newProducts);
+            toast({ title: "Invoice Saved (Local)", description: `Invoice #${newId} saved locally.` });
             
             if (settings.printFormat === 'pos' && settings.posPrinterType !== 'disabled') {
-               await printInvoice(newInvoice);
+                await printInvoice(newInvoice);
             }
-
-            return newInvoice.id;
-        } catch (error) {
-            console.error("Failed to save invoice:", error);
-            throw error; // Re-throw to be caught by the calling function
+            return newId;
         }
-    }, [loadAllData, settings, printInvoice]);
+    }, [isDbConnected, lastInvoiceId, invoices, products, loadAllData, settings, printInvoice, toast, saveDataToLocalStorage]);
     
     const deleteInvoice = useCallback(async (invoiceId: number) => {
-        try {
-            await dataActions.deleteInvoice(invoiceId);
-            await loadAllData();
-            toast({ title: "Invoice Deleted", description: `Invoice #${invoiceId} has been successfully deleted.` });
-        } catch (error) {
-            console.error("Failed to delete invoice:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete invoice. Check DB connection.' });
+        if (isDbConnected) {
+            try {
+                await dataActions.deleteInvoice(invoiceId);
+                await loadAllData();
+                toast({ title: "Invoice Deleted", description: `Invoice #${invoiceId} has been successfully deleted.` });
+            } catch (error) {
+                console.error("Failed to delete invoice:", error);
+                toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete invoice. Check DB connection.' });
+            }
+        } else {
+            const invoiceToDelete = invoices.find(inv => inv.id === invoiceId);
+            if (!invoiceToDelete) return;
+
+            const newInvoices = invoices.filter(inv => inv.id !== invoiceId);
+            setInvoices(newInvoices);
+            saveDataToLocalStorage('invoices', newInvoices);
+
+            const newPayments = payments.filter(p => p.invoiceId !== invoiceId);
+            setPayments(newPayments);
+            saveDataToLocalStorage('payments', newPayments);
+            
+            const stockUpdates = invoiceToDelete.items.map(item => ({ id: item.id, stockChange: +item.quantity }));
+            const newProducts = products.map(p => {
+                const update = stockUpdates.find(u => u.id === p.id);
+                return update ? { ...p, stock: p.stock + update.stockChange } : p;
+            });
+            setProducts(newProducts);
+            saveDataToLocalStorage('products', newProducts);
+            toast({ title: "Invoice Deleted (Local)", description: `Invoice #${invoiceId} deleted locally.` });
         }
-    }, [toast, loadAllData]);
+    }, [isDbConnected, toast, loadAllData, invoices, payments, products, saveDataToLocalStorage]);
 
     const getBuyerById = useCallback((buyerId: string) => buyers.find(b => b.id === buyerId), [buyers]);
 
@@ -268,51 +394,96 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
 
     const addPayment = useCallback(async (paymentData: Omit<Payment, 'id' | 'date'>): Promise<{ payment: Payment; updatedInvoice: Invoice } | null> => {
-        try {
-            const { payment: newPayment, updatedInvoice } = await dataActions.addPayment(paymentData);
-            // Instead of full reload, update state locally for immediate feedback
-            setPayments(prev => [newPayment, ...prev]);
-            setInvoices(prev => prev.map(inv => inv.id === updatedInvoice.id ? updatedInvoice : inv));
-            return { payment: newPayment, updatedInvoice };
-        } catch (error: any) {
-            toast({ variant: 'destructive', title: 'Payment Error', description: error.message || "Failed to process payment. Check DB connection."});
+        if (isDbConnected) {
+            try {
+                const result = await dataActions.addPayment(paymentData);
+                // Instead of full reload, update state locally for immediate feedback
+                setPayments(prev => [result.payment, ...prev]);
+                setInvoices(prev => prev.map(inv => inv.id === result.updatedInvoice.id ? result.updatedInvoice : inv));
+                return result;
+            } catch (error: any) {
+                toast({ variant: 'destructive', title: 'Payment Error', description: error.message || "Failed to process payment. Check DB connection."});
+                return null;
+            }
+        } else {
+            const newPayment: Payment = { ...paymentData, id: `pay-${Date.now()}`, date: new Date().toISOString() };
+            const newPayments = [newPayment, ...payments];
+            setPayments(newPayments);
+            saveDataToLocalStorage('payments', newPayments);
+            
+            let updatedInvoice: Invoice | null = null;
+            const newInvoices = invoices.map(inv => {
+                if (inv.id === paymentData.invoiceId) {
+                    updatedInvoice = { ...inv, paidAmount: inv.paidAmount + paymentData.amount, dueAmount: inv.dueAmount - paymentData.amount };
+                    return updatedInvoice;
+                }
+                return inv;
+            });
+            setInvoices(newInvoices);
+            saveDataToLocalStorage('invoices', newInvoices);
+
+            if (updatedInvoice) {
+                return { payment: newPayment, updatedInvoice };
+            }
             return null;
         }
-    }, [toast]);
+    }, [isDbConnected, toast, payments, invoices, saveDataToLocalStorage]);
 
     const getPaymentsForInvoice = useCallback((invoiceId: number) => {
         return payments.filter(p => p.invoiceId === invoiceId).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }, [payments]);
 
     const addExpense = useCallback(async (expenseData: Omit<Expense, 'id'>) => {
-        try {
-            await dataActions.addExpense(expenseData);
-            await loadAllData();
-            toast({ title: "Expense Added", description: `New expense of ৳ ${expenseData.amount} has been recorded.` });
-        } catch (error) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to add expense. Check DB connection.' });
+        if (isDbConnected) {
+            try {
+                await dataActions.addExpense(expenseData);
+                await loadAllData();
+                toast({ title: "Expense Added", description: `New expense of ৳ ${expenseData.amount} has been recorded.` });
+            } catch (error) {
+                toast({ variant: 'destructive', title: 'Error', description: 'Failed to add expense. Check DB connection.' });
+            }
+        } else {
+            const newExpense = { ...expenseData, id: `exp-${Date.now()}` };
+            const newExpenses = [newExpense, ...expenses];
+            setExpenses(newExpenses);
+            saveDataToLocalStorage('expenses', newExpenses);
+            toast({ title: "Expense Added (Local)", description: `New expense of ৳ ${expenseData.amount} recorded locally.` });
         }
-    }, [toast, loadAllData]);
+    }, [isDbConnected, toast, loadAllData, expenses, saveDataToLocalStorage]);
 
     const updateExpense = useCallback(async (expenseId: string, updatedData: Omit<Expense, 'id'>) => {
-        try {
-            await dataActions.updateExpense(expenseId, updatedData);
-            await loadAllData();
-            toast({ title: "Expense Updated", description: "The expense details have been updated." });
-        } catch (error) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to update expense. Check DB connection.' });
+        if (isDbConnected) {
+            try {
+                await dataActions.updateExpense(expenseId, updatedData);
+                await loadAllData();
+                toast({ title: "Expense Updated", description: "The expense details have been updated." });
+            } catch (error) {
+                toast({ variant: 'destructive', title: 'Error', description: 'Failed to update expense. Check DB connection.' });
+            }
+        } else {
+            const newExpenses = expenses.map(e => e.id === expenseId ? { ...e, ...updatedData } : e);
+            setExpenses(newExpenses);
+            saveDataToLocalStorage('expenses', newExpenses);
+            toast({ title: "Expense Updated (Local)", description: "The expense details updated locally." });
         }
-    }, [toast, loadAllData]);
+    }, [isDbConnected, toast, loadAllData, expenses, saveDataToLocalStorage]);
 
     const deleteExpense = useCallback(async (expenseId: string) => {
-        try {
-            await dataActions.deleteExpense(expenseId);
-            await loadAllData();
-            toast({ title: "Expense Deleted", description: "The expense record has been removed." });
-        } catch (error) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete expense. Check DB connection.' });
+        if (isDbConnected) {
+            try {
+                await dataActions.deleteExpense(expenseId);
+                await loadAllData();
+                toast({ title: "Expense Deleted", description: "The expense record has been removed." });
+            } catch (error) {
+                toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete expense. Check DB connection.' });
+            }
+        } else {
+            const newExpenses = expenses.filter(e => e.id !== expenseId);
+            setExpenses(newExpenses);
+            saveDataToLocalStorage('expenses', newExpenses);
+            toast({ title: "Expense Deleted (Local)", description: "The expense record has been removed locally." });
         }
-    }, [toast, loadAllData]);
+    }, [isDbConnected, toast, loadAllData, expenses, saveDataToLocalStorage]);
     
     const getExpensesForDateRange = useCallback((startDate: Date, endDate: Date) => {
         const start = startOfDay(startDate);
@@ -321,57 +492,94 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }, [expenses]);
 
     const addEmployee = useCallback(async (employeeData: Omit<Employee, 'id'>) => {
-        try {
-            await dataActions.addEmployee(employeeData);
-            await loadAllData();
-            toast({ title: "Employee Added", description: `${employeeData.name} has been added.` });
-        } catch (error) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to add employee. Check DB connection.' });
+        if (isDbConnected) {
+            try {
+                await dataActions.addEmployee(employeeData);
+                await loadAllData();
+                toast({ title: "Employee Added", description: `${employeeData.name} has been added.` });
+            } catch (error) {
+                toast({ variant: 'destructive', title: 'Error', description: 'Failed to add employee. Check DB connection.' });
+            }
+        } else {
+            const newEmployee = { ...employeeData, id: `emp-${Date.now()}` };
+            const newEmployees = [...employees, newEmployee];
+            setEmployees(newEmployees);
+            saveDataToLocalStorage('employees', newEmployees);
+            toast({ title: "Employee Added (Local)", description: `${employeeData.name} added locally.` });
         }
-    }, [toast, loadAllData]);
+    }, [isDbConnected, toast, loadAllData, employees, saveDataToLocalStorage]);
 
     const updateEmployee = useCallback(async (employeeId: string, updatedData: Omit<Employee, 'id'>) => {
-        try {
-            await dataActions.updateEmployee(employeeId, updatedData);
-            await loadAllData();
-            toast({ title: "Employee Updated", description: "The employee details have been updated." });
-        } catch (error) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to update employee. Check DB connection.' });
+        if (isDbConnected) {
+            try {
+                await dataActions.updateEmployee(employeeId, updatedData);
+                await loadAllData();
+                toast({ title: "Employee Updated", description: "The employee details have been updated." });
+            } catch (error) {
+                toast({ variant: 'destructive', title: 'Error', description: 'Failed to update employee. Check DB connection.' });
+            }
+        } else {
+            const newEmployees = employees.map(e => e.id === employeeId ? { ...e, ...updatedData } : e);
+            setEmployees(newEmployees);
+            saveDataToLocalStorage('employees', newEmployees);
+            toast({ title: "Employee Updated (Local)", description: "The employee details updated locally." });
         }
-    }, [toast, loadAllData]);
+    }, [isDbConnected, toast, loadAllData, employees, saveDataToLocalStorage]);
 
     const deleteEmployee = useCallback(async (employeeId: string) => {
-        try {
-            await dataActions.deleteEmployee(employeeId);
-            await loadAllData();
-            toast({ title: "Employee Deleted", description: "The employee record has been removed." });
-        } catch (error) {
-             toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete employee. Check DB connection.' });
+        if (isDbConnected) {
+            try {
+                await dataActions.deleteEmployee(employeeId);
+                await loadAllData();
+                toast({ title: "Employee Deleted", description: "The employee record has been removed." });
+            } catch (error) {
+                 toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete employee. Check DB connection.' });
+            }
+        } else {
+            const newEmployees = employees.filter(e => e.id !== employeeId);
+            setEmployees(newEmployees);
+            saveDataToLocalStorage('employees', newEmployees);
+            toast({ title: "Employee Deleted (Local)", description: "The employee record has been removed locally." });
         }
-    }, [toast, loadAllData]);
+    }, [isDbConnected, toast, loadAllData, employees, saveDataToLocalStorage]);
 
     const markAttendance = useCallback(async (employeeId: string, date: Date, status: AttendanceStatus) => {
-        const attendanceData = { employeeId, date: date.toISOString(), status };
-        try {
-            await dataActions.markAttendance(attendanceData);
-            await loadAllData();
-        } catch (error) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to mark attendance. Check DB connection.' });
+        if (isDbConnected) {
+            try {
+                await dataActions.markAttendance({ employeeId, date: date.toISOString(), status });
+                await loadAllData();
+            } catch (error) {
+                toast({ variant: 'destructive', title: 'Error', description: 'Failed to mark attendance. Check DB connection.' });
+            }
+        } else {
+            const dateString = date.toISOString().split('T')[0];
+            const newAttendance = [...attendance.filter(a => !(a.employeeId === employeeId && a.date.startsWith(dateString)))];
+            newAttendance.push({ id: `att-${Date.now()}`, employeeId, date: date.toISOString(), status });
+            setAttendance(newAttendance);
+            saveDataToLocalStorage('attendance', newAttendance);
         }
-    }, [loadAllData, toast]);
+    }, [isDbConnected, loadAllData, toast, attendance, saveDataToLocalStorage]);
 
     const getAttendanceForDate = useCallback((date: Date) => {
         return attendance.filter(a => isSameDay(new Date(a.date), date));
     }, [attendance]);
 
     const addSalaryPayment = useCallback(async (paymentData: Omit<SalaryPayment, 'id'>) => {
-        try {
-            await dataActions.addSalaryPayment(paymentData);
-            await loadAllData();
-        } catch (error) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to add salary payment. Check DB connection.' });
+        if (isDbConnected) {
+            try {
+                await dataActions.addSalaryPayment(paymentData);
+                await loadAllData();
+            } catch (error) {
+                toast({ variant: 'destructive', title: 'Error', description: 'Failed to add salary payment. Check DB connection.' });
+            }
+        } else {
+            const newPayment = { ...paymentData, id: `sal-${Date.now()}` };
+            const newPayments = [...salaryPayments, newPayment];
+            setSalaryPayments(newPayments);
+            saveDataToLocalStorage('salaryPayments', newPayments);
+            toast({ title: "Salary Paid (Local)", description: "Payment recorded locally." });
         }
-    }, [loadAllData, toast]);
+    }, [isDbConnected, loadAllData, toast, salaryPayments, saveDataToLocalStorage]);
 
     const getPaymentsForMonth = useCallback((employeeId: string, startDate: Date, endDate: Date) => {
         return salaryPayments.filter(p => 
