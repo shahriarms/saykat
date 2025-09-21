@@ -305,24 +305,22 @@ export function DataProvider({ children }: { children: ReactNode }) {
         } else {
             // --- Local Storage Logic ---
             const newId = lastInvoiceId + 1;
-            let newInvoice: Omit<Invoice, 'id'> = { ...invoiceToSave };
+            let newInvoiceData = { ...invoiceToSave };
             
             let newBuyers = [...buyers];
-            let buyerToUpdate = buyers.find(b => b.name.toLowerCase() === newInvoice.customerName.toLowerCase());
+            let buyerToUpdate = buyers.find(b => b.name.toLowerCase() === newInvoiceData.customerName.toLowerCase());
     
             if (buyerToUpdate) {
-                // Update existing buyer
                 newBuyers = newBuyers.map(b => b.id === buyerToUpdate!.id ? { ...b, invoiceIds: [...b.invoiceIds, String(newId)] } : b);
-                newInvoice.buyerId = buyerToUpdate.id;
-            } else if (newInvoice.customerName) {
-                // Create new buyer
+                newInvoiceData.buyerId = buyerToUpdate.id;
+            } else if (newInvoiceData.customerName) {
                 const newBuyerId = `buyer-${Date.now()}`;
-                newInvoice.buyerId = newBuyerId;
+                newInvoiceData.buyerId = newBuyerId;
                 const newBuyer: Buyer = {
                     id: newBuyerId,
-                    name: newInvoice.customerName,
-                    address: newInvoice.customerAddress,
-                    phone: newInvoice.customerPhone,
+                    name: newInvoiceData.customerName,
+                    address: newInvoiceData.customerAddress,
+                    phone: newInvoiceData.customerPhone,
                     invoiceIds: [String(newId)]
                 };
                 newBuyers.push(newBuyer);
@@ -331,7 +329,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
             setBuyers(newBuyers);
             saveDataToLocalStorage('buyers', newBuyers);
     
-            const finalInvoice: Invoice = { ...newInvoice, id: newId };
+            const finalInvoice: Invoice = { ...newInvoiceData, id: newId };
 
             const newInvoices = [finalInvoice, ...invoices];
             setInvoices(newInvoices);
@@ -376,6 +374,25 @@ export function DataProvider({ children }: { children: ReactNode }) {
             setInvoices(newInvoices);
             saveDataToLocalStorage('invoices', newInvoices);
 
+            // Update buyer's invoice list or delete buyer
+            if (invoiceToDelete.buyerId) {
+                const buyer = buyers.find(b => b.id === invoiceToDelete.buyerId);
+                if (buyer) {
+                    const updatedInvoiceIds = buyer.invoiceIds.filter(id => id !== String(invoiceId));
+                    if (updatedInvoiceIds.length === 0) {
+                        // If no invoices are left, delete the buyer
+                        const newBuyers = buyers.filter(b => b.id !== invoiceToDelete.buyerId);
+                        setBuyers(newBuyers);
+                        saveDataToLocalStorage('buyers', newBuyers);
+                    } else {
+                        // Otherwise, just update the buyer's invoice list
+                        const newBuyers = buyers.map(b => b.id === invoiceToDelete.buyerId ? { ...b, invoiceIds: updatedInvoiceIds } : b);
+                        setBuyers(newBuyers);
+                        saveDataToLocalStorage('buyers', newBuyers);
+                    }
+                }
+            }
+            
             const newPayments = payments.filter(p => p.invoiceId !== invoiceId);
             setPayments(newPayments);
             saveDataToLocalStorage('payments', newPayments);
@@ -389,7 +406,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
             saveDataToLocalStorage('products', newProducts);
             toast({ title: "Invoice Deleted (Local)", description: `Invoice #${invoiceId} deleted locally.` });
         }
-    }, [isDbConnected, toast, loadAllData, invoices, payments, products, saveDataToLocalStorage]);
+    }, [isDbConnected, toast, loadAllData, invoices, payments, products, buyers, saveDataToLocalStorage]);
 
     const getBuyerById = useCallback((buyerId: string) => buyers.find(b => b.id === buyerId), [buyers]);
 
