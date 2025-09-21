@@ -307,27 +307,32 @@ export function DataProvider({ children }: { children: ReactNode }) {
             const newId = lastInvoiceId + 1;
             let newInvoiceData = { ...invoiceToSave };
             
-            let newBuyers = [...buyers];
-            let buyerToUpdate = buyers.find(b => b.name.toLowerCase() === newInvoiceData.customerName.toLowerCase());
+            let tempBuyers = [...buyers];
+            let buyerToUpdate = tempBuyers.find(b => b.id === newInvoiceData.buyerId);
     
             if (buyerToUpdate) {
-                newBuyers = newBuyers.map(b => b.id === buyerToUpdate!.id ? { ...b, invoiceIds: [...b.invoiceIds, String(newId)] } : b);
-                newInvoiceData.buyerId = buyerToUpdate.id;
+                tempBuyers = tempBuyers.map(b => b.id === buyerToUpdate!.id ? { ...b, invoiceIds: [...b.invoiceIds, String(newId)] } : b);
             } else if (newInvoiceData.customerName) {
-                const newBuyerId = `buyer-${Date.now()}`;
-                newInvoiceData.buyerId = newBuyerId;
-                const newBuyer: Buyer = {
-                    id: newBuyerId,
-                    name: newInvoiceData.customerName,
-                    address: newInvoiceData.customerAddress,
-                    phone: newInvoiceData.customerPhone,
-                    invoiceIds: [String(newId)]
-                };
-                newBuyers.push(newBuyer);
+                buyerToUpdate = tempBuyers.find(b => b.name.toLowerCase() === newInvoiceData.customerName.toLowerCase());
+                 if (buyerToUpdate) {
+                     newInvoiceData.buyerId = buyerToUpdate.id;
+                     tempBuyers = tempBuyers.map(b => b.id === buyerToUpdate!.id ? { ...b, invoiceIds: [...b.invoiceIds, String(newId)] } : b);
+                 } else {
+                    const newBuyerId = `buyer-${Date.now()}`;
+                    newInvoiceData.buyerId = newBuyerId;
+                    const newBuyer: Buyer = {
+                        id: newBuyerId,
+                        name: newInvoiceData.customerName,
+                        address: newInvoiceData.customerAddress,
+                        phone: newInvoiceData.customerPhone,
+                        invoiceIds: [String(newId)]
+                    };
+                    tempBuyers.push(newBuyer);
+                 }
             }
     
-            setBuyers(newBuyers);
-            saveDataToLocalStorage('buyers', newBuyers);
+            setBuyers(tempBuyers);
+            saveDataToLocalStorage('buyers', tempBuyers);
     
             const finalInvoice: Invoice = { ...newInvoiceData, id: newId };
 
@@ -375,21 +380,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
             saveDataToLocalStorage('invoices', newInvoices);
 
             // Update buyer's invoice list or delete buyer
+            let tempBuyers = [...buyers];
             if (invoiceToDelete.buyerId) {
-                const buyer = buyers.find(b => b.id === invoiceToDelete.buyerId);
+                const buyer = tempBuyers.find(b => b.id === invoiceToDelete.buyerId);
                 if (buyer) {
                     const updatedInvoiceIds = buyer.invoiceIds.filter(id => id !== String(invoiceId));
                     if (updatedInvoiceIds.length === 0) {
                         // If no invoices are left, delete the buyer
-                        const newBuyers = buyers.filter(b => b.id !== invoiceToDelete.buyerId);
-                        setBuyers(newBuyers);
-                        saveDataToLocalStorage('buyers', newBuyers);
+                        tempBuyers = tempBuyers.filter(b => b.id !== invoiceToDelete.buyerId);
                     } else {
                         // Otherwise, just update the buyer's invoice list
-                        const newBuyers = buyers.map(b => b.id === invoiceToDelete.buyerId ? { ...b, invoiceIds: updatedInvoiceIds } : b);
-                        setBuyers(newBuyers);
-                        saveDataToLocalStorage('buyers', newBuyers);
+                        tempBuyers = tempBuyers.map(b => b.id === invoiceToDelete.buyerId ? { ...b, invoiceIds: updatedInvoiceIds } : b);
                     }
+                    setBuyers(tempBuyers);
+                    saveDataToLocalStorage('buyers', tempBuyers);
                 }
             }
             
