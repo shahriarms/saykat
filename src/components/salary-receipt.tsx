@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { numberToWords, numberToWordsBn } from '@/lib/utils';
 import { useTranslation } from '@/hooks/use-translation';
 import { cn } from '@/lib/utils';
+import { StockPilotLogo } from './stock-pilot-logo';
 
 interface SalaryReceiptProps {
   employee: Employee;
@@ -18,22 +19,25 @@ export const SalaryReceipt = React.memo(React.forwardRef<HTMLDivElement, SalaryR
   ({ employee, paymentAmount, paymentDate }, ref) => {
     const { t, locale } = useTranslation();
     const isBn = locale === 'bn';
-    const amountInWords = isBn ? numberToWordsBn(paymentAmount) : numberToWords(paymentAmount);
+    const amountInWords = isBn ? numberToWordsBn(paymentAmount) : numberToWords(paymentAmount).replace("Dollars", "Taka");
 
     return (
-      <div ref={ref} className={cn("bg-white p-4 font-sans print:p-0", isBn ? 'font-bangla' : '')}>
+      <div ref={ref} className={cn("bg-white p-4 font-sans", isBn ? 'font-bangla' : '')}>
         <div 
-          className={cn("w-full max-w-4xl mx-auto border-2 border-dashed border-gray-400 p-8 relative print:p-6", isBn ? 'font-bangla' : '')}
+          className={cn("w-full max-w-4xl mx-auto border-4 border-dashed border-gray-400 p-8 relative print:p-6", isBn ? 'font-bangla' : '')}
           style={{
             backgroundColor: '#fff',
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='10' y='50' font-family='sans-serif' font-size='30' fill='%23000000' fill-opacity='0.05' transform='rotate(-30, 60, 60)'%3E৳%3C/text%3E%3Ctext x='70' y='110' font-family='sans-serif' font-size='30' fill='%23000000' fill-opacity='0.05' transform='rotate(-30, 60, 60)'%3E৳%3C/text%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='0' y='20' font-family='sans-serif' font-size='30' fill='%23000000' fill-opacity='0.04'%3E৳%3C/text%3E%3Ctext x='50' y='70' font-family='sans-serif' font-size='30' fill='%23000000' fill-opacity='0.04'%3E৳%3C/text%3E%3C/svg%3E")`,
           }}
         >
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
-            <div className="text-left">
-              <h1 className="text-2xl font-bold text-gray-800 tracking-wider">{t('shop_name')}</h1>
-              <p className="text-sm text-gray-500">Dhaka, Bangladesh</p>
+            <div className="flex items-center gap-2 text-left">
+              <StockPilotLogo className="w-12 h-12" />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-800 tracking-wider">{t('shop_name')}</h1>
+                <p className="text-sm text-gray-500">Dhaka, Bangladesh</p>
+              </div>
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-500 uppercase">{t('date_label')}</p>
@@ -47,7 +51,7 @@ export const SalaryReceipt = React.memo(React.forwardRef<HTMLDivElement, SalaryR
                 <span className="text-gray-600 font-semibold uppercase pb-1">{t('pay_to_label')}</span>
                 <p className="w-full border-b-2 border-dotted border-gray-400 font-semibold text-xl pb-1 min-w-[300px]">{employee.name}</p>
             </div>
-            <div className="flex items-center border-2 border-gray-700 px-4 py-1 font-mono text-xl font-bold text-center">
+            <div className="flex items-center border-2 border-gray-700 px-4 py-1 font-mono text-2xl font-bold text-center">
                 <span className="text-lg font-semibold mr-1">৳</span>
                 <span>{paymentAmount.toFixed(2)}</span>
             </div>
