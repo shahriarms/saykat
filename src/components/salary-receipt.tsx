@@ -85,13 +85,6 @@ export const SalaryReceipt = React.memo(React.forwardRef<HTMLDivElement, SalaryR
                   </div>
                 </div>
               </div>
-              
-              {/* MICR Line */}
-              <div className="absolute bottom-2 left-4 right-4 font-mono text-sm text-gray-500">
-                  <span>⑆567890⑈</span>
-                  <span className="ml-4">1234567890⑆</span>
-                  <span className="ml-4">1234</span>
-              </div>
           </div>
         </div>
       </div>
