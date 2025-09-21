@@ -113,21 +113,36 @@ function InvoicePage() {
     if (invoiceToPrint) {
       const originalTitle = document.title;
       document.title = `invoice-${invoiceToPrint.id}`;
-      
-      // Use a timeout to ensure the state has updated and the component has re-rendered
-      const timer = setTimeout(() => {
-        window.print();
+
+      const handleAfterPrint = () => {
+        // This function will be called after the print dialog is closed.
         document.title = originalTitle;
-        // Clean up after printing is done or cancelled
         setInvoiceToPrint(null);
         resetActiveDraft();
         toast({
             title: "Memo Ready",
             description: "A new, empty memo is ready for you.",
         });
+        // Clean up the event listener
+        window.removeEventListener('afterprint', handleAfterPrint);
+      };
+
+      // Listen for the afterprint event
+      window.addEventListener('afterprint', handleAfterPrint);
+      
+      // Use a timeout to ensure the state has updated and the component has re-rendered before printing
+      const timer = setTimeout(() => {
+        window.print();
       }, 100);
       
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener('afterprint', handleAfterPrint);
+        // Restore title if component unmounts before printing finishes
+        if (document.title !== originalTitle) {
+          document.title = originalTitle;
+        }
+      };
     }
   }, [invoiceToPrint, resetActiveDraft, toast]);
 
@@ -529,3 +544,5 @@ export default function InvoicePageWrapper() {
     </InvoiceFormProvider>
   );
 }
+
+    
