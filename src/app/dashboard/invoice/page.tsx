@@ -115,7 +115,6 @@ function InvoicePage() {
       document.title = `invoice-${invoiceToPrint.id}`;
 
       const handleAfterPrint = () => {
-        // This function will be called after the print dialog is closed.
         document.title = originalTitle;
         setInvoiceToPrint(null);
         resetActiveDraft();
@@ -123,14 +122,11 @@ function InvoicePage() {
             title: "Memo Ready",
             description: "A new, empty memo is ready for you.",
         });
-        // Clean up the event listener
         window.removeEventListener('afterprint', handleAfterPrint);
       };
 
-      // Listen for the afterprint event
       window.addEventListener('afterprint', handleAfterPrint);
       
-      // Use a timeout to ensure the state has updated and the component has re-rendered before printing
       const timer = setTimeout(() => {
         window.print();
       }, 100);
@@ -138,7 +134,6 @@ function InvoicePage() {
       return () => {
         clearTimeout(timer);
         window.removeEventListener('afterprint', handleAfterPrint);
-        // Restore title if component unmounts before printing finishes
         if (document.title !== originalTitle) {
           document.title = originalTitle;
         }
@@ -376,14 +371,20 @@ function InvoicePage() {
             </Card>
           </div>
 
-          {/* Column 2: Invoice Items & Preview */}
+          {/* Column 2: Invoice Items */}
           <div className="flex flex-col gap-4">
               <Card className="flex flex-col">
-                <CardHeader>
+                <CardHeader className="flex-row items-center justify-between">
                     <CardTitle>Invoice Items</CardTitle>
+                    <div className="flex gap-2">
+                        <Button onClick={handlePrintConfirm} disabled={!items || items.length === 0 || isProcessing}>
+                            {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>} 
+                            {isProcessing ? 'Processing...' : t('save_and_print_button')}
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent className='p-0 flex-1'>
-                    <ScrollArea className="h-full max-h-96">
+                    <ScrollArea className="h-full max-h-[calc(100vh-500px)]">
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -452,35 +453,6 @@ function InvoicePage() {
                     </div>
                 </CardFooter>
               </Card>
-
-              <Card>
-                  <CardHeader className="flex-row items-center justify-between">
-                      <CardTitle>{t('live_print_preview_title')}</CardTitle>
-                       <div className="flex gap-2">
-                          <Button onClick={handlePrintConfirm} disabled={!items || items.length === 0 || isProcessing}>
-                              {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>} 
-                              {isProcessing ? 'Processing...' : t('save_and_print_button')}
-                          </Button>
-                      </div>
-                  </CardHeader>
-                  <CardContent className="p-4 bg-muted/50 rounded-lg overflow-auto">
-                      <div className="transform scale-[0.9] origin-top">
-                          {activeDraft && <InvoicePrintLayout 
-                              invoiceId={activeDraft.id}
-                              currentDate={new Date().toLocaleDateString()}
-                              customerName={activeDraft.customerName}
-                              customerAddress={activeDraft.customerAddress}
-                              customerPhone={activeDraft.customerPhone}
-                              invoiceItems={activeDraft.items}
-                              subtotal={activeDraft.subtotal}
-                              paidAmount={activeDraft.paidAmount || 0}
-                              dueAmount={activeDraft.dueAmount}
-                              printFormat={settings.printFormat}
-                              locale={settings.locale}
-                          />}
-                      </div>
-                  </CardContent>
-              </Card>
           </div>
         </div>
       </div>
@@ -544,5 +516,3 @@ export default function InvoicePageWrapper() {
     </InvoiceFormProvider>
   );
 }
-
-    
