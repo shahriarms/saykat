@@ -214,7 +214,7 @@ export default function ExpensesPage() {
                 <DropdownMenuItem onClick={() => handleExport('pdf')}>{t('export_as_pdf')}</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button onClick={handleAddNew} className="flex-1 sm:flex-none" disabled={user?.role !== 'admin'}>
+            <Button onClick={handleAddNew} className="flex-1 sm:flex-none">
               <PlusCircle className="mr-2 h-4 w-4" /> {t('add_expense_button')}
             </Button>
           </div>
