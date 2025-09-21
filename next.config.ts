@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [],
   },
+  pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
   allowedDevOrigins: ["*.cloudworkstations.dev"],
 };
 

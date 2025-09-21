@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useUser } from '@/hooks/use-user';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { RedeemAdminCodeDialog } from './redeem-admin-code-dialog';
 import { ShowAdminCodeDialog } from './show-admin-code-dialog';
 import dynamic from 'next/dynamic';
@@ -27,7 +27,10 @@ import type { Locale } from '@/lib/types';
 import Link from 'next/link';
 import { StockPilotLogo } from './stock-pilot-logo';
 import { useAppData } from '@/hooks/use-app-data';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Upload } from 'lucide-react';
+import { useToast } from './use-toast';
+import * as XLSX from 'xlsx';
+import type { Product } from '@/lib/types';
 
 
 const LiveClock = dynamic(() => import('./live-clock').then(mod => mod.LiveClock), {
@@ -39,11 +42,14 @@ export function SiteHeader() {
   const { user, logout, generateAdminCode, adminCode } = useUser();
   const { t } = useTranslation();
   const { settings, updateSettings } = useSettings();
-  const { isDbConnected, isAppDataLoading } = useAppData();
+  const { isDbConnected, isAppDataLoading, addMultipleProducts } = useAppData();
+  const { toast } = useToast();
 
   const [isRedeemDialogOpen, setRedeemDialogOpen] = useState(false);
   const [isShowCodeDialogOpen, setShowCodeDialogOpen] = useState(false);
   
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleShowCode = () => {
     generateAdminCode();
     setShowCodeDialogOpen(true);
@@ -52,6 +58,59 @@ export function SiteHeader() {
   const handleLocaleChange = (value: string) => {
     updateSettings({ locale: value as Locale });
   }
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json(worksheet);
+
+        const newProducts: Omit<Product, 'id' | 'sellingPrice'>[] = json.map((row: any) => ({
+          name: String(row['Name'] || ''),
+          sku: String(row['SKU'] || ''),
+          buyingPrice: parseFloat(String(row['Buying Price'] || 0)),
+          profitMargin: parseFloat(String(row['Profit Margin'] || 0)),
+          stock: parseInt(String(row['Stock'] || 0), 10),
+          mainCategory: (row['Main Category'] === 'Hardware' ? 'Hardware' : 'Material') as 'Material' | 'Hardware',
+          category: String(row['Category'] || ''),
+          subCategory: String(row['Sub-Category'] || ''),
+        })).filter(p => p.name && p.sku);
+
+        if (newProducts.length > 0) {
+          addMultipleProducts(newProducts);
+          toast({
+            title: t('upload_successful_toast_title'),
+            description: t('upload_successful_toast_description', { count: newProducts.length }),
+          });
+        } else {
+          toast({
+            variant: 'destructive',
+            title: t('upload_failed_toast_title'),
+            description: t('upload_failed_toast_description'),
+          });
+        }
+      } catch (error) {
+        console.error("Error parsing uploaded file:", error);
+        toast({
+          variant: 'destructive',
+          title: t('upload_error_toast_title'),
+          description: t('upload_error_toast_description'),
+        });
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    // Reset file input
+    if(fileInputRef.current) {
+        fileInputRef.current.value = '';
+    }
+  };
   
   if (!user) {
     return (
@@ -71,6 +130,17 @@ export function SiteHeader() {
       <header className="sticky top-0 z-20 grid h-16 grid-cols-3 items-center border-b bg-card px-4 sm:px-6">
         {/* Left Section: Empty */}
         <div className="flex justify-start">
+           <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            className="hidden"
+            accept=".xlsx, .xls, .csv"
+          />
+          <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={user?.role !== 'admin'}>
+            <Upload className="mr-2 h-4 w-4" />
+            <span className="hidden sm:inline">{t('upload_button')}</span>
+          </Button>
         </div>
 
         {/* Center Section: Logo and Title */}
