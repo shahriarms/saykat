@@ -93,6 +93,7 @@ function InvoicePage() {
               description: t('invoice_saved_toast_description', { invoiceId: newInvoiceId }),
             });
             
+            // This is the fix: wait for the updateActiveDraft promise to resolve
             const updatedDraftWithId = await updateActiveDraft({ id: newInvoiceId });
             setInvoiceToPrint(updatedDraftWithId);
         }

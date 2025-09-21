@@ -94,22 +94,24 @@ export default function BuyersPage() {
     }
   };
   
-  useEffect(() => {
-    if (invoiceToPrint) {
-      setIsPrinting(true);
-      const originalTitle = document.title;
-      document.title = `invoice-${invoiceToPrint.id}`;
-      
-      const timer = setTimeout(() => {
-        window.print();
-        document.title = originalTitle;
-        setInvoiceToPrint(null);
-        setIsPrinting(false);
-      }, 100);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [invoiceToPrint]);
+    useEffect(() => {
+        if (invoiceToPrint) {
+            setIsPrinting(true);
+            const originalTitle = document.title;
+            document.title = `invoice-${invoiceToPrint.id}`;
+            
+            // Allow state to update and content to render before printing
+            const timer = setTimeout(() => {
+                window.print();
+                document.title = originalTitle;
+                // Clean up after printing
+                setInvoiceToPrint(null);
+                setIsPrinting(false);
+            }, 100); 
+            
+            return () => clearTimeout(timer);
+        }
+    }, [invoiceToPrint]);
   
   const filteredInvoices = useMemo(() => {
     if (!selectedBuyer) return [];
