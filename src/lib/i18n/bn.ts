@@ -312,7 +312,7 @@ export const bn = {
     'amount_exceeds_due': 'টাকার পরিমাণ বকেয়া বেতনের বেশি',
     'authorizing_advance_payment': 'আপনি একটি অগ্রিম পেমেন্টের অনুমোদন দিচ্ছেন।',
     'ask_admin_for_approval': 'অনুমোদনের জন্য অ্যাডমিনকে বলুন।',
-    'pay_button': 'প্রদান করুন {{amount}}',
+    'pay_and_print_receipt_button': '{{amount}} প্রদান করুন ও রশিদ প্রিন্ট করুন',
     'monthly_payment_history_title': 'মাসিক পেমেন্টের ইতিহাস',
     'no_payments_this_month': 'এই মাসে কোনো পেমেন্ট নেই।',
     'overpayment_permission_error': 'আপনার বকেয়া পরিমাণের বেশি অর্থ প্রদানের অনুমতি নেই। অনুগ্রহ করে একজন অ্যাডমিনের সাথে যোগাযোগ করুন।',

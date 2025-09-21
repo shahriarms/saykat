@@ -73,7 +73,7 @@ interface AppDataContextType {
     getAttendanceForDate: (date: Date) => Attendance[];
 
     // Salary Functions
-    addSalaryPayment: (payment: Omit<SalaryPayment, 'id'>) => Promise<void>;
+    addSalaryPayment: (payment: Omit<SalaryPayment, 'id'>) => Promise<SalaryPayment | null>;
     getPaymentsForMonth: (employeeId: string, startDate: Date, endDate: Date) => SalaryPayment[];
     getSalaryPaymentsForDateRange: (startDate: Date, endDate: Date) => SalaryPayment[];
     getDueSalaryForMonth: (employee: Employee, date: Date) => number;
@@ -615,13 +615,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
         return attendance.filter(a => isSameDay(new Date(a.date), date));
     }, [attendance]);
 
-    const addSalaryPayment = useCallback(async (paymentData: Omit<SalaryPayment, 'id'>) => {
+    const addSalaryPayment = useCallback(async (paymentData: Omit<SalaryPayment, 'id'>): Promise<SalaryPayment | null> => {
         if (isDbConnected) {
             try {
-                await dataActions.addSalaryPayment(paymentData);
+                const newPayment = await dataActions.addSalaryPayment(paymentData);
                 await loadAllData();
+                return newPayment;
             } catch (error) {
                 toast({ variant: 'destructive', title: 'Error', description: 'Failed to add salary payment. Check DB connection.' });
+                return null;
             }
         } else {
             const newPayment = { ...paymentData, id: `sal-${Date.now()}` };
@@ -629,6 +631,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
             setSalaryPayments(newPayments);
             saveDataToLocalStorage('salaryPayments', newPayments);
             toast({ title: "Salary Paid (Local)", description: "Payment recorded locally." });
+            return newPayment;
         }
     }, [isDbConnected, loadAllData, toast, salaryPayments, saveDataToLocalStorage]);
 

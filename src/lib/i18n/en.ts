@@ -312,7 +312,7 @@ export const en = {
     'amount_exceeds_due': 'Amount Exceeds Due Salary',
     'authorizing_advance_payment': 'You are authorizing an advance payment.',
     'ask_admin_for_approval': 'Please ask an admin to approve.',
-    'pay_button': 'Pay {{amount}}',
+    'pay_and_print_receipt_button': 'Pay{{amount}} & Print Receipt',
     'monthly_payment_history_title': 'Monthly Payment History',
     'no_payments_this_month': 'No payments this month.',
     'overpayment_permission_error': 'You do not have permission to pay more than the due amount. Please ask an admin.',
