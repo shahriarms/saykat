@@ -76,7 +76,6 @@ export function SiteHeader() {
         
         {/* Right Section: Status, Clock, and User Menu */}
         <div className="flex items-center gap-2 sm:gap-4">
-            <div className="hidden sm:flex"><DatabaseStatus /></div>
             <div className="hidden sm:flex"><LiveClock /></div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -85,6 +84,9 @@ export function SiteHeader() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <div className="flex items-center justify-center px-2 py-1.5">
+                  <DatabaseStatus />
+                </div>
                 <DropdownMenuLabel>
                   <div>{t('my_account_label')}</div>
                   <div className="text-xs font-normal text-muted-foreground">{user.email} ({t(`role_${user.role}` as any)})</div>
