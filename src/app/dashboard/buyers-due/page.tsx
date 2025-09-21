@@ -330,15 +330,16 @@ export default function BuyersDuePage() {
                           <CardDescription>{t('receive_payment_description')}</CardDescription>
                       </div>
                       <div className="flex items-center gap-2">
-                          <Button onClick={handlePrint} disabled={!selectedInvoice || isPrinting}>
-                              {isPrinting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>}
-                              {t('print_invoice_button')}
-                          </Button>
+                          
                            {user?.role === 'admin' && (
                                 <Button variant="destructive" onClick={handleDeleteClick} disabled={!selectedInvoice || isDeleting}>
                                     <Trash2 className="mr-2 h-4 w-4"/> Delete Invoice
                                 </Button>
                             )}
+                            <Button onClick={handlePrint} disabled={!selectedInvoice || isPrinting}>
+                              {isPrinting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>}
+                              {t('print_invoice_button')}
+                          </Button>
                       </div>
                   </CardHeader>
                   <CardContent className="space-y-4 no-print">
