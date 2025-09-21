@@ -86,6 +86,10 @@ class PostgresDataService {
                 let buyerResult = await client.query('SELECT id FROM buyers WHERE name = $1 AND phone = $2', [invoiceData.customerName, invoiceData.customerPhone]);
                 if (buyerResult.rows.length > 0) {
                     buyerId = buyerResult.rows[0].id;
+                     await client.query(
+                        'UPDATE buyers SET invoice_ids = invoice_ids || $1::jsonb WHERE id = $2',
+                        [JSON.stringify(newId), buyerId]
+                    );
                 } else {
                     buyerId = `buyer-${Date.now()}`;
                     await client.query(
@@ -126,35 +130,34 @@ class PostgresDataService {
         try {
             await client.query('BEGIN');
 
-            // 1. Get the invoice to know which items to restock and which buyer to update
             const invoiceResult = await client.query('SELECT * FROM invoices WHERE id = $1', [invoiceId]);
-            if (invoiceResult.rows.length === 0) {
-                throw new Error('Invoice not found.');
-            }
+            if (invoiceResult.rows.length === 0) throw new Error('Invoice not found.');
             const invoice: Invoice = formatRow(invoiceResult.rows[0]);
 
-            // 2. Restore stock for each item in the invoice
             if (invoice.items && invoice.items.length > 0) {
-                const stockUpdates = invoice.items.map(item => ({
-                    id: item.id,
-                    stockChange: +item.quantity, // Add stock back
-                }));
+                const stockUpdates = invoice.items.map(item => ({ id: item.id, stockChange: +item.quantity }));
                 await PostgresProductService.updateMultipleStocks(stockUpdates, client);
             }
 
-            // 3. Delete associated payments
             await client.query('DELETE FROM payments WHERE invoice_id = $1', [invoiceId]);
-
-            // 4. Update the buyer's invoice_ids array
+            
             if (invoice.buyerId) {
                 await client.query(
-                    'UPDATE buyers SET invoice_ids = invoice_ids - $1::text WHERE id = $2',
+                    "UPDATE buyers SET invoice_ids = invoice_ids - $1::text WHERE id = $2",
                     [String(invoiceId), invoice.buyerId]
                 );
             }
-            
-            // 5. Delete the invoice itself
+
             await client.query('DELETE FROM invoices WHERE id = $1', [invoiceId]);
+
+            // Check if the buyer has any other invoices left
+            if (invoice.buyerId) {
+                const buyerInvoicesResult = await client.query("SELECT invoice_ids FROM buyers WHERE id = $1", [invoice.buyerId]);
+                const remainingInvoiceIds = buyerInvoicesResult.rows[0]?.invoice_ids || [];
+                if (remainingInvoiceIds.length === 0) {
+                    await client.query("DELETE FROM buyers WHERE id = $1", [invoice.buyerId]);
+                }
+            }
 
             await client.query('COMMIT');
         } catch (e) {
@@ -334,5 +337,3 @@ class PostgresDataService {
 }
 
 export default PostgresDataService;
-
-    

@@ -132,5 +132,3 @@ export async function importAllData(data: BackupData): Promise<{ success: boolea
     
     return PostgresDataService.importAllData(data);
 }
-
-    
