@@ -22,13 +22,10 @@ export const SalaryReceipt = React.memo(React.forwardRef<HTMLDivElement, SalaryR
     const amountInWords = isBn ? numberToWordsBn(paymentAmount) : numberToWords(paymentAmount);
     const dateFormatted = format(paymentDate, 'ddMMyyyy');
 
-    const backgroundPattern = "data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d1e0d7' fill-opacity='0.15'%3E%3Cpath d='M50 50V30h-5v20h-20v5h20v20h5V55h20v-5H50z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E";
-
     return (
       <div ref={ref} className={cn("bg-white p-4 font-sans", isBn ? 'font-bangla' : '')}>
         <div 
           className="w-full max-w-4xl mx-auto border-2 border-gray-400 p-4 relative"
-          style={{ backgroundImage: `url("${backgroundPattern}")`}}
         >
           {/* Watermark */}
           <div className="absolute inset-0 flex items-center justify-center z-0">
@@ -72,14 +69,14 @@ export const SalaryReceipt = React.memo(React.forwardRef<HTMLDivElement, SalaryR
               </div>
 
               {/* Account Number and Signature */}
-              <div className="mt-12 flex flex-col md:flex-row md:justify-between items-end gap-4">
-                <div className="w-full md:w-auto">
+              <div className="mt-12 flex justify-between items-end gap-4">
+                <div className="w-auto">
                   <span className="text-sm text-gray-600 font-semibold">{t('phone_number_label')}:</span>
                   <div className="font-mono border border-gray-300 px-3 py-1 inline-block ml-2">
                     {employee.phone}
                   </div>
                 </div>
-                <div className="w-full md:w-64 text-center mt-4 md:mt-0">
+                <div className="w-64 text-center mt-4">
                   <div className="border-t border-gray-400 pt-1 text-xs text-gray-600">
                     {t('please_sign_above_label')}
                   </div>
