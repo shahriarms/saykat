@@ -27,12 +27,11 @@ import { MonthlyExpensesDialog } from '@/components/monthly-expenses-report-dial
 import { MonthlyDueDialog } from '@/components/monthly-due-report-dialog';
 import { MonthlyUnitsSoldDialog } from '@/components/monthly-units-sold-report-dialog';
 import { MonthlySalaryReportDialog } from '@/components/monthly-salary-report-dialog';
-import type { DateRange } from 'react-day-picker';
-import type { Invoice, Expense, SalaryPayment, Attendance, Product } from '@/lib/types';
+import type { DateRange, Invoice, Expense, SalaryPayment, Attendance, Product } from '@/lib/types';
 
 
 export default function Dashboard() {
-  const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, getAttendanceForDate, invoices: allInvoices } from useAppData();
+  const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, getAttendanceForDate, invoices: allInvoices } = useAppData();
   const { t } = useTranslation();
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);

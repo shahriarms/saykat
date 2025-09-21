@@ -1,3 +1,7 @@
+import type { DateRange } from 'react-day-picker';
+
+export { type DateRange };
+
 export interface Product {
   id: string;
   name: string;
