@@ -16,6 +16,7 @@ interface BackupData {
     employees: Employee[];
     salaryPayments: SalaryPayment[];
     payments: Payment[];
+    attendance: Attendance[];
 }
 
 export async function getAllData(): Promise<Omit<BackupData, 'products'>> {

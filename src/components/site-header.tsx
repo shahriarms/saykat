@@ -73,7 +73,7 @@ export function SiteHeader() {
         <div className="flex items-center justify-center">
             <Link href="/dashboard" className="flex items-center gap-2">
                 <StockPilotLogo className="w-10 h-10" />
-                <h1 className="text-xl sm:text-2xl font-bold">
+                <h1 className="hidden sm:block text-xl sm:text-2xl font-bold">
                     <span className="text-foreground">Mahmud Engineering Shop</span>
                 </h1>
             </Link>
@@ -88,8 +88,8 @@ export function SiteHeader() {
                   <UserCircle className="h-8 w-8" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <div className="flex items-center justify-center px-2 py-1.5">
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="px-1 py-1.5">
                   <DatabaseStatus />
                 </div>
                 <DropdownMenuLabel>

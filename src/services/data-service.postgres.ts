@@ -19,6 +19,7 @@ interface BackupData {
     employees: Employee[];
     salaryPayments: SalaryPayment[];
     payments: Payment[];
+    attendance: Attendance[];
 }
 
 // Helper function to format row data from snake_case to camelCase if needed, and parse JSON
@@ -304,7 +305,7 @@ class PostgresDataService {
         }
     }
 
-    static async importAllData(data: { products?: Product[], invoices?: Invoice[], buyers?: Buyer[], expenses?: Expense[], employees?: Employee[], salaryPayments?: SalaryPayment[], payments?: Payment[], attendance?: Attendance[] }): Promise<{ success: boolean; message: string }> {
+    static async importAllData(data: BackupData): Promise<{ success: boolean; message: string }> {
         if (!pool) throw new Error("Database not connected.");
         const client = await pool.connect();
         try {
