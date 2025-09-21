@@ -95,7 +95,13 @@ function InvoicePage() {
             });
             
             const updatedDraftWithId = await updateActiveDraft({ id: newInvoiceId });
-            setInvoiceToPrint(updatedDraftWithId);
+            
+            const timer = setTimeout(() => {
+                setInvoiceToPrint(updatedDraftWithId);
+            }, 100);
+            
+            // Cleanup timer if component unmounts
+            return () => clearTimeout(timer);
         }
     } catch (error: any) {
         console.error("Failed to save invoice:", error);
@@ -127,6 +133,7 @@ function InvoicePage() {
 
       window.addEventListener('afterprint', handleAfterPrint);
       
+      // We still need a small delay to ensure the state has propagated and the DOM is ready.
       const timer = setTimeout(() => {
         window.print();
       }, 100);
@@ -452,6 +459,30 @@ function InvoicePage() {
                     </div>
                     </div>
                 </CardFooter>
+              </Card>
+               <Card>
+                  <CardHeader>
+                      <CardTitle>{t('live_print_preview_title')}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                      <ScrollArea className="h-96">
+                          <div className="p-4 bg-muted/50 rounded-lg min-w-[820px]">
+                              <InvoicePrintLayout 
+                                  invoiceId={draftId}
+                                  currentDate={new Date().toLocaleDateString()}
+                                  customerName={customerName}
+                                  customerAddress={customerAddress}
+                                  customerPhone={customerPhone}
+                                  invoiceItems={items}
+                                  subtotal={subtotal}
+                                  paidAmount={paidAmount || 0}
+                                  dueAmount={dueAmount}
+                                  printFormat={settings.printFormat}
+                                  locale={settings.locale}
+                              />
+                          </div>
+                      </ScrollArea>
+                  </CardContent>
               </Card>
           </div>
         </div>
