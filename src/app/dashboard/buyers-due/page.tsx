@@ -33,13 +33,16 @@ import { useTranslation } from '@/hooks/use-translation';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { useUser } from '@/hooks/use-user';
+import { useSettings } from '@/hooks/use-settings';
+import { InvoicePrintLayout } from '@/components/invoice-print-layout';
 
 
 export default function BuyersDuePage() {
-  const { invoices: allInvoices, buyers, getInvoicesForBuyer, addPayment, getPaymentsForInvoice, isAppDataLoading, deleteInvoice } = useAppData();
+  const { invoices: allInvoices, buyers, getInvoicesForBuyer, addPayment, getPaymentsForInvoice, isAppDataLoading, deleteInvoice, printInvoice: appPrintInvoice } = useAppData();
   const { user } = useUser();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const { settings } = useSettings();
 
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -53,6 +56,9 @@ export default function BuyersDuePage() {
   
   const [isDeleting, setIsDeleting] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
+
+  const [isPrinting, setIsPrinting] = useState(false);
+  const [invoiceToPrint, setInvoiceToPrint] = useState<Invoice | null>(null);
   
   const numericPaymentAmount = useMemo(() => parseFloat(paymentAmount) || 0, [paymentAmount]);
   
@@ -153,6 +159,41 @@ export default function BuyersDuePage() {
             setIsDeleting(false);
         }
     };
+
+  const handlePrint = async () => {
+    if (!selectedInvoice || isPrinting) return;
+    
+    if (settings.printFormat === 'pos' && settings.posPrinterType !== 'disabled') {
+      setIsPrinting(true);
+      try {
+        await appPrintInvoice(selectedInvoice);
+      } catch (error: any) {
+        console.error(error.message);
+      } finally {
+        setIsPrinting(false);
+      }
+    } else {
+      setInvoiceToPrint(selectedInvoice);
+    }
+  };
+
+  useEffect(() => {
+    if (invoiceToPrint) {
+      setIsPrinting(true);
+      const originalTitle = document.title;
+      document.title = `invoice-${invoiceToPrint.id}`;
+      
+      const timer = setTimeout(() => {
+        window.print();
+        document.title = originalTitle;
+        setInvoiceToPrint(null);
+        setIsPrinting(false);
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [invoiceToPrint]);
+
 
   const buyersWithDue = useMemo(() => buyers.filter(b => getInvoicesForBuyer(b.id).some(inv => inv.dueAmount > 0.001)), [buyers, getInvoicesForBuyer]);
   const filteredBuyersWithDue = useMemo(() => buyerSearchTerm ? buyersWithDue.filter(b => b.name.toLowerCase().includes(buyerSearchTerm.toLowerCase()) || (b.phone && b.phone.toLowerCase().includes(buyerSearchTerm.toLowerCase()))) : buyersWithDue, [buyersWithDue, buyerSearchTerm]);
@@ -281,91 +322,122 @@ export default function BuyersDuePage() {
             </CardContent>
           </Card>
           
-          <Card className="md:col-span-5 lg:col-span-3 flex flex-col">
-              <CardHeader className="flex-row items-center justify-between no-print">
-                  <div>
-                      <CardTitle>{t('receive_payment_title')}</CardTitle>
-                      <CardDescription>{t('receive_payment_description')}</CardDescription>
-                  </div>
-                   {user?.role === 'admin' && (
-                        <Button variant="destructive" onClick={handleDeleteClick} disabled={!selectedInvoice || isDeleting}>
-                            <Trash2 className="mr-2 h-4 w-4"/> Delete Invoice
-                        </Button>
-                    )}
-              </CardHeader>
-              <CardContent className="space-y-4 no-print">
-                  {selectedInvoice ? (
-                      <>
-                          <div className="flex justify-between items-start p-4 bg-muted/50 rounded-lg">
-                            <div>
-                                <p>{t('invoice_label')}: <span className="font-mono">{selectedInvoice.id}</span></p>
-                                <p>Original Due: <span className="font-mono">৳ {selectedInvoice.dueAmount.toFixed(2)}</span></p>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-lg">New Due:</p>
-                                <p className="font-bold text-destructive text-2xl">৳ {currentDueForSelectedInvoice.toFixed(2)}</p>
-                            </div>
-                          </div>
-                          <div className="flex flex-col sm:flex-row items-center gap-2">
-                              <div className="relative flex-1 w-full">
-                                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground">৳</span>
-                                  <Input 
-                                    type="text" 
-                                    inputMode="decimal" 
-                                    placeholder={t('enter_amount_placeholder')} 
-                                    className="pl-8" 
-                                    value={paymentAmount} 
-                                    onChange={(e) => setPaymentAmount(e.target.value)}
-                                    disabled={isProcessing || selectedInvoice.dueAmount <= 0} 
-                                  />
-                              </div>
-                              <Button onClick={handleOpenConfirmation} className="w-full sm:w-auto" disabled={isProcessing || numericPaymentAmount <= 0 || selectedInvoice.dueAmount <= 0}>
-                                  {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>}
-                                  {t('receive_and_print_button')}
-                              </Button>
-                          </div>
-                      </>
-                  ) : (
-                      <div className="text-center text-muted-foreground py-8">{t('select_invoice_to_receive_payment')}</div>
-                  )}
-              </CardContent>
-              <div className="flex-1 flex flex-col min-h-0">
-                  <div className="flex items-center gap-2 px-6 pt-4 no-print">
-                      <History className="w-5 h-5" />
-                      <h3 className="text-lg font-semibold">{t('live_receipt_preview_title')}</h3>
-                  </div>
-                  <div className="p-6 pt-2 flex-1">
-                      <div className="bg-background">
-                           <div className="no-print">
-                            {(selectedBuyer && selectedInvoice) ? (
-                                <PaymentReceipt
-                                    buyer={selectedBuyer}
-                                    invoice={selectedInvoice}
-                                    paymentHistory={getPaymentsForInvoice(selectedInvoice.id)}
-                                    newPaymentAmount={numericPaymentAmount}
-                                />
-                            ) : (
-                                <div className="text-center text-muted-foreground p-8 flex flex-col justify-center items-center h-full border rounded-lg">
-                                    <FileText className="w-12 h-12 mb-4 text-muted-foreground/50"/>
-                                    <p>{t('select_invoice_for_preview')}</p>
-                                </div>
-                            )}
-                           </div>
+          <div className="md:col-span-5 lg:col-span-3 flex flex-col gap-4">
+              <Card>
+                  <CardHeader className="flex-row items-center justify-between no-print">
+                      <div>
+                          <CardTitle>{t('receive_payment_title')}</CardTitle>
+                          <CardDescription>{t('receive_payment_description')}</CardDescription>
                       </div>
-                  </div>
-              </div>
-          </Card>
+                      <div className="flex items-center gap-2">
+                          <Button onClick={handlePrint} disabled={!selectedInvoice || isPrinting}>
+                              {isPrinting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>}
+                              {t('print_invoice_button')}
+                          </Button>
+                           {user?.role === 'admin' && (
+                                <Button variant="destructive" onClick={handleDeleteClick} disabled={!selectedInvoice || isDeleting}>
+                                    <Trash2 className="mr-2 h-4 w-4"/> Delete Invoice
+                                </Button>
+                            )}
+                      </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4 no-print">
+                      {selectedInvoice ? (
+                          <>
+                              <div className="flex justify-between items-start p-4 bg-muted/50 rounded-lg">
+                                <div>
+                                    <p>{t('invoice_label')}: <span className="font-mono">{selectedInvoice.id}</span></p>
+                                    <p>Original Due: <span className="font-mono">৳ {selectedInvoice.dueAmount.toFixed(2)}</span></p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-lg">New Due:</p>
+                                    <p className="font-bold text-destructive text-2xl">৳ {currentDueForSelectedInvoice.toFixed(2)}</p>
+                                </div>
+                              </div>
+                              <div className="flex flex-col sm:flex-row items-center gap-2">
+                                  <div className="relative flex-1 w-full">
+                                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground">৳</span>
+                                      <Input 
+                                        type="text" 
+                                        inputMode="decimal" 
+                                        placeholder={t('enter_amount_placeholder')} 
+                                        className="pl-8" 
+                                        value={paymentAmount} 
+                                        onChange={(e) => setPaymentAmount(e.target.value)}
+                                        disabled={isProcessing || selectedInvoice.dueAmount <= 0} 
+                                      />
+                                  </div>
+                                  <Button onClick={handleOpenConfirmation} className="w-full sm:w-auto" disabled={isProcessing || numericPaymentAmount <= 0 || selectedInvoice.dueAmount <= 0}>
+                                      {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>}
+                                      {t('receive_and_print_button')}
+                                  </Button>
+                              </div>
+                          </>
+                      ) : (
+                          <div className="text-center text-muted-foreground py-8">{t('select_invoice_to_receive_payment')}</div>
+                      )}
+                  </CardContent>
+              </Card>
+
+              <Card className="flex-1 flex flex-col">
+                  <CardHeader className="flex items-center gap-2 px-6 pt-4 no-print">
+                      <FileText className="w-5 h-5" />
+                      <h3 className="text-lg font-semibold">{t('invoice_details_title')}</h3>
+                  </CardHeader>
+                  <CardContent className="flex-1 overflow-auto">
+                      {selectedInvoice ? (
+                        <ScrollArea className="h-full">
+                          <div className="p-4 bg-muted/50 rounded-lg min-w-[820px]">
+                            <InvoicePrintLayout 
+                                  invoiceId={selectedInvoice.id}
+                                  currentDate={new Date(selectedInvoice.date).toLocaleDateString()}
+                                  customerName={selectedInvoice.customerName}
+                                  customerAddress={selectedInvoice.customerAddress}
+                                  customerPhone={selectedInvoice.customerPhone}
+                                  invoiceItems={selectedInvoice.items}
+                                  subtotal={selectedInvoice.subtotal}
+                                  paidAmount={selectedInvoice.paidAmount}
+                                  dueAmount={selectedInvoice.dueAmount}
+                                  printFormat={settings.printFormat}
+                                  locale={settings.locale}
+                              />
+                          </div>
+                        </ScrollArea>
+                      ) : (
+                          <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-4">
+                              <FileText className="w-12 h-12 mb-4"/>
+                              <h3 className="font-semibold">{t('no_invoice_selected_title')}</h3>
+                              <p className="text-sm">{t('no_invoice_selected_description')}</p>
+                          </div>
+                      )}
+                  </CardContent>
+              </Card>
+          </div>
         </div>
       </div>
       <div className="print-source">
-        {lastSuccessfulPayment && (
+        {lastSuccessfulPayment ? (
             <PaymentReceipt
                 buyer={lastSuccessfulPayment.buyer}
                 invoice={lastSuccessfulPayment.invoice}
                 paymentHistory={paymentHistoryForReceipt}
                 newPaymentAmount={lastSuccessfulPayment.payment.amount}
             />
-        )}
+        ) : invoiceToPrint ? (
+            <InvoicePrintLayout
+                invoiceId={invoiceToPrint.id}
+                currentDate={new Date(invoiceToPrint.date).toLocaleDateString()}
+                customerName={invoiceToPrint.customerName}
+                customerAddress={invoiceToPrint.customerAddress}
+                customerPhone={invoiceToPrint.customerPhone}
+                invoiceItems={invoiceToPrint.items}
+                subtotal={invoiceToPrint.subtotal}
+                paidAmount={invoiceToPrint.paidAmount}
+                dueAmount={invoiceToPrint.dueAmount}
+                printFormat={settings.printFormat}
+                locale={settings.locale}
+            />
+        ): null}
       </div>
       <AlertDialog open={isConfirmingPayment} onOpenChange={setConfirmingPayment}>
           <AlertDialogContent>
