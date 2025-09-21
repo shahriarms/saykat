@@ -2,7 +2,7 @@
 'use client';
 
 import { createContext, useContext, ReactNode, useMemo, useCallback, useState, useEffect } from 'react';
-import type { InvoiceItem, Product } from '@/lib/types';
+import type { InvoiceItem, Product, Buyer } from '@/lib/types';
 import { useToast } from './use-toast';
 import { useAppData } from './use-app-data';
 
@@ -67,6 +67,7 @@ const createNewDraft = (index: number, lastInvoiceId: number, isLoading: boolean
         dueAmount: 0,
         cashReceived: undefined,
         changeAmount: 0,
+        buyerId: undefined,
     }
 };
 
@@ -84,7 +85,7 @@ const STORAGE_KEYS = {
 };
 
 const useInvoiceFormData = (): InvoiceFormContextType => {
-    const { isAppDataLoading, products, lastInvoiceId } = useAppData();
+    const { isAppDataLoading, products, lastInvoiceId, buyers } = useAppData();
     const { toast } = useToast();
     
     const [drafts, setDrafts] = useState<DraftInvoice[]>([]);
@@ -194,10 +195,19 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                 const newDrafts = prev.map((draft, index) => {
                     if (index === activeDraftIndex) {
                         const newVersion = { ...draft, ...update };
+                        
+                        // If buyerId is being unset, it means user is typing a new name.
+                        // We also need to check if the new name matches an existing buyer.
+                        if (update.buyerId === undefined && update.customerName) {
+                            const existingBuyer = buyers.find(b => b.name.toLowerCase() === update.customerName?.toLowerCase());
+                            newVersion.buyerId = existingBuyer?.id;
+                        }
+
                         const { subtotal, dueAmount, changeAmount } = calculateTotals(newVersion.items, newVersion.paidAmount, newVersion.cashReceived);
                         newVersion.subtotal = subtotal;
                         newVersion.dueAmount = dueAmount;
                         newVersion.changeAmount = changeAmount;
+
                         if(typeof newVersion.id === 'string' || (typeof newVersion.id === 'number' && update.customerName && newVersion.label.startsWith('Memo'))) {
                             newVersion.label = update.customerName || `Memo #${newVersion.id}`;
                         }
@@ -213,7 +223,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                 return newDrafts;
             });
         });
-    }, [activeDraftIndex]);
+    }, [activeDraftIndex, buyers]);
 
     const addInvoiceItem = useCallback((product: Product) => {
         setDrafts(prev => prev.map((draft, index) => {
@@ -315,3 +325,5 @@ export function useInvoiceForm() {
     }
     return context;
 }
+
+    

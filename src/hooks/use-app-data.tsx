@@ -303,12 +303,37 @@ export function DataProvider({ children }: { children: ReactNode }) {
                 throw error; // Re-throw to be caught by the calling function
             }
         } else {
+            // --- Local Storage Logic ---
             const newId = lastInvoiceId + 1;
-            const newInvoice = { ...invoiceToSave, id: newId };
+            const newInvoice: Invoice = { ...invoiceToSave, id: newId };
+            let newBuyers = [...buyers];
+            let buyerToUpdate = buyers.find(b => b.id === newInvoice.buyerId);
+    
+            if (buyerToUpdate) {
+                // Update existing buyer
+                newBuyers = newBuyers.map(b => b.id === buyerToUpdate!.id ? { ...b, invoiceIds: [...b.invoiceIds, String(newId)] } : b);
+            } else if (newInvoice.customerName) {
+                // Create new buyer
+                const newBuyerId = `buyer-${Date.now()}`;
+                newInvoice.buyerId = newBuyerId;
+                const newBuyer: Buyer = {
+                    id: newBuyerId,
+                    name: newInvoice.customerName,
+                    address: newInvoice.customerAddress,
+                    phone: newInvoice.customerPhone,
+                    invoiceIds: [String(newId)]
+                };
+                newBuyers.push(newBuyer);
+            }
+    
+            setBuyers(newBuyers);
+            saveDataToLocalStorage('buyers', newBuyers);
+    
             const newInvoices = [newInvoice, ...invoices];
             setInvoices(newInvoices);
-            setLastInvoiceId(newId);
             saveDataToLocalStorage('invoices', newInvoices);
+            
+            setLastInvoiceId(newId);
             saveDataToLocalStorage('lastInvoiceId', newId);
 
             // Update stock locally
@@ -319,6 +344,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
             });
             setProducts(newProducts);
             saveDataToLocalStorage('products', newProducts);
+            
             toast({ title: "Invoice Saved (Local)", description: `Invoice #${newId} saved locally.` });
             
             if (settings.printFormat === 'pos' && settings.posPrinterType !== 'disabled') {
@@ -326,7 +352,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
             }
             return newId;
         }
-    }, [isDbConnected, lastInvoiceId, invoices, products, loadAllData, settings, printInvoice, toast, saveDataToLocalStorage]);
+    }, [isDbConnected, lastInvoiceId, invoices, products, buyers, loadAllData, settings, printInvoice, toast, saveDataToLocalStorage]);
     
     const deleteInvoice = useCallback(async (invoiceId: number) => {
         if (isDbConnected) {
@@ -642,3 +668,5 @@ export function useAppData() {
     }
     return context;
 }
+
+    

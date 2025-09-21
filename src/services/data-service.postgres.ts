@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { Pool } from 'pg';
@@ -83,19 +84,28 @@ class PostgresDataService {
             // Upsert buyer and get their ID
             let buyerId = invoiceData.buyerId;
             if (invoiceData.customerName) {
-                let buyerResult = await client.query('SELECT id FROM buyers WHERE name = $1 AND phone = $2', [invoiceData.customerName, invoiceData.customerPhone]);
-                if (buyerResult.rows.length > 0) {
-                    buyerId = buyerResult.rows[0].id;
-                     await client.query(
+                 if (buyerId) {
+                    // Existing buyer was selected, just add the new invoice ID to their list
+                    await client.query(
                         'UPDATE buyers SET invoice_ids = invoice_ids || $1::jsonb WHERE id = $2',
                         [JSON.stringify(newId), buyerId]
                     );
                 } else {
-                    buyerId = `buyer-${Date.now()}`;
-                    await client.query(
-                        'INSERT INTO buyers (id, name, address, phone, invoice_ids) VALUES ($1, $2, $3, $4, $5)',
-                        [buyerId, invoiceData.customerName, invoiceData.customerAddress, invoiceData.customerPhone, JSON.stringify([newId])]
-                    );
+                    // Check if buyer exists by name/phone, otherwise create new.
+                    let buyerResult = await client.query('SELECT id FROM buyers WHERE name = $1 AND phone = $2', [invoiceData.customerName, invoiceData.customerPhone]);
+                    if (buyerResult.rows.length > 0) {
+                        buyerId = buyerResult.rows[0].id;
+                        await client.query(
+                            'UPDATE buyers SET invoice_ids = invoice_ids || $1::jsonb WHERE id = $2',
+                            [JSON.stringify(newId), buyerId]
+                        );
+                    } else {
+                        buyerId = `buyer-${Date.now()}`;
+                        await client.query(
+                            'INSERT INTO buyers (id, name, address, phone, invoice_ids) VALUES ($1, $2, $3, $4, $5)',
+                            [buyerId, invoiceData.customerName, invoiceData.customerAddress, invoiceData.customerPhone, JSON.stringify([newId])]
+                        );
+                    }
                 }
                 newInvoice.buyerId = buyerId;
             }
@@ -337,3 +347,5 @@ class PostgresDataService {
 }
 
 export default PostgresDataService;
+
+    

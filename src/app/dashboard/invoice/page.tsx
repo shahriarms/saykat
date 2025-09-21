@@ -16,6 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAppData } from '@/hooks/use-app-data';
 import { Plus, Trash2, Printer, X, Loader2, Search } from 'lucide-react';
 import { useInvoiceForm, InvoiceFormProvider } from '@/hooks/use-invoice-form';
@@ -25,7 +26,7 @@ import { useSettings } from '@/hooks/use-settings';
 import { useTranslation } from '@/hooks/use-translation';
 import type { DraftInvoice } from '@/hooks/use-invoice-form';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { Product } from '@/lib/types';
+import type { Product, Buyer } from '@/lib/types';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
@@ -33,7 +34,7 @@ import dynamic from 'next/dynamic';
 
 
 function InvoicePage() {
-  const { addInvoice } = useAppData();
+  const { addInvoice, buyers } = useAppData();
   const { settings } = useSettings();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -58,9 +59,39 @@ function InvoicePage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isPrintConfirmOpen, setPrintConfirmOpen] = useState(false);
   const [invoiceToPrint, setInvoiceToPrint] = useState<DraftInvoice | null>(null);
+  const [buyerSearchTerm, setBuyerSearchTerm] = useState("");
+  const [isBuyerPopoverOpen, setBuyerPopoverOpen] = useState(false);
 
   
   const { id: draftId, customerName, customerAddress, customerPhone, paidAmount, subtotal, dueAmount, items, cashReceived, changeAmount } = activeDraft || {};
+
+  const filteredBuyers = useMemo(() => {
+    if (!buyerSearchTerm) return [];
+    const lowercasedTerm = buyerSearchTerm.toLowerCase();
+    return buyers.filter(
+      (buyer) =>
+        buyer.name.toLowerCase().includes(lowercasedTerm) ||
+        (buyer.phone && buyer.phone.includes(lowercasedTerm))
+    );
+  }, [buyerSearchTerm, buyers]);
+
+  const handleBuyerSelect = (buyer: Buyer) => {
+    updateActiveDraft({
+      customerName: buyer.name,
+      customerAddress: buyer.address,
+      customerPhone: buyer.phone,
+      buyerId: buyer.id,
+    });
+    setBuyerSearchTerm(buyer.name);
+    setBuyerPopoverOpen(false);
+  };
+  
+  const handleCustomerNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.value;
+    updateActiveDraft({ customerName: name, buyerId: undefined });
+    setBuyerSearchTerm(name);
+    setBuyerPopoverOpen(true);
+  };
 
   const validateInvoice = () => {
     if (!customerName) {
@@ -124,6 +155,7 @@ function InvoicePage() {
         document.title = originalTitle;
         setInvoiceToPrint(null);
         resetActiveDraft();
+        setBuyerSearchTerm("");
         toast({
             title: "Memo Ready",
             description: "A new, empty memo is ready for you.",
@@ -304,8 +336,36 @@ function InvoicePage() {
                 <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="customerName">{t('customer_name_label')}</Label>
-                            <Input id="customerName" placeholder={t('customer_name_placeholder')} value={customerName || ''} onChange={(e) => updateActiveDraft({ customerName: e.target.value })} />
+                          <Label htmlFor="customerName">{t('customer_name_label')}</Label>
+                           <Popover open={isBuyerPopoverOpen} onOpenChange={setBuyerPopoverOpen}>
+                              <PopoverTrigger asChild>
+                                  <Input
+                                    id="customerName"
+                                    placeholder={t('customer_name_placeholder')}
+                                    value={customerName || ''}
+                                    onChange={handleCustomerNameChange}
+                                    autoComplete="off"
+                                  />
+                              </PopoverTrigger>
+                              <PopoverContent className="w-[--radix-popover-trigger-width] max-h-60 overflow-y-auto p-0">
+                                {filteredBuyers.length > 0 ? (
+                                  <div className="divide-y">
+                                    {filteredBuyers.map((buyer) => (
+                                      <button
+                                        key={buyer.id}
+                                        onClick={() => handleBuyerSelect(buyer)}
+                                        className="w-full text-left p-2 hover:bg-muted"
+                                      >
+                                        <p className="font-semibold">{buyer.name}</p>
+                                        <p className="text-sm text-muted-foreground">{buyer.phone}</p>
+                                      </button>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p className="p-4 text-sm text-muted-foreground">No existing buyers found. A new one will be created.</p>
+                                )}
+                              </PopoverContent>
+                            </Popover>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="customerPhone">{t('customer_phone_label')}</Label>
@@ -546,3 +606,5 @@ export default function InvoicePageWrapper() {
     </InvoiceFormProvider>
   );
 }
+
+    
