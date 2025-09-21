@@ -36,7 +36,7 @@ import { useUser } from '@/hooks/use-user';
 
 
 export default function BuyersDuePage() {
-  const { invoices: allInvoices, buyers, getInvoicesForBuyer, addPayment, getPaymentsForInvoice, deleteInvoice } from 'useAppData();
+  const { invoices: allInvoices, buyers, getInvoicesForBuyer, addPayment, getPaymentsForInvoice, deleteInvoice } = useAppData();
   const { user } = useUser();
   const { toast } = useToast();
   const { t } = useTranslation();
