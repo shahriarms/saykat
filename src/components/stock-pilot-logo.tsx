@@ -1,11 +1,34 @@
 
+'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
 export const StockPilotLogo = React.memo(function StockPilotLogo({ className }: { className?: string }) {
   const graphPath = "M20 60C30 50, 35 70, 40 65C45 60, 50 40, 55 45C60 50, 65 30, 70 35C75 40, 80 25, 85 30";
   
+  const [rotation, setRotation] = useState({ s: 0, m: 0, h: 0 });
+
+  useEffect(() => {
+    // This effect runs only on the client, preventing hydration errors.
+    const updateClock = () => {
+      const now = new Date();
+      const s = now.getSeconds();
+      const m = now.getMinutes();
+      const h = now.getHours();
+      setRotation({
+        s: s * 6,
+        m: m * 6 + s / 10,
+        h: h * 30 + m / 2,
+      });
+    };
+    
+    updateClock(); // Initial set
+    const intervalId = setInterval(updateClock, 1000);
+    
+    return () => clearInterval(intervalId); // Cleanup
+  }, []);
+
   return (
     <div
       className={cn(
@@ -27,36 +50,6 @@ export const StockPilotLogo = React.memo(function StockPilotLogo({ className }: 
             stroke: #22C55E;
             stroke-width: 4;
             fill: #22C55E1A;
-          }
-          .clock-hand {
-            stroke: #22C55E;
-            stroke-linecap: round;
-            transform-origin: center;
-          }
-          .hour-hand {
-            stroke-width: 4;
-            animation: hours 43200s linear infinite;
-          }
-          .minute-hand {
-            stroke-width: 3;
-            animation: minutes 3600s linear infinite;
-          }
-          .second-hand {
-            stroke: #22C55E;
-            stroke-width: 2;
-            animation: seconds 60s steps(60, end) infinite;
-          }
-          @keyframes seconds {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-          @keyframes minutes {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-          @keyframes hours {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
           }
         `}
       </style>
@@ -94,9 +87,9 @@ export const StockPilotLogo = React.memo(function StockPilotLogo({ className }: 
           {/* Real Clock */}
           <g transform="translate(75, 65)">
               <circle className="clock-face" r="14" />
-              <line y1="-8" className="clock-hand hour-hand" />
-              <line y1="-11" className="clock-hand minute-hand" />
-              <line y1="-12" className="clock-hand second-hand" />
+              <line y1="-8" stroke="#22C55E" strokeWidth="4" strokeLinecap="round" style={{ transform: `rotate(${rotation.h}deg)`, transformOrigin: 'center' }} />
+              <line y1="-11" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" style={{ transform: `rotate(${rotation.m}deg)`, transformOrigin: 'center' }} />
+              <line y1="-12" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" style={{ transform: `rotate(${rotation.s}deg)`, transformOrigin: 'center' }} />
               <circle r="1.5" fill="#22C55E" />
           </g>
         </svg>
