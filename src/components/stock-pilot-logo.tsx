@@ -29,15 +29,7 @@ export const StockPilotLogo = React.memo(function StockPilotLogo({ className }: 
     return () => clearInterval(intervalId); // Cleanup
   }, []);
 
-  return (
-    <div
-      className={cn(
-        'flex items-center justify-center rounded-full bg-white shadow-md',
-        className
-      )}
-    >
-      <style>
-        {`
+  const styleContent = `
           @keyframes followPath {
             0% { offset-distance: 0%; }
             100% { offset-distance: 100%; }
@@ -51,8 +43,16 @@ export const StockPilotLogo = React.memo(function StockPilotLogo({ className }: 
             stroke-width: 4;
             fill: #22C55E1A;
           }
-        `}
-      </style>
+        `;
+
+  return (
+    <div
+      className={cn(
+        'flex items-center justify-center rounded-full bg-white shadow-md',
+        className
+      )}
+    >
+      <style dangerouslySetInnerHTML={{ __html: styleContent }} />
       <div className="h-full w-full">
         <svg
           className="h-full w-full text-black"
