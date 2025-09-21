@@ -652,7 +652,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         if (!employee) return 0;
         const monthStart = startOfMonth(date);
         const monthEnd = endOfMonth(date);
-        const totalPaid = getPaymentsForMonth(employee.id, monthStart, monthEnd).reduce((sum, p) => sum + p.amount, 0);
+        const totalPaid = getPaymentsForMonth(employee.id, monthStart, monthEnd).reduce((sum, p) => sum + (p.amount || 0), 0);
         return employee.salary - totalPaid;
     }, [getPaymentsForMonth]);
 

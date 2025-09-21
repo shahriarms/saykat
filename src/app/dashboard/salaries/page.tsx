@@ -60,7 +60,7 @@ export default function SalariesPage() {
     const lastDay = endOfMonth(currentDate);
     
     const payments = getPaymentsForMonth(selectedEmployee.id, firstDay, lastDay);
-    const paid = payments.reduce((acc, p) => acc + p.amount, 0);
+    const paid = payments.reduce((acc, p) => acc + (p.amount || 0), 0);
     const due = getDueSalaryForMonth(selectedEmployee, currentDate);
 
     return {
@@ -269,7 +269,7 @@ export default function SalariesPage() {
                                             paymentsThisMonth.map(payment => (
                                                 <TableRow key={payment.id}>
                                                     <TableCell>{format(new Date(payment.date), 'PP')}</TableCell>
-                                                    <TableCell className="text-right font-mono">৳ {payment.amount.toFixed(2)}</TableCell>
+                                                    <TableCell className="text-right font-mono">৳ {(payment.amount || 0).toFixed(2)}</TableCell>
                                                 </TableRow>
                                             ))
                                         ) : (
