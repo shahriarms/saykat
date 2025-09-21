@@ -7,6 +7,7 @@ export const bn = {
     'save_changes_button': 'পরিবর্তন সংরক্ষণ করুন',
     'are_you_sure_title': 'আপনি কি নিশ্চিত?',
     'ok_button': 'ঠিক আছে',
+    'taka_label': 'টাকা',
 
     // Sidebar
     'dashboard_sidebar': 'ড্যাশবোর্ড',

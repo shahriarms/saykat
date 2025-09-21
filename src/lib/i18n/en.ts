@@ -7,6 +7,7 @@ export const en = {
     'save_changes_button': 'Save Changes',
     'are_you_sure_title': 'Are you sure?',
     'ok_button': 'OK',
+    'taka_label': 'Taka',
 
     // Sidebar
     'dashboard_sidebar': 'Dashboard',
@@ -319,7 +320,7 @@ export const en = {
     'payment_successful_toast_title': 'Payment Successful',
     'payment_successful_toast_description': 'Paid ৳{{amount}} to {{name}}.',
     'salary_voucher_title': 'Salary Payment Voucher',
-    'pay_to_label': 'Pay To',
+    'pay_to_label': 'PAY TO THE ORDER OF',
     'or_bearer_label': 'or Bearer',
     'sum_of_label': 'Sum of',
     'employee_id_label': 'Employee ID',
