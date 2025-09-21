@@ -15,74 +15,87 @@ interface SalaryReceiptProps {
   paymentDate: Date;
 }
 
+const CheckPattern = () => (
+    <svg width="100%" height="100%" className="absolute inset-0 z-0 opacity-[0.07]">
+      <defs>
+        <pattern id="check-pattern" patternUnits="userSpaceOnUse" width="40" height="40" patternTransform="scale(1) rotate(0)">
+           <path d="M10 0L20 10L10 20L0 10Z" fill="#aab" stroke="#aab" strokeWidth="1"/>
+           <path d="M30 0L40 10L30 20L20 10Z" fill="#aab" stroke="#aab" strokeWidth="1"/>
+           <path d="M10 20L20 30L10 40L0 30Z" fill="#aab" stroke="#aab" strokeWidth="1"/>
+           <path d="M30 20L40 30L30 40L20 30Z" fill="#aab" stroke="#aab" strokeWidth="1"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#check-pattern)" />
+    </svg>
+);
+
+
 export const SalaryReceipt = React.memo(React.forwardRef<HTMLDivElement, SalaryReceiptProps>(
   ({ employee, paymentAmount, paymentDate }, ref) => {
     const { t, locale } = useTranslation();
     const isBn = locale === 'bn';
     const amountInWords = isBn ? numberToWordsBn(paymentAmount) : numberToWords(paymentAmount);
-    const dateFormatted = format(paymentDate, 'ddMMyyyy');
 
     return (
-      <div ref={ref} className={cn("bg-white p-4 font-sans", isBn ? 'font-bangla' : '')}>
+      <div ref={ref} className={cn("bg-white p-4 font-sans print:p-0", isBn ? 'font-bangla' : '')}>
         <div 
-          className="w-full max-w-4xl mx-auto border-2 border-gray-400 p-4 relative"
+          className="w-full max-w-4xl mx-auto border-4 border-gray-300 p-1 relative bg-white"
+          style={{ borderStyle: 'dashed' }}
         >
-          {/* Watermark */}
-          <div className="absolute inset-0 flex items-center justify-center z-0">
-              <StockPilotLogo className="w-64 h-64 opacity-5" />
-          </div>
+            <CheckPattern />
+            <div className="border border-gray-400 p-4 relative z-10">
+                
+                {/* Header */}
+                <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-2">
+                        <StockPilotLogo className="w-10 h-10" />
+                        <div>
+                            <h1 className="text-sm font-bold text-black">{t('shop_name')}</h1>
+                            <p className="text-xs text-gray-500">Dhaka, Bangladesh</p>
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-xs text-gray-600">DATE</p>
+                        <p className="font-semibold border-b border-gray-400 px-2">{format(paymentDate, 'MM/dd/yyyy')}</p>
+                    </div>
+                </div>
 
-          <div className="relative z-10">
-              {/* Header */}
-              <div className="flex justify-between items-start pb-2 border-b-2 border-gray-300">
-                <div className="flex items-center gap-3">
-                  <StockPilotLogo className="w-12 h-12" />
-                  <div>
-                    <h1 className="text-xl font-bold text-black">{t('shop_name')}</h1>
-                    <p className="text-xs text-gray-600">{t('salary_voucher_title')}</p>
-                  </div>
+                {/* Payee */}
+                <div className="flex items-center gap-4 mb-2">
+                    <span className="text-xs text-gray-600 whitespace-nowrap">PAY TO THE<br/>ORDER OF</span>
+                    <p className="w-full border-b border-gray-400 font-semibold text-lg pb-1">{employee.name}</p>
                 </div>
-                <div className="flex items-center gap-1">
-                  {dateFormatted.split('').map((char, i) => (
-                    <div key={i} className="w-6 h-8 border border-gray-400 flex items-center justify-center font-mono text-lg">{char}</div>
-                  ))}
-                </div>
-              </div>
 
-              {/* Payee and Amount */}
-              <div className="mt-6 grid grid-cols-12 gap-x-4 gap-y-6">
-                 <div className="col-span-2 text-sm text-gray-600 font-semibold flex items-end pb-1">{t('pay_to_label')}</div>
-                 <div className="col-span-7 border-b border-gray-300 ml-2 pb-1 font-semibold text-lg">
-                    {employee.name}
-                 </div>
-                 <div className="col-span-3 flex items-end pb-1 justify-end">
-                    <span className="text-sm text-gray-600 font-semibold">{t('or_bearer_label')}</span>
-                 </div>
-                 
-                 <div className="col-span-2 text-sm text-gray-600 font-semibold flex items-start pt-1">{t('sum_of_label')}</div>
-                 <div className="col-span-7 border-b border-gray-300 ml-2 pt-1 capitalize">
-                    {amountInWords}
-                 </div>
-                 <div className="col-span-3 border-2 border-gray-400 p-2 ml-4 font-mono text-xl font-bold text-center">
-                    {isBn ? '৳' : 'BDT'} {paymentAmount.toFixed(2)}
-                 </div>
-              </div>
+                 {/* Amount in words */}
+                 <div className="flex items-center gap-4 mb-4">
+                    <p className="w-full border-b border-gray-400 pb-1 capitalize">{amountInWords}</p>
+                     <span className="text-xs text-gray-600">DOLLARS</span>
+                </div>
+                
+                 {/* Amount box */}
+                <div className="absolute top-[5.5rem] right-4 flex items-center">
+                    <span className="text-lg font-semibold mr-1">$</span>
+                    <div className="border-2 border-gray-400 px-3 py-1 font-mono text-lg font-bold w-40 text-center">
+                        {paymentAmount.toFixed(2)}
+                    </div>
+                </div>
 
-              {/* Account Number and Signature */}
-              <div className="mt-12 flex justify-between items-end gap-4">
-                <div className="w-auto">
-                  <span className="text-sm text-gray-600 font-semibold">{t('phone_number_label')}:</span>
-                  <div className="font-mono border border-gray-300 px-3 py-1 inline-block ml-2">
-                    {employee.phone}
-                  </div>
+                {/* Memo and Signature */}
+                <div className="flex justify-between items-end mt-8">
+                     <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-600">MEMO</span>
+                        <p className="w-64 border-b border-gray-400 text-sm font-mono">{employee.phone}</p>
+                    </div>
+                     <div className="w-60 border-t border-gray-400 text-center pt-1">
+                        <p className="text-xs text-gray-500">Authorized Signature</p>
+                    </div>
                 </div>
-                <div className="w-64 text-center mt-4">
-                  <div className="border-t border-gray-400 pt-1 text-xs text-gray-600">
-                    {t('please_sign_above_label')}
-                  </div>
+
+                {/* MICR Line */}
+                <div className="absolute bottom-1 left-0 right-0 text-center font-mono text-sm text-gray-500">
+                    <span className="font-serif">⑆</span>123456789<span className="font-serif">⑆</span> &nbsp;987654321<span className="font-serif">⑈</span> 0123
                 </div>
-              </div>
-          </div>
+            </div>
         </div>
       </div>
     );
