@@ -14,7 +14,6 @@ interface User {
   uid: string;
   email: string | null;
   role: Role;
-  photoURL: string | null;
 }
 
 interface UserContextType {
@@ -24,14 +23,12 @@ interface UserContextType {
   generateAdminCode: () => void;
   redeemAdminCode: (code: string) => boolean;
   adminCode: string | null;
-  updateProfilePicture: (file: File) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 const ADMIN_EMAIL = "shahriar.ms1k@gmail.com";
 const ADMIN_CODE_STORAGE_KEY = 'stockpilot-admin-code';
-const PROFILE_PIC_STORAGE_KEY = 'stockpilot-profile-pic';
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
@@ -55,12 +52,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
             userRole = sessionRole;
         }
 
-        // Defer reading from localStorage to a client-side effect
         setUser({
           uid: firebaseUser.uid,
           email: firebaseUser.email,
           role: userRole,
-          photoURL: null, // Start with null to avoid hydration mismatch
         });
         
         if (isUserAdmin) {
@@ -87,15 +82,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, [auth, router, pathname]);
 
-  // A separate effect to read from localStorage only on the client
-  useEffect(() => {
-    if (user) {
-      const storedPhoto = localStorage.getItem(PROFILE_PIC_STORAGE_KEY);
-      if (storedPhoto) {
-        setUser(currentUser => currentUser ? { ...currentUser, photoURL: storedPhoto } : null);
-      }
-    }
-  }, [user?.uid]); // Run when user logs in
 
   const logout = useCallback(async () => {
     setIsLoading(true);
@@ -149,23 +135,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     return false;
   }, [user, toast]);
   
-  const updateProfilePicture = useCallback((file: File) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const dataUrl = reader.result as string;
-      localStorage.setItem(PROFILE_PIC_STORAGE_KEY, dataUrl);
-      if (user) {
-        setUser({ ...user, photoURL: dataUrl });
-      }
-      toast({
-        title: 'Profile Picture Updated',
-        description: 'Your new picture has been saved.',
-      });
-    };
-    reader.readAsDataURL(file);
-  }, [user, toast]);
-
-  const value = useMemo(() => ({ user, isLoading, logout, generateAdminCode, redeemAdminCode, adminCode, updateProfilePicture }), [user, isLoading, logout, generateAdminCode, redeemAdminCode, adminCode, updateProfilePicture]);
+  const value = useMemo(() => ({ user, isLoading, logout, generateAdminCode, redeemAdminCode, adminCode }), [user, isLoading, logout, generateAdminCode, redeemAdminCode, adminCode]);
 
   if (isLoading) {
     return (
