@@ -155,6 +155,12 @@ export default function SalariesPage() {
         setConfirmingPayment(true);
     }
   }
+  
+  const handleHistoryItemClick = (payment: SalaryPayment) => {
+    if (selectedEmployee) {
+      setLastSuccessfulPayment({ payment, employee: selectedEmployee });
+    }
+  };
 
   const confirmPayment = async () => {
     setConfirmingPayment(false);
@@ -269,7 +275,11 @@ export default function SalariesPage() {
                                     <TableBody>
                                         {paymentsThisMonth.length > 0 ? (
                                             paymentsThisMonth.map(payment => (
-                                                <TableRow key={payment.id}>
+                                                <TableRow 
+                                                  key={payment.id} 
+                                                  onClick={() => handleHistoryItemClick(payment)}
+                                                  className="cursor-pointer"
+                                                >
                                                     <TableCell>{format(new Date(payment.date), 'PP')}</TableCell>
                                                     <TableCell className="text-right font-mono">৳ {(payment.amount || 0).toFixed(2)}</TableCell>
                                                 </TableRow>
