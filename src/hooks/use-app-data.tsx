@@ -404,7 +404,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     
     if (isAppDataLoading) {
         return (
-            <div className="flex h-screen w-full items-center justify-center bg-background">
+            <div className="flex h-svh w-full items-center justify-center bg-background">
                 <Loader2 className="h-8 w-8 animate-spin" />
             </div>
         );
