@@ -93,11 +93,8 @@ function InvoicePage() {
               description: t('invoice_saved_toast_description', { invoiceId: newInvoiceId }),
             });
             
-            // The state update needs a moment to propagate.
-            // We use a callback in `updateActiveDraft` to get the latest state.
-            updateActiveDraft({ id: newInvoiceId }, (updatedDraftWithId) => {
-              setInvoiceToPrint(updatedDraftWithId);
-            });
+            const updatedDraftWithId = await updateActiveDraft({ id: newInvoiceId });
+            setInvoiceToPrint(updatedDraftWithId);
         }
     } catch (error: any) {
         console.error("Failed to save invoice:", error);

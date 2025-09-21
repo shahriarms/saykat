@@ -32,7 +32,7 @@ interface InvoiceFormContextType {
     addNewDraft: () => void;
     removeDraft: (draftId: string | number) => void;
     setActiveDraftIndex: (index: number) => void;
-    updateActiveDraft: (update: Partial<Omit<DraftInvoice, 'subtotal' | 'dueAmount' | 'changeAmount' | 'label'>>, cb?: (updatedDraft: DraftInvoice) => void) => void;
+    updateActiveDraft: (update: Partial<Omit<DraftInvoice, 'subtotal' | 'dueAmount' | 'changeAmount' | 'label'>>) => Promise<DraftInvoice>;
     addInvoiceItem: (product: Product) => void;
     updateInvoiceItem: (itemId: string, update: { [key: string]: string }) => void;
     removeInvoiceItem: (itemId: string) => void;
@@ -187,31 +187,31 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
         });
     }, [activeDraftIndex, lastInvoiceId, isAppDataLoading]);
 
-    const updateActiveDraft = useCallback((update: Partial<Omit<DraftInvoice, 'subtotal' | 'dueAmount' | 'changeAmount' | 'label'>>, cb?: (updatedDraft: DraftInvoice) => void) => {
-        setDrafts(prev => {
-            let updatedDraft: DraftInvoice | undefined;
-            const newDrafts = prev.map((draft, index) => {
-                if (index === activeDraftIndex) {
-                    const newVersion = { ...draft, ...update };
-                    const { subtotal, dueAmount, changeAmount } = calculateTotals(newVersion.items, newVersion.paidAmount, newVersion.cashReceived);
-                    newVersion.subtotal = subtotal;
-                    newVersion.dueAmount = dueAmount;
-                    newVersion.changeAmount = changeAmount;
-                    // Update label if customerName is changed and it's a draft
-                    if(typeof newVersion.id === 'string' || (typeof newVersion.id === 'number' && update.customerName && newVersion.label.startsWith('Memo'))) {
-                        newVersion.label = update.customerName || `Memo #${newVersion.id}`;
+    const updateActiveDraft = useCallback((update: Partial<Omit<DraftInvoice, 'subtotal' | 'dueAmount' | 'changeAmount' | 'label'>>): Promise<DraftInvoice> => {
+        return new Promise((resolve) => {
+            setDrafts(prev => {
+                let resolvedDraft: DraftInvoice | undefined;
+                const newDrafts = prev.map((draft, index) => {
+                    if (index === activeDraftIndex) {
+                        const newVersion = { ...draft, ...update };
+                        const { subtotal, dueAmount, changeAmount } = calculateTotals(newVersion.items, newVersion.paidAmount, newVersion.cashReceived);
+                        newVersion.subtotal = subtotal;
+                        newVersion.dueAmount = dueAmount;
+                        newVersion.changeAmount = changeAmount;
+                        if(typeof newVersion.id === 'string' || (typeof newVersion.id === 'number' && update.customerName && newVersion.label.startsWith('Memo'))) {
+                            newVersion.label = update.customerName || `Memo #${newVersion.id}`;
+                        }
+                        resolvedDraft = newVersion;
+                        return newVersion;
                     }
-                    updatedDraft = newVersion;
-                    return newVersion;
-                }
-                return draft;
-            });
-            
-            if (cb && updatedDraft) {
-                cb(updatedDraft);
-            }
+                    return draft;
+                });
 
-            return newDrafts;
+                if (resolvedDraft) {
+                    resolve(resolvedDraft);
+                }
+                return newDrafts;
+            });
         });
     }, [activeDraftIndex]);
 
@@ -251,7 +251,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                     if (key === 'quantity' || key === 'price') {
                         const parsedValue = parseFloat(value);
                         // @ts-ignore
-                        updatedItem[key] = isNaN(parsedValue) ? 0 : parsedValue;
+                        updatedItem[key] = isNaN(parsedValue) ? '' : parsedValue;
                     }
                     return updatedItem;
                 }
