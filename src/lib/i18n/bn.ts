@@ -318,6 +318,12 @@ export const bn = {
     'overpayment_permission_error': 'আপনার বকেয়া পরিমাণের বেশি অর্থ প্রদানের অনুমতি নেই। অনুগ্রহ করে একজন অ্যাডমিনের সাথে যোগাযোগ করুন।',
     'payment_successful_toast_title': 'পেমেন্ট সফল',
     'payment_successful_toast_description': '{{name}} কে ৳{{amount}} প্রদান করা হয়েছে।',
+    'salary_voucher_title': 'বেতন ভাউচার',
+    'pay_to_label': 'প্রাপক',
+    'or_bearer_label': 'অথবা বাহককে',
+    'sum_of_label': 'টাকার পরিমাণ',
+    'employee_id_label': 'কর্মচারী আইডি',
+    'please_sign_above_label': 'উপরে স্বাক্ষর করুন',
 
     // Settings Page
     'settings_page_title': 'সেটিংস',
@@ -328,5 +334,3 @@ export const bn = {
     'language_settings_title': 'ভাষা সেটিংস',
     'language_settings_description': 'অ্যাপ্লিকেশনের জন্য আপনার পছন্দের ভাষা বেছে নিন।',
 };
-
-    

@@ -20,7 +20,7 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
   const locale = settings.locale || 'en';
 
   const t = useMemo((): TranslationFunction => (key, options) => {
-    let text = translations[locale][key] || translations['en'][key];
+    let text = translations[locale]?.[key as keyof typeof translations.bn] || translations['en'][key];
     if (options) {
       Object.keys(options).forEach(k => {
         const regex = new RegExp(`{{${k}}}`, 'g');

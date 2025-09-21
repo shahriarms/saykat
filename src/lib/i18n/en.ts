@@ -318,6 +318,12 @@ export const en = {
     'overpayment_permission_error': 'You do not have permission to pay more than the due amount. Please ask an admin.',
     'payment_successful_toast_title': 'Payment Successful',
     'payment_successful_toast_description': 'Paid ৳{{amount}} to {{name}}.',
+    'salary_voucher_title': 'Salary Payment Voucher',
+    'pay_to_label': 'PAY TO',
+    'or_bearer_label': 'OR BEARER',
+    'sum_of_label': 'SUM OF',
+    'employee_id_label': 'Employee ID',
+    'please_sign_above_label': 'Please Sign Above',
 
     // Settings Page
     'settings_page_title': 'Settings',
@@ -328,5 +334,3 @@ export const en = {
     'language_settings_title': 'Language Settings',
     'language_settings_description': 'Choose your preferred language for the application.',
 };
-
-    
