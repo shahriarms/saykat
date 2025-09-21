@@ -323,6 +323,7 @@ export const en = {
     'or_bearer_label': 'or Bearer',
     'sum_of_label': 'Sum of',
     'employee_id_label': 'Employee ID',
+    'phone_label': 'Phone',
     'please_sign_above_label': 'Please Sign Above',
 
     // Settings Page

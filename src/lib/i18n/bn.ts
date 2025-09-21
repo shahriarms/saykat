@@ -323,6 +323,7 @@ export const bn = {
     'or_bearer_label': 'অথবা বাহককে',
     'sum_of_label': 'টাকার পরিমাণ',
     'employee_id_label': 'কর্মচারী আইডি',
+    'phone_label': 'ফোন',
     'please_sign_above_label': 'উপরে স্বাক্ষর করুন',
 
     // Settings Page
