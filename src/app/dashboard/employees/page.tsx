@@ -54,7 +54,7 @@ import { useTranslation } from '@/hooks/use-translation';
 
 
 export default function EmployeesPage() {
-    const { employees, markAttendance, getAttendanceForDate, deleteEmployee, isAppDataLoading } = useAppData();
+    const { employees, markAttendance, getAttendanceForDate, deleteEmployee } = useAppData();
     const { user } = useUser();
     const { t } = useTranslation();
     
@@ -136,10 +136,6 @@ export default function EmployeesPage() {
                 return '';
         }
     };
-
-    if (isAppDataLoading) {
-      return <div className="flex h-full w-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
-    }
 
     return (
         <div className="flex flex-col gap-6">
@@ -314,5 +310,7 @@ export default function EmployeesPage() {
         </div>
     );
 }
+
+    
 
     

@@ -37,7 +37,7 @@ import { useUser } from '@/hooks/use-user';
 
 export default function BuyersPage() {
   const { user } = useUser();
-  const { buyers, getInvoicesForBuyer, isAppDataLoading, printInvoice: appPrintInvoice, getPaymentsForInvoice, deleteInvoice } = useAppData();
+  const { buyers, getInvoicesForBuyer, printInvoice: appPrintInvoice, getPaymentsForInvoice, deleteInvoice } = useAppData();
   const { settings } = useSettings();
   const { t } = useTranslation();
 
@@ -127,10 +127,6 @@ export default function BuyersPage() {
         (buyer.phone && buyer.phone.toLowerCase().includes(buyerSearchTerm.toLowerCase()))
     );
   }, [buyers, buyerSearchTerm]);
-  
-  if (isAppDataLoading) {
-    return <div className="flex h-full w-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
-  }
   
   const getInvoiceStatus = (invoice: Invoice) => {
     if (invoice.dueAmount <= 0.001) { 
@@ -342,3 +338,5 @@ export default function BuyersPage() {
     </>
   );
 }
+
+    

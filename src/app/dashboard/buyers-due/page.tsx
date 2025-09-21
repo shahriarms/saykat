@@ -38,7 +38,7 @@ import { InvoicePrintLayout } from '@/components/invoice-print-layout';
 
 
 export default function BuyersDuePage() {
-  const { invoices: allInvoices, buyers, getInvoicesForBuyer, addPayment, getPaymentsForInvoice, isAppDataLoading, deleteInvoice, printInvoice: appPrintInvoice } = useAppData();
+  const { invoices: allInvoices, buyers, getInvoicesForBuyer, addPayment, getPaymentsForInvoice, deleteInvoice, printInvoice: appPrintInvoice } = useAppData();
   const { user } = useUser();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -245,11 +245,6 @@ export default function BuyersDuePage() {
     }
     return selectedInvoice.dueAmount;
   }, [selectedInvoice, numericPaymentAmount]);
-
-
-  if (isAppDataLoading) {
-    return <div className="flex h-full w-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
-  }
 
   return (
     <>
@@ -484,3 +479,5 @@ export default function BuyersDuePage() {
     </>
   );
 }
+
+    

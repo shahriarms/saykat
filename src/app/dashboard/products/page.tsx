@@ -50,7 +50,7 @@ import { useTranslation } from '@/hooks/use-translation';
 
 
 export default function ProductsPage() {
-  const { products, isAppDataLoading, addMultipleProducts, deleteProduct } = useAppData();
+  const { products, addMultipleProducts, deleteProduct } = useAppData();
   const { user } = useUser();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -192,11 +192,11 @@ export default function ProductsPage() {
             className="hidden"
             accept=".xlsx, .xls, .csv"
           />
-          <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isAppDataLoading || user?.role !== 'admin'}>
+          <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={user?.role !== 'admin'}>
             <Upload className="mr-2 h-4 w-4" />
             <span className="hidden sm:inline">{t('upload_button')}</span>
           </Button>
-          <Button variant="outline" onClick={handleDownload} disabled={isAppDataLoading || filteredProducts.length === 0}>
+          <Button variant="outline" onClick={handleDownload} disabled={filteredProducts.length === 0}>
             <Download className="mr-2 h-4 w-4" />
             <span className="hidden sm:inline">{t('download_report_button')}</span>
           </Button>
@@ -250,11 +250,7 @@ export default function ProductsPage() {
                 </div>
                 {/* Table Section */}
                 <div className="relative rounded-md border overflow-auto flex-1">
-                {isAppDataLoading ? (
-                <div className="absolute inset-0 flex justify-center items-center">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                </div>
-                ) : filteredProducts.length > 0 ? (
+                {filteredProducts.length > 0 ? (
                 <Table>
                     <TableHeader className="sticky top-0 bg-card z-10">
                     <TableRow>
@@ -374,5 +370,7 @@ export default function ProductsPage() {
     </div>
   );
 }
+
+    
 
     

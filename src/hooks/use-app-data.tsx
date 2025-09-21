@@ -63,7 +63,6 @@ interface AppDataContextType {
     addSalaryPayment: (payment: Omit<SalaryPayment, 'id'>) => Promise<void>;
     getPaymentsForMonth: (employeeId: string, startDate: Date, endDate: Date) => SalaryPayment[];
     getSalaryPaymentsForDateRange: (startDate: Date, endDate: Date) => SalaryPayment[];
-    getDueSalaryForMonth: (employee: Employee, date: Date) => number;
 }
 
 const AppDataContext = createContext<AppDataContextType | undefined>(undefined);
@@ -386,14 +385,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
         return salaryPayments.filter(p => isWithinInterval(new Date(p.date), { start, end }));
     }, [salaryPayments]);
 
-    const getDueSalaryForMonth = useCallback((employee: Employee, date: Date) => {
-        if (!employee) return 0;
-        const monthStart = startOfMonth(date);
-        const monthEnd = endOfMonth(date);
-        const totalPaid = getPaymentsForMonth(employee.id, monthStart, monthEnd).reduce((sum, p) => sum + p.amount, 0);
-        return employee.salary - totalPaid;
-    }, [getPaymentsForMonth]);
-
     const value = useMemo(() => ({
         products, invoices, buyers, expenses, employees, attendance, salaryPayments, payments, isAppDataLoading, isDbConnected, lastInvoiceId,
         addProduct, addMultipleProducts, updateProduct, deleteProduct, getProductById,
@@ -401,7 +392,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addPayment, getPaymentsForInvoice,
         addExpense, updateExpense, deleteExpense, getExpensesForDateRange,
         addEmployee, updateEmployee, deleteEmployee, markAttendance, getAttendanceForDate,
-        addSalaryPayment, getPaymentsForMonth, getSalaryPaymentsForDateRange, getDueSalaryForMonth,
+        addSalaryPayment, getPaymentsForMonth, getSalaryPaymentsForDateRange,
     }), [
         products, invoices, buyers, expenses, employees, attendance, salaryPayments, payments, isAppDataLoading, isDbConnected, lastInvoiceId,
         addProduct, addMultipleProducts, updateProduct, deleteProduct, getProductById,
@@ -409,7 +400,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addPayment, getPaymentsForInvoice,
         addExpense, updateExpense, deleteExpense, getExpensesForDateRange,
         addEmployee, updateEmployee, deleteEmployee, markAttendance, getAttendanceForDate,
-        addSalaryPayment, getPaymentsForMonth, getSalaryPaymentsForDateRange, getDueSalaryForMonth
+        addSalaryPayment, getPaymentsForMonth, getSalaryPaymentsForDateRange
     ]);
     
     if (isAppDataLoading) {
@@ -434,3 +425,5 @@ export function useAppData() {
     }
     return context;
 }
+
+    
