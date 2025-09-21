@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
@@ -86,7 +87,7 @@ export default function BuyersDuePage() {
             setSelectedInvoice(null);
         }
     }
-  }, [allInvoices, buyers, selectedBuyer, selectedInvoice, getInvoicesForBuyer]);
+  }, [allInvoices, buyers]);
 
   const handleOpenConfirmation = () => {
     if (!selectedInvoice || !selectedBuyer || numericPaymentAmount <= 0) {
@@ -480,5 +481,3 @@ export default function BuyersDuePage() {
     </>
   );
 }
-
-    

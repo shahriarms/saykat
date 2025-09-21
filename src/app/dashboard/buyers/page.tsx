@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -69,7 +70,7 @@ export default function BuyersPage() {
             setSelectedInvoice(null);
         }
     }
-  }, [buyers, invoices, selectedBuyer, selectedInvoice]);
+  }, [buyers, invoices]);
   
   const handleSelectBuyer = (buyer: Buyer) => {
     setSelectedBuyer(buyer);
@@ -372,5 +373,3 @@ export default function BuyersPage() {
     </>
   );
 }
-
-    
