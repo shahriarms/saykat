@@ -265,7 +265,7 @@ export default function BuyersPage() {
                   <div className="flex items-center gap-2">
                       {user?.role === 'admin' && (
                         <Button variant="destructive" onClick={handleDeleteClick} disabled={!selectedInvoice || isDeleting}>
-                          <Trash2 className="mr-2 h-4 w-4"/> Delete
+                          <Trash2 className="mr-2 h-4 w-4"/> Delete Invoice
                         </Button>
                       )}
                       <Button onClick={handlePrint} disabled={!selectedInvoice || isPrinting}>
