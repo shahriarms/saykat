@@ -286,7 +286,8 @@ export default function BuyersDuePage() {
                   </div>
                    {user?.role === 'admin' && (
                         <Button variant="destructive" onClick={handleDeleteClick} disabled={!selectedInvoice || isDeleting}>
-                            <Trash2 className="mr-2 h-4 w-4"/> Delete Invoice
+                            {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Trash2 className="mr-2 h-4 w-4"/>}
+                            Delete Invoice
                         </Button>
                     )}
               </CardHeader>

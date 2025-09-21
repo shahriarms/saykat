@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -38,7 +37,7 @@ import { useUser } from '@/hooks/use-user';
 
 export default function BuyersPage() {
   const { user } = useUser();
-  const { buyers, getInvoicesForBuyer, printInvoice: appPrintInvoice, getPaymentsForInvoice, deleteInvoice } = useAppData();
+  const { buyers, invoices, getInvoicesForBuyer, printInvoice: appPrintInvoice, getPaymentsForInvoice, deleteInvoice } = useAppData();
   const { settings } = useSettings();
   const { t } = useTranslation();
 
@@ -50,6 +49,19 @@ export default function BuyersPage() {
   const [invoiceToPrint, setInvoiceToPrint] = useState<Invoice | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
+  
+  // Effect to handle data refreshes and keep selected items up-to-date
+  useEffect(() => {
+    if (selectedBuyer) {
+        const refreshedBuyer = buyers.find(b => b.id === selectedBuyer.id);
+        if (!refreshedBuyer) setSelectedBuyer(null);
+    }
+    if (selectedInvoice) {
+        const refreshedInvoice = invoices.find(inv => inv.id === selectedInvoice.id);
+        if (!refreshedInvoice) setSelectedInvoice(null);
+        else setSelectedInvoice(refreshedInvoice);
+    }
+  }, [buyers, invoices, selectedBuyer, selectedInvoice]);
   
   const handleSelectBuyer = (buyer: Buyer) => {
     setSelectedBuyer(buyer);
@@ -89,7 +101,7 @@ export default function BuyersPage() {
       setIsDeleting(true);
       await deleteInvoice(invoiceToDelete.id);
       setInvoiceToDelete(null);
-      setSelectedInvoice(null);
+      setSelectedInvoice(null); // Deselect after deletion
       setIsDeleting(false);
     }
   };
@@ -262,7 +274,8 @@ export default function BuyersPage() {
                   <div className="flex items-center gap-2">
                       {user?.role === 'admin' && (
                         <Button variant="destructive" onClick={handleDeleteClick} disabled={!selectedInvoice || isDeleting}>
-                          <Trash2 className="mr-2 h-4 w-4"/> Delete
+                          {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Trash2 className="mr-2 h-4 w-4"/>}
+                          Delete Invoice
                         </Button>
                       )}
                       <Button onClick={handlePrint} disabled={!selectedInvoice || isPrinting}>
