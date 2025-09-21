@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -17,19 +18,20 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, differenceInDays } from 'date-fns';
 import { useTranslation } from '@/hooks/use-translation';
-import { DailySalesDialog } from '@/components/daily-sales-report-dialog';
-import { DailyExpensesReportDialog } from '@/components/daily-expenses-report-dialog';
-import { DailyDueReportDialog } from '@/components/daily-due-report-dialog';
-import { DailyUnitsSoldReportDialog } from '@/components/daily-units-sold-report-dialog';
-import { DailyAttendanceReportDialog } from '@/components/daily-attendance-report-dialog';
-import { MonthlySalesDialog } from '@/components/monthly-sales-report-dialog';
-import { MonthlyExpensesDialog } from '@/components/monthly-expenses-report-dialog';
-import { MonthlyDueDialog } from '@/components/monthly-due-report-dialog';
-import { MonthlyUnitsSoldDialog } from '@/components/monthly-units-sold-report-dialog';
-import { MonthlySalaryReportDialog } from '@/components/monthly-salary-report-dialog';
-import type { DateRange } from 'react-day-picker';
-import type { Invoice, Expense, SalaryPayment, Attendance, Product } from '@/lib/types';
+import type { DateRange, Invoice, Expense, SalaryPayment, Attendance, Product } from '@/lib/types';
+import dynamic from 'next/dynamic';
 
+
+const DailySalesDialog = dynamic(() => import('@/components/daily-sales-report-dialog').then(mod => mod.DailySalesDialog), { ssr: false });
+const DailyExpensesReportDialog = dynamic(() => import('@/components/daily-expenses-report-dialog').then(mod => mod.DailyExpensesReportDialog), { ssr: false });
+const DailyDueReportDialog = dynamic(() => import('@/components/daily-due-report-dialog').then(mod => mod.DailyDueReportDialog), { ssr: false });
+const DailyUnitsSoldReportDialog = dynamic(() => import('@/components/daily-units-sold-report-dialog').then(mod => mod.DailyUnitsSoldReportDialog), { ssr: false });
+const DailyAttendanceReportDialog = dynamic(() => import('@/components/daily-attendance-report-dialog').then(mod => mod.DailyAttendanceReportDialog), { ssr: false });
+const MonthlySalesDialog = dynamic(() => import('@/components/monthly-sales-report-dialog').then(mod => mod.MonthlySalesDialog), { ssr: false });
+const MonthlyExpensesDialog = dynamic(() => import('@/components/monthly-expenses-report-dialog').then(mod => mod.MonthlyExpensesDialog), { ssr: false });
+const MonthlyDueDialog = dynamic(() => import('@/components/monthly-due-report-dialog').then(mod => mod.MonthlyDueDialog), { ssr: false });
+const MonthlyUnitsSoldDialog = dynamic(() => import('@/components/monthly-units-sold-report-dialog').then(mod => mod.MonthlyUnitsSoldDialog), { ssr: false });
+const MonthlySalaryReportDialog = dynamic(() => import('@/components/monthly-salary-report-dialog').then(mod => mod.MonthlySalaryReportDialog), { ssr: false });
 
 export default function Dashboard() {
   const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, getAttendanceForDate, invoices: allInvoices } = useAppData();
@@ -170,10 +172,6 @@ export default function Dashboard() {
     }
     return format(dateRange.from, 'PPP');
   }, [dateRange]);
-
-  if (!dateRange) {
-    return <div className="flex h-full w-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
-  }
 
   return (
     <>
@@ -422,67 +420,67 @@ export default function Dashboard() {
       </div>
 
       {/* Daily Report Dialogs */}
-      <DailySalesDialog
+      { isDailySalesReportOpen && <DailySalesDialog
         open={isDailySalesReportOpen}
         onOpenChange={setDailySalesReportOpen}
         invoices={todayInvoices}
-      />
-      <DailyExpensesReportDialog
+      /> }
+      { isDailyExpensesReportOpen && <DailyExpensesReportDialog
         open={isDailyExpensesReportOpen}
         onOpenChange={setDailyExpensesReportOpen}
         expenses={todayExpenses}
-      />
-      <DailyDueReportDialog
+      /> }
+      { isDailyDueReportOpen && <DailyDueReportDialog
         open={isDailyDueReportOpen}
         onOpenChange={setDailyDueReportOpen}
         invoices={todayInvoices}
-      />
-      <DailyUnitsSoldReportDialog
+      /> }
+      { isDailyUnitsSoldReportOpen && <DailyUnitsSoldReportDialog
         open={isDailyUnitsSoldReportOpen}
         onOpenChange={setDailyUnitsSoldReportOpen}
         invoices={todayInvoices}
         products={products}
-      />
-      <DailyAttendanceReportDialog
+      /> }
+      { isDailyAttendanceReportOpen && <DailyAttendanceReportDialog
         open={isDailyAttendanceReportOpen}
         onOpenChange={setDailyAttendanceReportOpen}
         attendance={todayAttendance}
         employees={employees}
-      />
+      /> }
 
       {/* Monthly/Date Range Report Dialogs */}
-      <MonthlySalesDialog
+      { isMonthlySalesReportOpen && <MonthlySalesDialog
         open={isMonthlySalesReportOpen}
         onOpenChange={setMonthlySalesReportOpen}
         invoices={rangeInvoices}
         dateRange={dateRange}
-      />
-      <MonthlyExpensesDialog
+      /> }
+      { isMonthlyExpensesReportOpen && <MonthlyExpensesDialog
         open={isMonthlyExpensesReportOpen}
         onOpenChange={setMonthlyExpensesReportOpen}
         expenses={rangeExpenses}
         dateRange={dateRange}
-      />
-      <MonthlyDueDialog
+      /> }
+      { isMonthlyDueReportOpen && <MonthlyDueDialog
         open={isMonthlyDueReportOpen}
         onOpenChange={setMonthlyDueReportOpen}
         invoices={rangeInvoices}
         dateRange={dateRange}
-      />
-      <MonthlyUnitsSoldDialog
+      /> }
+      { isMonthlyUnitsSoldReportOpen && <MonthlyUnitsSoldDialog
         open={isMonthlyUnitsSoldReportOpen}
         onOpenChange={setMonthlyUnitsSoldReportOpen}
         invoices={rangeInvoices}
         products={products}
         dateRange={dateRange}
-      />
-      <MonthlySalaryReportDialog
+      /> }
+      { isMonthlySalaryReportOpen && <MonthlySalaryReportDialog
         open={isMonthlySalaryReportOpen}
         onOpenChange={setMonthlySalaryReportOpen}
         salaryPayments={rangeSalaries}
         employees={employees}
         dateRange={dateRange}
-      />
+      /> }
     </>
   );
 }

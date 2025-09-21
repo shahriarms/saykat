@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -36,7 +37,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { PlusCircle, MoreHorizontal, Pencil, Trash2, CalendarIcon, Users, UserCheck, UserX, NotebookText, Loader2 } from 'lucide-react';
-import { EmployeeDialog } from '@/components/employee-dialog';
 import { format, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useUser } from '@/hooks/use-user';
@@ -51,7 +51,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useTranslation } from '@/hooks/use-translation';
+import dynamic from 'next/dynamic';
 
+const EmployeeDialog = dynamic(() => import('@/components/employee-dialog').then(mod => mod.EmployeeDialog), {
+    ssr: false,
+    loading: () => <Loader2 className="h-5 w-5 animate-spin" />
+});
 
 export default function EmployeesPage() {
     const { employees, markAttendance, getAttendanceForDate, deleteEmployee } = useAppData();

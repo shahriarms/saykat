@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useRef } from 'react';
@@ -29,8 +30,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppData } from '@/hooks/use-app-data';
 import type { Product } from '@/lib/types';
-import { AddProductDialog } from '@/components/add-product-dialog';
-import { EditProductDialog } from '@/components/edit-product-dialog';
 import { Download, PlusCircle, MoreHorizontal, Loader2, PackageOpen, Pencil, ShieldAlert, Search, Upload, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useUser } from '@/hooks/use-user';
@@ -47,7 +46,17 @@ import {
 import * as XLSX from 'xlsx';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from '@/hooks/use-translation';
+import dynamic from 'next/dynamic';
 
+const AddProductDialog = dynamic(() => import('@/components/add-product-dialog').then(mod => mod.AddProductDialog), {
+    ssr: false,
+    loading: () => <Loader2 className="h-5 w-5 animate-spin" />
+});
+
+const EditProductDialog = dynamic(() => import('@/components/edit-product-dialog').then(mod => mod.EditProductDialog), {
+    ssr: false,
+    loading: () => <Loader2 className="h-5 w-5 animate-spin" />
+});
 
 export default function ProductsPage() {
   const { products, addMultipleProducts, deleteProduct } = useAppData();
@@ -250,7 +259,6 @@ export default function ProductsPage() {
                 </div>
                 {/* Table Section */}
                 <div className="relative rounded-md border overflow-auto flex-1">
-                {filteredProducts.length > 0 ? (
                 <Table>
                     <TableHeader className="sticky top-0 bg-card z-10">
                     <TableRow>
@@ -262,59 +270,64 @@ export default function ProductsPage() {
                     </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {filteredProducts.map((product) => (
-                        <TableRow key={product.id}>
-                        <TableCell className="font-medium">
-                            {product.name}
-                            <div className="text-xs text-muted-foreground md:hidden">{product.category} / {product.subCategory}</div>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">{product.category} / {product.subCategory}</TableCell>
-                        <TableCell className="text-right font-semibold hidden sm:table-cell">
-                            ৳ {product.sellingPrice.toFixed(2)}
-                        </TableCell>
-                        <TableCell className={`text-right font-medium ${product.stock === 0 ? 'text-destructive' : ''}`}>
-                            {product.stock} <span className="text-xs text-muted-foreground">{product.mainCategory === 'Material' ? 'kg' : 'pcs'}</span>
-                        </TableCell>
-                        <TableCell>
-                            <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">{t('open_menu_sr')}</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleEditClick(product)}>
-                                <Pencil className="mr-2 h-4 w-4" />
-                                {t('edit_product_button')}
-                                </DropdownMenuItem>
-                                {user?.role === 'admin' && <DropdownMenuSeparator />}
-                                {user?.role === 'admin' && <DropdownMenuItem onClick={() => handleDeleteClick(product)} className="text-destructive">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                {t('delete_product_button')}
-                                </DropdownMenuItem>}
-                            </DropdownMenuContent>
-                            </DropdownMenu>
-                        </TableCell>
+                    {filteredProducts.length > 0 ? (
+                        filteredProducts.map((product) => (
+                            <TableRow key={product.id}>
+                            <TableCell className="font-medium">
+                                {product.name}
+                                <div className="text-xs text-muted-foreground md:hidden">{product.category} / {product.subCategory}</div>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">{product.category} / {product.subCategory}</TableCell>
+                            <TableCell className="text-right font-semibold hidden sm:table-cell">
+                                ৳ {product.sellingPrice.toFixed(2)}
+                            </TableCell>
+                            <TableCell className={`text-right font-medium ${product.stock === 0 ? 'text-destructive' : ''}`}>
+                                {product.stock} <span className="text-xs text-muted-foreground">{product.mainCategory === 'Material' ? 'kg' : 'pcs'}</span>
+                            </TableCell>
+                            <TableCell>
+                                <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <span className="sr-only">{t('open_menu_sr')}</span>
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => handleEditClick(product)}>
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    {t('edit_product_button')}
+                                    </DropdownMenuItem>
+                                    {user?.role === 'admin' && <DropdownMenuSeparator />}
+                                    {user?.role === 'admin' && <DropdownMenuItem onClick={() => handleDeleteClick(product)} className="text-destructive">
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    {t('delete_product_button')}
+                                    </DropdownMenuItem>}
+                                </DropdownMenuContent>
+                                </DropdownMenu>
+                            </TableCell>
+                            </TableRow>
+                        ))
+                    ) : (
+                        <TableRow>
+                            <TableCell colSpan={5} className="h-full">
+                                <div className="flex justify-center items-center text-center h-full py-16">
+                                    <div>
+                                    <PackageOpen className="mx-auto h-12 w-12 text-muted-foreground" />
+                                    <h3 className="mt-4 text-lg font-semibold">{t('no_products_found_title')}</h3>
+                                    <p className="mt-1 text-sm text-muted-foreground">
+                                        {t('no_products_found_description')}
+                                    </p>
+                                     <Button className="mt-4" onClick={() => setAddDialogOpen(true)}>
+                                        <PlusCircle className="mr-2 h-4 w-4" />
+                                        {t('add_product_button')}
+                                    </Button>
+                                    </div>
+                                </div>
+                            </TableCell>
                         </TableRow>
-                    ))}
+                    )}
                     </TableBody>
                 </Table>
-                ) : (
-                <div className="flex justify-center items-center text-center h-full">
-                    <div>
-                    <PackageOpen className="mx-auto h-12 w-12 text-muted-foreground" />
-                    <h3 className="mt-4 text-lg font-semibold">{t('no_products_found_title')}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        {t('no_products_found_description')}
-                    </p>
-                     <Button className="mt-4" onClick={() => setAddDialogOpen(true)}>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        {t('add_product_button')}
-                    </Button>
-                    </div>
-                </div>
-                )}
                 </div>
             </CardContent>
             </Card>

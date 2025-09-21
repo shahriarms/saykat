@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -37,7 +38,6 @@ import {
 } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
 import { PlusCircle, Download, MoreHorizontal, Search, Trash2, Pencil, PackageOpen, Loader2, Receipt } from 'lucide-react';
-import { ExpenseDialog } from '@/components/expense-dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,6 +54,12 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { useTranslation } from '@/hooks/use-translation';
 import { useUser } from '@/hooks/use-user';
+import dynamic from 'next/dynamic';
+
+const ExpenseDialog = dynamic(() => import('@/components/expense-dialog').then(mod => mod.ExpenseDialog), {
+    ssr: false,
+    loading: () => <Loader2 className="h-5 w-5 animate-spin" />
+});
 
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];

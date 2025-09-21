@@ -1,11 +1,12 @@
 
-'use client';
 
+'use client';
+import React from 'react';
 import { useAppData } from '@/hooks/use-app-data';
 import { Loader2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
-export function DatabaseStatus() {
+export const DatabaseStatus = React.memo(function DatabaseStatus() {
   const { isDbConnected, isAppDataLoading } = useAppData();
 
   if (isAppDataLoading) {
@@ -39,4 +40,6 @@ export function DatabaseStatus() {
       </TooltipContent>
     </Tooltip>
   );
-}
+});
+
+DatabaseStatus.displayName = 'DatabaseStatus';

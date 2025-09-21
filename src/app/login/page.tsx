@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -10,7 +11,6 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { StockPilotLogo } from '@/components/stock-pilot-logo';
-import { ForgotPasswordDialog } from '@/components/forgot-password-dialog';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -18,6 +18,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from "@/hooks/use-toast";
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import app from '@/lib/firebase/firebase';
+import dynamic from 'next/dynamic';
+
+const ForgotPasswordDialog = dynamic(() => import('@/components/forgot-password-dialog').then(mod => mod.ForgotPasswordDialog), {
+    ssr: false,
+    loading: () => <Loader2 className="h-5 w-5 animate-spin" />
+});
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),

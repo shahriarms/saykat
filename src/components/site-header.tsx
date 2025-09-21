@@ -1,4 +1,5 @@
 
+
 'use client';
 import { Button } from '@/components/ui/button';
 import { UserCircle, LogOut, Settings, KeyRound, Languages } from 'lucide-react';
@@ -18,8 +19,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useUser } from '@/hooks/use-user';
 import { useState } from 'react';
-import { RedeemAdminCodeDialog } from './redeem-admin-code-dialog';
-import { ShowAdminCodeDialog } from './show-admin-code-dialog';
 import dynamic from 'next/dynamic';
 import { useTranslation } from '@/hooks/use-translation';
 import { useSettings } from '@/hooks/use-settings';
@@ -27,9 +26,21 @@ import type { Locale } from '@/lib/types';
 import Link from 'next/link';
 import { StockPilotLogo } from './stock-pilot-logo';
 import { DatabaseStatus } from './database-status';
+import { Loader2 } from 'lucide-react';
+
 
 const LiveClock = dynamic(() => import('./live-clock').then(mod => mod.LiveClock), {
   ssr: false,
+});
+
+const RedeemAdminCodeDialog = dynamic(() => import('./redeem-admin-code-dialog').then(mod => mod.RedeemAdminCodeDialog), {
+    ssr: false,
+    loading: () => <Loader2 className="h-5 w-5 animate-spin" />
+});
+
+const ShowAdminCodeDialog = dynamic(() => import('./show-admin-code-dialog').then(mod => mod.ShowAdminCodeDialog), {
+    ssr: false,
+    loading: () => <Loader2 className="h-5 w-5 animate-spin" />
 });
 
 

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React from 'react';
@@ -21,7 +22,7 @@ interface InvoicePrintLayoutProps {
     locale?: Locale;
 }
 
-export const InvoicePrintLayout = React.forwardRef<HTMLDivElement, InvoicePrintLayoutProps>(
+export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, InvoicePrintLayoutProps>(
   (props, ref) => {
     const {
         invoiceId,
@@ -230,6 +231,6 @@ export const InvoicePrintLayout = React.forwardRef<HTMLDivElement, InvoicePrintL
         </div>
     );
   }
-);
+));
 
 InvoicePrintLayout.displayName = 'InvoicePrintLayout';
