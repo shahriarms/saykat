@@ -26,7 +26,9 @@ import { useSettings } from '@/hooks/use-settings';
 import type { Locale } from '@/lib/types';
 import Link from 'next/link';
 import { StockPilotLogo } from './stock-pilot-logo';
-import { DatabaseStatus } from './database-status';
+import { useAppData } from '@/hooks/use-app-data';
+import { Loader2 } from 'lucide-react';
+
 
 const LiveClock = dynamic(() => import('./live-clock').then(mod => mod.LiveClock), {
   ssr: false,
@@ -37,6 +39,7 @@ export function SiteHeader() {
   const { user, logout, generateAdminCode, adminCode } = useUser();
   const { t } = useTranslation();
   const { settings, updateSettings } = useSettings();
+  const { isDbConnected, isAppDataLoading } = useAppData();
 
   const [isRedeemDialogOpen, setRedeemDialogOpen] = useState(false);
   const [isShowCodeDialogOpen, setShowCodeDialogOpen] = useState(false);
@@ -66,8 +69,19 @@ export function SiteHeader() {
   return (
     <>
       <header className="sticky top-0 z-20 grid h-16 grid-cols-3 items-center border-b bg-card px-4 sm:px-6">
-        {/* Left Section: Placeholder for spacing */}
-        <div className="flex justify-start"></div>
+        {/* Left Section: DB Status */}
+        <div className="flex justify-start">
+           <div className="flex items-center justify-center gap-2 p-2 rounded-md border bg-background text-foreground text-sm shadow-inner w-full sm:w-auto hover:bg-muted transition-colors">
+                {isAppDataLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                    <span className={`h-2.5 w-2.5 rounded-full ${ isDbConnected ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                )}
+                <span className="font-mono text-xs font-semibold hidden sm:inline">
+                  {isAppDataLoading ? 'Connecting...' : (isDbConnected ? 'Online' : 'Local Mode')}
+                </span>
+            </div>
+        </div>
 
         {/* Center Section: Logo and Title */}
         <div className="flex items-center justify-center">
@@ -89,9 +103,6 @@ export function SiteHeader() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <div className="px-1 py-1.5">
-                  <DatabaseStatus />
-                </div>
                 <DropdownMenuLabel>
                   <div>{t('my_account_label')}</div>
                   <div className="text-xs font-normal text-muted-foreground">{user.email} ({t(`role_${user.role}` as any)})</div>

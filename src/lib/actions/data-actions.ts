@@ -8,18 +8,8 @@ import PostgresDataService from '@/services/data-service.postgres';
 // This is a Server Action file. It will only run on the server.
 const usePostgres = !!process.env.POSTGRES_URL;
 
-interface BackupData {
-    products: Product[];
-    invoices: Invoice[];
-    buyers: Buyer[];
-    expenses: Expense[];
-    employees: Employee[];
-    salaryPayments: SalaryPayment[];
-    payments: Payment[];
-    attendance: Attendance[];
-}
 
-export async function getAllData(): Promise<Omit<BackupData, 'products'>> {
+export async function getAllData(): Promise<Omit<import('@/services/data-service.postgres').BackupData, 'products'>> {
     if (!usePostgres) {
         throw new Error("Database not connected. Cannot fetch data.");
     }
@@ -106,30 +96,4 @@ export async function markAttendance(attendanceData: Omit<Attendance, 'id'>): Pr
         throw new Error("Database not connected.");
     }
     return PostgresDataService.markAttendance(attendanceData);
-}
-
-
-export async function exportAllData(): Promise<BackupData> {
-    if (!usePostgres) {
-        throw new Error("Database not connected. Cannot export data.");
-    }
-    
-    const [products, otherData] = await Promise.all([
-        PostgresDataService.getAllProducts(),
-        PostgresDataService.getAllData()
-    ]);
-    
-    return {
-        products,
-        ...otherData
-    };
-}
-
-
-export async function importAllData(data: BackupData): Promise<{ success: boolean; message: string }> {
-    if (!usePostgres) {
-        throw new Error("Database not connected. Cannot import data.");
-    }
-    
-    return PostgresDataService.importAllData(data);
 }
