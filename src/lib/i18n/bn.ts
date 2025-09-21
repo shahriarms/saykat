@@ -255,7 +255,7 @@ export const bn = {
     'payment_method_bkash': 'বিকাশ',
     'payment_method_card': 'কার্ড',
     'payment_method_bank': 'ব্যাংক',
-    
+
     // Attendance Page
     'attendance_page_title': 'কর্মচারী হাজিরা',
     'add_employee_button': 'কর্মচারী যোগ করুন',

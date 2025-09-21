@@ -319,9 +319,9 @@ export const en = {
     'payment_successful_toast_title': 'Payment Successful',
     'payment_successful_toast_description': 'Paid ৳{{amount}} to {{name}}.',
     'salary_voucher_title': 'Salary Payment Voucher',
-    'pay_to_label': 'PAY TO',
-    'or_bearer_label': 'OR BEARER',
-    'sum_of_label': 'SUM OF',
+    'pay_to_label': 'Pay To',
+    'or_bearer_label': 'or Bearer',
+    'sum_of_label': 'Sum of',
     'employee_id_label': 'Employee ID',
     'please_sign_above_label': 'Please Sign Above',
 

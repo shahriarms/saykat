@@ -22,7 +22,7 @@ export const SalaryReceipt = React.memo(React.forwardRef<HTMLDivElement, SalaryR
     const amountInWords = isBn ? numberToWordsBn(paymentAmount) : numberToWords(paymentAmount);
     const dateFormatted = format(paymentDate, 'ddMMyyyy');
 
-    const backgroundPattern = "data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d1e0d7' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E";
+    const backgroundPattern = "data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d1e0d7' fill-opacity='0.15'%3E%3Cpath d='M50 50V30h-5v20h-20v5h20v20h5V55h20v-5H50z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E";
 
     return (
       <div ref={ref} className={cn("bg-white p-4 font-sans", isBn ? 'font-bangla' : '')}>
@@ -37,7 +37,7 @@ export const SalaryReceipt = React.memo(React.forwardRef<HTMLDivElement, SalaryR
 
           <div className="relative z-10">
               {/* Header */}
-              <div className="flex justify-between items-start pb-2 border-b border-gray-300">
+              <div className="flex justify-between items-start pb-2 border-b-2 border-gray-300">
                 <div className="flex items-center gap-3">
                   <StockPilotLogo className="w-12 h-12" />
                   <div>
@@ -53,31 +53,30 @@ export const SalaryReceipt = React.memo(React.forwardRef<HTMLDivElement, SalaryR
               </div>
 
               {/* Payee and Amount */}
-              <div className="mt-6 space-y-4">
-                <div className="flex items-end">
-                  <span className="text-sm text-gray-600 font-semibold w-24">{t('pay_to_label')}</span>
-                  <div className="flex-1 border-b border-gray-300 ml-2 pb-1 font-semibold text-lg">
+              <div className="mt-6 grid grid-cols-12 gap-x-4 gap-y-6">
+                 <div className="col-span-2 text-sm text-gray-600 font-semibold flex items-end pb-1">{t('pay_to_label')}</div>
+                 <div className="col-span-7 border-b border-gray-300 ml-2 pb-1 font-semibold text-lg">
                     {employee.name}
-                  </div>
-                  <span className="text-sm text-gray-600 font-semibold ml-4">{t('or_bearer_label')}</span>
-                </div>
-                <div className="flex items-end">
-                  <span className="text-sm text-gray-600 font-semibold w-24">{t('sum_of_label')}</span>
-                  <div className="flex-1 border-b border-gray-300 ml-2 pb-1">
+                 </div>
+                 <div className="col-span-3 flex items-end pb-1 justify-end">
+                    <span className="text-sm text-gray-600 font-semibold">{t('or_bearer_label')}</span>
+                 </div>
+                 
+                 <div className="col-span-2 text-sm text-gray-600 font-semibold flex items-start pt-1">{t('sum_of_label')}</div>
+                 <div className="col-span-7 border-b border-gray-300 ml-2 pt-1 capitalize">
                     {amountInWords}
-                  </div>
-                  <div className="border-2 border-gray-400 p-2 ml-4 font-mono text-xl font-bold w-48 text-center">
+                 </div>
+                 <div className="col-span-3 border-2 border-gray-400 p-2 ml-4 font-mono text-xl font-bold text-center">
                     {isBn ? '৳' : 'BDT'} {paymentAmount.toFixed(2)}
-                  </div>
-                </div>
+                 </div>
               </div>
 
               {/* Account Number and Signature */}
-              <div className="mt-8 flex justify-between items-end">
+              <div className="mt-12 flex justify-between items-end">
                 <div>
-                  <span className="text-sm text-gray-600 font-semibold">{t('employee_id_label')}:</span>
-                  <div className="border border-gray-300 px-3 py-1 inline-block ml-2">
-                    {employee.id}
+                  <span className="text-sm text-gray-600 font-semibold">{t('phone_number_label')}:</span>
+                  <div className="font-mono border border-gray-300 px-3 py-1 inline-block ml-2">
+                    {employee.phone}
                   </div>
                 </div>
                 <div className="w-64 text-center">
