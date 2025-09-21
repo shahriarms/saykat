@@ -31,7 +31,7 @@ import type { Invoice, Expense, SalaryPayment, Attendance, Product } from '@/lib
 
 
 export default function Dashboard() {
-  const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, isAppDataLoading: isLoading, getAttendanceForDate, invoices: allInvoices } = useAppData();
+  const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, isAppDataLoading: isLoading, getAttendanceForDate, invoices: allInvoices } from 'use-app-data';
   const { t } = useTranslation();
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
@@ -214,8 +214,8 @@ export default function Dashboard() {
                   onSelect={setDateRange}
                   numberOfMonths={1}
                   captionLayout="dropdown-buttons"
-                  fromYear={2019}
-                  toYear={new Date().getFullYear() + 5}
+                  fromYear={2025}
+                  toYear={2050}
                 />
               </PopoverContent>
             </Popover>
