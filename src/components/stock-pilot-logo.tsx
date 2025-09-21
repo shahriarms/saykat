@@ -1,14 +1,15 @@
 
 
 import React from 'react';
+import { cn } from '@/lib/utils';
 
 export const StockPilotLogo = React.memo(function StockPilotLogo({ className }: { className?: string }) {
   return (
     <div
-      className={
-        className +
-        ' flex items-center justify-center rounded-full bg-white shadow-md'
-      }
+      className={cn(
+        'flex items-center justify-center rounded-full bg-white shadow-md',
+        className
+      )}
     >
       <div className="h-full w-full">
         <svg
