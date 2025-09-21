@@ -1,7 +1,7 @@
 
 'use client';
 import { Button } from '@/components/ui/button';
-import { UserCircle, LogOut, Settings, KeyRound, Languages } from 'lucide-react';
+import { UserCircle, LogOut, Settings, KeyRound, Languages, Database } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,18 +69,8 @@ export function SiteHeader() {
   return (
     <>
       <header className="sticky top-0 z-20 grid h-16 grid-cols-3 items-center border-b bg-card px-4 sm:px-6">
-        {/* Left Section: DB Status */}
+        {/* Left Section: Empty */}
         <div className="flex justify-start">
-           <div className="flex items-center justify-center gap-2 p-2 rounded-md border bg-background text-foreground text-sm shadow-inner w-full sm:w-auto hover:bg-muted transition-colors">
-                {isAppDataLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                    <span className={`h-2.5 w-2.5 rounded-full ${ isDbConnected ? 'bg-green-500' : 'bg-yellow-500'}`} />
-                )}
-                <span className="font-mono text-xs font-semibold hidden sm:inline">
-                  {isAppDataLoading ? 'Connecting...' : (isDbConnected ? 'Online' : 'Local Mode')}
-                </span>
-            </div>
         </div>
 
         {/* Center Section: Logo and Title */}
@@ -107,6 +97,23 @@ export function SiteHeader() {
                   <div>{t('my_account_label')}</div>
                   <div className="text-xs font-normal text-muted-foreground">{user.email} ({t(`role_${user.role}` as any)})</div>
                 </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                 <DropdownMenuItem disabled>
+                    <div className="flex items-center w-full">
+                        <Database className="mr-2 h-4 w-4" />
+                        <span>Database:</span>
+                        <div className="flex items-center gap-2 ml-auto">
+                            {isAppDataLoading ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                                <span className={`h-2.5 w-2.5 rounded-full ${ isDbConnected ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                            )}
+                            <span className="font-mono text-xs font-semibold">
+                                {isAppDataLoading ? '...' : (isDbConnected ? 'Online' : 'Local')}
+                            </span>
+                        </div>
+                    </div>
+                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
