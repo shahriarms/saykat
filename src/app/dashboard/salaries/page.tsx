@@ -292,11 +292,13 @@ export default function SalariesPage() {
                         <h3 className="font-semibold text-lg">{t('live_receipt_preview_title')}</h3>
                         <ScrollArea className="flex-1">
                             <div className="bg-muted/50 p-4 rounded-lg">
-                               <SalaryReceipt 
-                                    employee={selectedEmployee}
-                                    paymentAmount={typeof paymentAmount === 'number' ? paymentAmount : 0}
-                                    paymentDate={new Date()}
-                               />
+                                <div className="p-1 bg-muted/20 rounded-md">
+                                   <SalaryReceipt 
+                                        employee={selectedEmployee}
+                                        paymentAmount={typeof paymentAmount === 'number' ? paymentAmount : 0}
+                                        paymentDate={new Date()}
+                                   />
+                                </div>
                             </div>
                         </ScrollArea>
                     </div>
@@ -335,5 +337,3 @@ export default function SalariesPage() {
     </>
   );
 }
-
-    
