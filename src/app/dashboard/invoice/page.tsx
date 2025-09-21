@@ -29,6 +29,7 @@ import type { Product } from '@/lib/types';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
+import dynamic from 'next/dynamic';
 
 
 function InvoicePage() {
@@ -93,7 +94,6 @@ function InvoicePage() {
               description: t('invoice_saved_toast_description', { invoiceId: newInvoiceId }),
             });
             
-            // This is the fix: wait for the updateActiveDraft promise to resolve
             const updatedDraftWithId = await updateActiveDraft({ id: newInvoiceId });
             setInvoiceToPrint(updatedDraftWithId);
         }
@@ -114,9 +114,11 @@ function InvoicePage() {
       const originalTitle = document.title;
       document.title = `invoice-${invoiceToPrint.id}`;
       
+      // Use a timeout to ensure the state has updated and the component has re-rendered
       const timer = setTimeout(() => {
         window.print();
         document.title = originalTitle;
+        // Clean up after printing is done or cancelled
         setInvoiceToPrint(null);
         resetActiveDraft();
         toast({
@@ -124,6 +126,7 @@ function InvoicePage() {
             description: "A new, empty memo is ready for you.",
         });
       }, 100);
+      
       return () => clearTimeout(timer);
     }
   }, [invoiceToPrint, resetActiveDraft, toast]);
