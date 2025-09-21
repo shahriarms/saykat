@@ -260,6 +260,40 @@ export default function SalariesPage() {
                              {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>}
                              {isProcessing ? "Processing..." : t('pay_and_print_receipt_button', { amount: typeof paymentAmount === 'number' && paymentAmount > 0 ? ` ৳${paymentAmount.toFixed(2)}` : '' })}
                         </Button>
+
+                         <div className="flex-1 min-h-0 mt-4">
+                            <h3 className="font-semibold text-lg flex items-center gap-2 mb-2"><History className="w-5 h-5"/> {t('monthly_payment_history_title')}</h3>
+                            <ScrollArea className="h-32 rounded-md border">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>{t('date_header')}</TableHead>
+                                            <TableHead className="text-right">{t('amount_header')}</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {paymentsThisMonth.length > 0 ? (
+                                            paymentsThisMonth.map(payment => (
+                                                <TableRow 
+                                                  key={payment.id} 
+                                                  onClick={() => handleHistoryItemClick(payment)}
+                                                  className="cursor-pointer hover:bg-muted"
+                                                >
+                                                    <TableCell>{format(new Date(payment.date), 'PP')}</TableCell>
+                                                    <TableCell className="text-right font-mono">৳ {(payment.amount || 0).toFixed(2)}</TableCell>
+                                                </TableRow>
+                                            ))
+                                        ) : (
+                                            <TableRow>
+                                                <TableCell colSpan={2} className="text-center h-24 text-muted-foreground">
+                                                    {t('no_payments_this_month')}
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </ScrollArea>
+                        </div>
                     </>
                 )}
             </CardContent>
@@ -280,9 +314,8 @@ export default function SalariesPage() {
                     <p className="mt-4">No employee selected.</p>
                 </div>
              ) : (
-                <>
                 <ScrollArea className="flex-1">
-                    <div className="bg-muted/50 p-1 rounded-lg">
+                    <div className="bg-muted/20 p-1 rounded-lg">
                         <SalaryReceipt 
                             employee={selectedEmployee}
                             paymentAmount={typeof paymentAmount === 'number' ? paymentAmount : 0}
@@ -290,40 +323,6 @@ export default function SalariesPage() {
                         />
                     </div>
                 </ScrollArea>
-                 <div className="flex-1 min-h-0">
-                    <h3 className="font-semibold text-lg flex items-center gap-2 mb-2"><History className="w-5 h-5"/> {t('monthly_payment_history_title')}</h3>
-                    <ScrollArea className="h-32 rounded-md border">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>{t('date_header')}</TableHead>
-                                    <TableHead className="text-right">{t('amount_header')}</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {paymentsThisMonth.length > 0 ? (
-                                    paymentsThisMonth.map(payment => (
-                                        <TableRow 
-                                          key={payment.id} 
-                                          onClick={() => handleHistoryItemClick(payment)}
-                                          className="cursor-pointer"
-                                        >
-                                            <TableCell>{format(new Date(payment.date), 'PP')}</TableCell>
-                                            <TableCell className="text-right font-mono">৳ {(payment.amount || 0).toFixed(2)}</TableCell>
-                                        </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={2} className="text-center h-24 text-muted-foreground">
-                                            {t('no_payments_this_month')}
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </ScrollArea>
-                </div>
-                </>
              )}
           </CardContent>
         </Card>
@@ -359,4 +358,3 @@ export default function SalariesPage() {
   );
 }
 
-    
