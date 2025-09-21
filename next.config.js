@@ -12,7 +12,6 @@ const nextConfig = {
     remotePatterns: [],
   },
   pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
-  allowedDevOrigins: ["*.cloudworkstations.dev"],
 };
 
 module.exports = nextConfig;
