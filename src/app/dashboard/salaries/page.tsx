@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { Users, ChevronRight, DollarSign, Wallet, History, AlertCircle, ShieldCheck, Loader2, Printer } from 'lucide-react';
+import { Users, ChevronRight, DollarSign, Wallet, History, AlertCircle, ShieldCheck, Loader2, Printer, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { useTranslation } from '@/hooks/use-translation';
@@ -174,9 +174,9 @@ export default function SalariesPage() {
         <Wallet className="w-6 h-6" />
         {t('salaries_page_title')}
       </h1>
-      <div className="grid md:grid-cols-5 gap-6 flex-1">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
         {/* Employee List */}
-        <Card className="md:col-span-2 flex flex-col">
+        <Card className="lg:col-span-1 flex flex-col">
           <CardHeader>
             <CardTitle>{t('employee_list_title')}</CardTitle>
             <CardDescription>{t('salaries_employee_list_description')}</CardDescription>
@@ -207,23 +207,21 @@ export default function SalariesPage() {
         </Card>
 
         {/* Payment Processing Card */}
-        <Card className="md:col-span-3 flex flex-col">
-          <CardHeader>
-            <CardTitle>{t('process_salary_payment_title')}</CardTitle>
-             <CardDescription>
-                {selectedEmployee ? t('for_employee_subtitle', { name: selectedEmployee.name }) : t('select_employee_from_list')}
-             </CardDescription>
-          </CardHeader>
-          <CardContent className="flex-1 flex flex-col gap-6 min-h-0">
-            {!selectedEmployee ? (
-                <div className="text-center text-muted-foreground py-12 flex-1 flex flex-col justify-center items-center">
-                    <Users className="mx-auto h-12 w-12 text-muted-foreground/50"/>
-                    <p className="mt-4">{t('please_select_employee')}</p>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-0">
-                    {/* Payment Input & History Section */}
-                    <div className="space-y-4 flex flex-col">
+        <Card className="lg:col-span-1 flex flex-col">
+            <CardHeader>
+                <CardTitle>{t('process_salary_payment_title')}</CardTitle>
+                <CardDescription>
+                    {selectedEmployee ? t('for_employee_subtitle', { name: selectedEmployee.name }) : t('select_employee_from_list')}
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1 flex flex-col gap-6">
+                {!selectedEmployee ? (
+                     <div className="text-center text-muted-foreground py-12 flex-1 flex flex-col justify-center items-center">
+                        <Users className="mx-auto h-12 w-12 text-muted-foreground/50"/>
+                        <p className="mt-4">{t('please_select_employee')}</p>
+                    </div>
+                ) : (
+                    <>
                         <div>
                           <h3 className="font-semibold text-lg">{t('payment_details_title')}</h3>
                           <div className="p-4 rounded-lg bg-muted/50 space-y-2">
@@ -262,58 +260,71 @@ export default function SalariesPage() {
                              {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>}
                              {isProcessing ? "Processing..." : t('pay_and_print_receipt_button', { amount: typeof paymentAmount === 'number' && paymentAmount > 0 ? ` ৳${paymentAmount.toFixed(2)}` : '' })}
                         </Button>
-                        <div className="flex-1 min-h-0">
-                            <h3 className="font-semibold text-lg flex items-center gap-2 mt-4 mb-2"><History className="w-5 h-5"/> {t('monthly_payment_history_title')}</h3>
-                            <ScrollArea className="h-32 rounded-md border">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>{t('date_header')}</TableHead>
-                                            <TableHead className="text-right">{t('amount_header')}</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {paymentsThisMonth.length > 0 ? (
-                                            paymentsThisMonth.map(payment => (
-                                                <TableRow 
-                                                  key={payment.id} 
-                                                  onClick={() => handleHistoryItemClick(payment)}
-                                                  className="cursor-pointer"
-                                                >
-                                                    <TableCell>{format(new Date(payment.date), 'PP')}</TableCell>
-                                                    <TableCell className="text-right font-mono">৳ {(payment.amount || 0).toFixed(2)}</TableCell>
-                                                </TableRow>
-                                            ))
-                                        ) : (
-                                            <TableRow>
-                                                <TableCell colSpan={2} className="text-center h-24 text-muted-foreground">
-                                                    {t('no_payments_this_month')}
-                                                </TableCell>
-                                            </TableRow>
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </ScrollArea>
-                        </div>
-                    </div>
+                    </>
+                )}
+            </CardContent>
+        </Card>
 
-                    {/* Receipt Preview Section */}
-                    <div className="space-y-4 flex flex-col min-h-0">
-                        <h3 className="font-semibold text-lg">{t('live_receipt_preview_title')}</h3>
-                        <ScrollArea className="flex-1">
-                            <div className="bg-muted/50 p-4 rounded-lg">
-                                <div className="p-1 bg-muted/20 rounded-md">
-                                   <SalaryReceipt 
-                                        employee={selectedEmployee}
-                                        paymentAmount={typeof paymentAmount === 'number' ? paymentAmount : 0}
-                                        paymentDate={new Date()}
-                                   />
-                                </div>
-                            </div>
-                        </ScrollArea>
-                    </div>
+        {/* Receipt Preview & History Card */}
+        <Card className="lg:col-span-1 flex flex-col">
+          <CardHeader>
+            <CardTitle>{t('live_receipt_preview_title')}</CardTitle>
+            <CardDescription>
+                {selectedEmployee ? 'Preview of the payment receipt.' : 'Select an employee to see a preview.'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex-1 flex flex-col gap-4">
+             {!selectedEmployee ? (
+                <div className="text-center text-muted-foreground py-12 flex-1 flex flex-col justify-center items-center">
+                    <FileText className="mx-auto h-12 w-12 text-muted-foreground/50"/>
+                    <p className="mt-4">No employee selected.</p>
                 </div>
-            )}
+             ) : (
+                <>
+                <ScrollArea className="flex-1">
+                    <div className="bg-muted/50 p-1 rounded-lg">
+                        <SalaryReceipt 
+                            employee={selectedEmployee}
+                            paymentAmount={typeof paymentAmount === 'number' ? paymentAmount : 0}
+                            paymentDate={new Date()}
+                        />
+                    </div>
+                </ScrollArea>
+                 <div className="flex-1 min-h-0">
+                    <h3 className="font-semibold text-lg flex items-center gap-2 mb-2"><History className="w-5 h-5"/> {t('monthly_payment_history_title')}</h3>
+                    <ScrollArea className="h-32 rounded-md border">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>{t('date_header')}</TableHead>
+                                    <TableHead className="text-right">{t('amount_header')}</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {paymentsThisMonth.length > 0 ? (
+                                    paymentsThisMonth.map(payment => (
+                                        <TableRow 
+                                          key={payment.id} 
+                                          onClick={() => handleHistoryItemClick(payment)}
+                                          className="cursor-pointer"
+                                        >
+                                            <TableCell>{format(new Date(payment.date), 'PP')}</TableCell>
+                                            <TableCell className="text-right font-mono">৳ {(payment.amount || 0).toFixed(2)}</TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={2} className="text-center h-24 text-muted-foreground">
+                                            {t('no_payments_this_month')}
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </ScrollArea>
+                </div>
+                </>
+             )}
           </CardContent>
         </Card>
       </div>
@@ -347,3 +358,5 @@ export default function SalariesPage() {
     </>
   );
 }
+
+    
