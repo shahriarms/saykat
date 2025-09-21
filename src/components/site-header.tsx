@@ -28,7 +28,7 @@ import Link from 'next/link';
 import { StockPilotLogo } from './stock-pilot-logo';
 import { useAppData } from '@/hooks/use-app-data';
 import { Loader2, Upload } from 'lucide-react';
-import { useToast } from './use-toast';
+import { useToast } from '@/hooks/use-toast';
 import * as XLSX from 'xlsx';
 import type { Product } from '@/lib/types';
 
