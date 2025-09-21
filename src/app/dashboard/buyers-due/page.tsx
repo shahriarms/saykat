@@ -33,13 +33,16 @@ import { useTranslation } from '@/hooks/use-translation';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { useUser } from '@/hooks/use-user';
+import { InvoicePrintLayout } from '@/components/invoice-print-layout';
+import { useSettings } from '@/hooks/use-settings';
 
 
 export default function BuyersDuePage() {
-  const { invoices: allInvoices, buyers, getInvoicesForBuyer, addPayment, getPaymentsForInvoice, deleteInvoice } = useAppData();
+  const { invoices: allInvoices, buyers, getInvoicesForBuyer, addPayment, getPaymentsForInvoice, deleteInvoice, printInvoice: appPrintInvoice } = useAppData();
   const { user } = useUser();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const { settings } = useSettings();
 
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -54,10 +57,11 @@ export default function BuyersDuePage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
   
+  const [isPrinting, setIsPrinting] = useState(false);
+  const [invoiceToPrint, setInvoiceToPrint] = useState<Invoice | null>(null);
+
   const numericPaymentAmount = useMemo(() => parseFloat(paymentAmount) || 0, [paymentAmount]);
   
-  // This effect ensures that if the underlying data changes (e.g. after a payment),
-  // the selected items are refreshed with the latest data to prevent stale state.
   useEffect(() => {
     if (selectedBuyer) {
       const refreshedBuyer = buyers.find(b => b.id === selectedBuyer.id);
@@ -206,6 +210,52 @@ export default function BuyersDuePage() {
     return selectedInvoice.dueAmount;
   }, [selectedInvoice, numericPaymentAmount]);
 
+  const handlePrint = async () => {
+    if (!selectedInvoice || isPrinting) return;
+    
+    if (settings.printFormat === 'pos' && settings.posPrinterType !== 'disabled') {
+      setIsPrinting(true);
+      try {
+        await appPrintInvoice(selectedInvoice);
+      } catch (error: any) {
+        console.error(error.message);
+      } finally {
+        setIsPrinting(false);
+      }
+    } else {
+      setInvoiceToPrint(selectedInvoice);
+    }
+  };
+
+  useEffect(() => {
+    if (invoiceToPrint) {
+        setIsPrinting(true);
+        const originalTitle = document.title;
+        document.title = `invoice-${invoiceToPrint.id}`;
+        
+        const handleAfterPrint = () => {
+            document.title = originalTitle;
+            setInvoiceToPrint(null);
+            setIsPrinting(false);
+            window.removeEventListener('afterprint', handleAfterPrint);
+        };
+
+        window.addEventListener('afterprint', handleAfterPrint);
+        
+        const timer = setTimeout(() => {
+            window.print();
+        }, 100); 
+        
+        return () => {
+            clearTimeout(timer);
+            window.removeEventListener('afterprint', handleAfterPrint);
+            if (document.title !== originalTitle) {
+              document.title = originalTitle;
+            }
+        };
+    }
+}, [invoiceToPrint]);
+
 
   return (
     <>
@@ -284,12 +334,18 @@ export default function BuyersDuePage() {
                       <CardTitle>{t('receive_payment_title')}</CardTitle>
                       <CardDescription>{t('receive_payment_description')}</CardDescription>
                   </div>
-                   {user?.role === 'admin' && (
-                        <Button variant="destructive" onClick={handleDeleteClick} disabled={!selectedInvoice || isDeleting}>
-                            {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Trash2 className="mr-2 h-4 w-4"/>}
-                            Delete Invoice
-                        </Button>
-                    )}
+                  <div className="flex items-center gap-2">
+                    {user?.role === 'admin' && (
+                          <Button variant="destructive" onClick={handleDeleteClick} disabled={!selectedInvoice || isDeleting}>
+                              {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Trash2 className="mr-2 h-4 w-4"/>}
+                              Delete Invoice
+                          </Button>
+                      )}
+                      <Button onClick={handlePrint} disabled={!selectedInvoice || isPrinting}>
+                          {isPrinting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>}
+                          {t('print_invoice_button')}
+                      </Button>
+                  </div>
               </CardHeader>
               <CardContent className="space-y-4 no-print">
                   {selectedInvoice ? (
@@ -364,6 +420,21 @@ export default function BuyersDuePage() {
                 newPaymentAmount={lastSuccessfulPayment.payment.amount}
             />
         )}
+        {invoiceToPrint && (
+            <InvoicePrintLayout
+                invoiceId={invoiceToPrint.id}
+                currentDate={new Date(invoiceToPrint.date).toLocaleDateString()}
+                customerName={invoiceToPrint.customerName}
+                customerAddress={invoiceToPrint.customerAddress}
+                customerPhone={invoiceToPrint.customerPhone}
+                invoiceItems={invoiceToPrint.items}
+                subtotal={invoiceToPrint.subtotal}
+                paidAmount={invoiceToPrint.paidAmount}
+                dueAmount={invoiceToPrint.dueAmount}
+                printFormat={settings.printFormat}
+                locale={settings.locale}
+            />
+        )}
       </div>
       <AlertDialog open={isConfirmingPayment} onOpenChange={setConfirmingPayment}>
           <AlertDialogContent>
@@ -409,3 +480,5 @@ export default function BuyersDuePage() {
     </>
   );
 }
+
+    

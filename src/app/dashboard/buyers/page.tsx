@@ -54,12 +54,20 @@ export default function BuyersPage() {
   useEffect(() => {
     if (selectedBuyer) {
         const refreshedBuyer = buyers.find(b => b.id === selectedBuyer.id);
-        if (!refreshedBuyer) setSelectedBuyer(null);
+        if (refreshedBuyer) {
+             setSelectedBuyer(refreshedBuyer);
+        } else {
+            setSelectedBuyer(null);
+            setSelectedInvoice(null);
+        }
     }
     if (selectedInvoice) {
         const refreshedInvoice = invoices.find(inv => inv.id === selectedInvoice.id);
-        if (!refreshedInvoice) setSelectedInvoice(null);
-        else setSelectedInvoice(refreshedInvoice);
+        if (refreshedInvoice) {
+            setSelectedInvoice(refreshedInvoice);
+        } else {
+            setSelectedInvoice(null);
+        }
     }
   }, [buyers, invoices, selectedBuyer, selectedInvoice]);
   
@@ -112,14 +120,26 @@ export default function BuyersPage() {
             const originalTitle = document.title;
             document.title = `invoice-${invoiceToPrint.id}`;
             
-            const timer = setTimeout(() => {
-                window.print();
+            const handleAfterPrint = () => {
                 document.title = originalTitle;
                 setInvoiceToPrint(null);
                 setIsPrinting(false);
+                window.removeEventListener('afterprint', handleAfterPrint);
+            };
+
+            window.addEventListener('afterprint', handleAfterPrint);
+            
+            const timer = setTimeout(() => {
+                window.print();
             }, 100); 
             
-            return () => clearTimeout(timer);
+            return () => {
+                clearTimeout(timer);
+                window.removeEventListener('afterprint', handleAfterPrint);
+                if (document.title !== originalTitle) {
+                  document.title = originalTitle;
+                }
+            };
         }
     }, [invoiceToPrint]);
   
@@ -352,3 +372,5 @@ export default function BuyersPage() {
     </>
   );
 }
+
+    
