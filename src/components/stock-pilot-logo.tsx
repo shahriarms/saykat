@@ -4,6 +4,8 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 export const StockPilotLogo = React.memo(function StockPilotLogo({ className }: { className?: string }) {
+  const graphPath = "M20 60C30 50, 35 70, 40 65C45 60, 50 40, 55 45C60 50, 65 30, 70 35C75 40, 80 25, 85 30";
+  
   return (
     <div
       className={cn(
@@ -11,6 +13,22 @@ export const StockPilotLogo = React.memo(function StockPilotLogo({ className }: 
         className
       )}
     >
+      <style>
+        {`
+          @keyframes followPath {
+            0% {
+              offset-distance: 0%;
+            }
+            100% {
+              offset-distance: 100%;
+            }
+          }
+          .path-follower {
+            offset-path: path("${graphPath}");
+            animation: followPath 4s linear infinite;
+          }
+        `}
+      </style>
       <div className="h-full w-full">
         <svg
           className="h-full w-full text-black"
@@ -31,13 +49,16 @@ export const StockPilotLogo = React.memo(function StockPilotLogo({ className }: 
 
           {/* Graph Line */}
           <path
-            d="M20 60C30 50, 35 70, 40 65C45 60, 50 40, 55 45C60 50, 65 30, 70 35C75 40, 80 25, 85 30"
+            d={graphPath}
             stroke="currentColor"
             strokeWidth="4"
             fill="none"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
+          
+          {/* Animated Circle */}
+          <circle className="path-follower" r="5" fill="#22C55E" />
 
           {/* Clock */}
           <g stroke="#22C55E">
