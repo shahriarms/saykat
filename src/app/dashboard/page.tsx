@@ -437,7 +437,7 @@ export default function Dashboard() {
       /> }
       { isDailyUnitsSoldReportOpen && <DailyUnitsSoldReportDialog
         open={isDailyUnitsSoldReportOpen}
-        onOpenChange={setDailyUnitsSoldReportOpen}
+        onOpenchaUnge={setDailyUnitsSoldReportOpen}
         invoices={todayInvoices}
         products={products}
       /> }
