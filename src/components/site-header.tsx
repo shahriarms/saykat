@@ -84,16 +84,9 @@ export function SiteHeader() {
         <div className="flex flex-1 items-center justify-center">
             <Link href="/dashboard" className="flex items-center gap-2">
                 <StockPilotLogo className="w-10 h-10" />
-                <div className="hidden sm:block">
-                  <h1 className="text-xl sm:text-2xl font-bold">
-                      <span className="text-foreground">Mahmud Engineering Shop</span>
-                  </h1>
-                </div>
-                 <div className="block sm:hidden">
-                  <h1 className="text-xl font-bold">
-                      <span className="text-foreground">StockPilot</span>
-                  </h1>
-                </div>
+                <h1 className="text-lg sm:text-2xl font-bold">
+                    <span className="text-foreground">Mahmud Engineering Shop</span>
+                </h1>
             </Link>
         </div>
         
