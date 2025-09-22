@@ -174,7 +174,7 @@ export default function ExpensesPage() {
     }, [expenses, t]);
     
     const chartConfig: ChartConfig = {
-      Expense: { label: t('expense_label'), color: "hsl(var(--primary))" },
+      Expense: { label: t('expense_label'), color: "hsl(var(--destructive))" },
     };
 
     const handleExport = (fileType: 'csv' | 'xlsx' | 'pdf') => {
@@ -210,17 +210,15 @@ export default function ExpensesPage() {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h1 className="text-2xl font-semibold flex items-center gap-2"><Receipt className="w-6 h-6"/> {t('expenses_page_title')}</h1>
-          <div className="flex gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-2">
             <DateRangePicker
               initialDateRange={localDateRange}
               onDateChange={setLocalDateRange}
               centralDateRange={centralDateRange}
-              className="w-full sm:w-auto"
             />
-
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex-1 sm:flex-none"><Download className="mr-2 h-4 w-4"/> {t('export_button')}</Button>
+                <Button variant="outline"><Download className="mr-2 h-4 w-4"/> {t('export_button')}</Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem onClick={() => handleExport('csv')}>{t('export_as_csv')}</DropdownMenuItem>
@@ -228,7 +226,7 @@ export default function ExpensesPage() {
                 <DropdownMenuItem onClick={() => handleExport('pdf')}>{t('export_as_pdf')}</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button onClick={handleAddNew} className="flex-1 sm:flex-none">
+            <Button onClick={handleAddNew}>
               <PlusCircle className="mr-2 h-4 w-4" /> {t('add_expense_button')}
             </Button>
           </div>

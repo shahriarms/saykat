@@ -71,7 +71,12 @@ export default function EmployeesPage() {
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        setLocalDate(centralDateRange?.from || new Date());
+        // Only sync from central if the local date is for a different day than central's from date
+        if (centralDateRange?.from && !isToday(centralDateRange.from)) {
+            setLocalDate(centralDateRange.from);
+        } else if (!localDate) {
+             setLocalDate(new Date());
+        }
     }, [centralDateRange]);
 
     const handleResetDate = useCallback(() => {

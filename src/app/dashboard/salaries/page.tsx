@@ -30,7 +30,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Users, ChevronRight, DollarSign, Wallet, History, AlertCircle, ShieldCheck, Loader2, Printer, FileText, CalendarIcon, RotateCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { format, startOfMonth, endOfMonth } from 'date-fns';
+import { format, startOfMonth, endOfMonth, isToday } from 'date-fns';
 import { useTranslation } from '@/hooks/use-translation';
 import { SalaryReceipt } from '@/components/salary-receipt';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -53,7 +53,12 @@ export default function SalariesPage() {
   const [localDate, setLocalDate] = useState<Date>(centralDateRange?.from || new Date());
 
   useEffect(() => {
-    setLocalDate(centralDateRange?.from || new Date());
+    // Only sync from central if the local date is for a different day than central's from date
+    if (centralDateRange?.from && !isToday(centralDateRange.from)) {
+        setLocalDate(centralDateRange.from);
+    } else if (!localDate) {
+          setLocalDate(new Date());
+    }
   }, [centralDateRange]);
 
   const handleResetDate = useCallback(() => {
