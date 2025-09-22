@@ -10,33 +10,37 @@ import {
 } from '@/components/ui/chart';
 import { useAppData } from '@/hooks/use-app-data';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { DollarSign, ShoppingCart, TrendingUp, TrendingDown, CalendarIcon, Package, HandCoins, Receipt, Loader2, BadgeIndianRupee, Container, Wallet, RotateCw, Users, ThumbsUp, Weight, FileText } from 'lucide-react';
+import { DollarSign, ShoppingCart, TrendingUp, TrendingDown, Users, Package, HandCoins, Receipt, Loader2, BadgeIndianRupee, Container, Wallet, ThumbsUp, Weight, FileText } from 'lucide-react';
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, differenceInDays } from 'date-fns';
 import { useTranslation } from '@/hooks/use-translation';
 import type { DateRange, Invoice, Expense, SalaryPayment, Attendance, Product } from '@/lib/types';
 import dynamic from 'next/dynamic';
+import { DateRangePicker } from '@/components/date-range-picker';
 
 
 const DailySalesDialog = dynamic(() => import('@/components/daily-sales-report-dialog').then(mod => mod.DailySalesDialog), { ssr: false });
 const DailyExpensesReportDialog = dynamic(() => import('@/components/daily-expenses-report-dialog').then(mod => mod.DailyExpensesReportDialog), { ssr: false });
-const DailyDueReportDialog = dynamic(() => import('@/components/daily-due-report-dialog').then(mod => mod.DailyDueReportDialog), { ssr: false });
-const DailyUnitsSoldReportDialog = dynamic(() => import('@/components/daily-units-sold-report-dialog').then(mod => mod.DailyUnitsSoldReportDialog), { ssr: false });
-const DailyAttendanceReportDialog = dynamic(() => import('@/components/daily-attendance-report-dialog').then(mod => mod.DailyAttendanceReportDialog), { ssr: false });
-const MonthlySalesDialog = dynamic(() => import('@/components/monthly-sales-report-dialog').then(mod => mod.MonthlySalesDialog), { ssr: false });
-const MonthlyExpensesDialog = dynamic(() => import('@/components/monthly-expenses-report-dialog').then(mod => mod.MonthlyExpensesDialog), { ssr: false });
-const MonthlyDueDialog = dynamic(() => import('@/components/monthly-due-report-dialog').then(mod => mod.MonthlyDueDialog), { ssr: false });
-const MonthlyUnitsSoldDialog = dynamic(() => import('@/components/monthly-units-sold-report-dialog').then(mod => mod.MonthlyUnitsSoldDialog), { ssr: false });
-const MonthlySalaryReportDialog = dynamic(() => import('@/components/monthly-salary-report-dialog').then(mod => mod.MonthlySalaryReportDialog), { ssr: false });
-const InvoicePreviewDialog = dynamic(() => import('@/components/invoice-preview-dialog').then(mod => mod.InvoicePreviewDialog), { ssr: false });
+const DailyDueReportDialog = dynamic(() => import('@/components/daily-due-report-dialog').then(mod => mod.DailyDueReportDialog), { ssr. false });
+const DailyUnitsSoldReportDialog = dynamic(() => import('@/components/daily-units-sold-report-dialog').then(mod => mod.DailyUnitsSoldReportDialog), { ssr. false });
+const DailyAttendanceReportDialog = dynamic(() => import('@/components/daily-attendance-report-dialog').then(mod => mod.DailyAttendanceReportDialog), { ssr. false });
+const MonthlySalesDialog = dynamic(() => import('@/components/monthly-sales-report-dialog').then(mod => mod.MonthlySalesDialog), { ssr. false });
+const MonthlyExpensesDialog = dynamic(() => import('@/components/monthly-expenses-report-dialog').then(mod => mod.MonthlyExpensesDialog), { ssr. false });
+const MonthlyDueDialog = dynamic(() => import('@/components/monthly-due-report-dialog').then(mod => mod.MonthlyDueDialog), { ssr. false });
+const MonthlyUnitsSoldDialog = dynamic(() => import('@/components/monthly-units-sold-report-dialog').then(mod => mod.MonthlyUnitsSoldDialog), { ssr. false });
+const MonthlySalaryReportDialog = dynamic(() => import('@/components/monthly-salary-report-dialog').then(mod => mod.MonthlySalaryReportDialog), { ssr. false });
+const InvoicePreviewDialog = dynamic(() => import('@/components/invoice-preview-dialog').then(mod => mod.InvoicePreviewDialog), { ssr. false });
 
 
 export default function Dashboard() {
-  const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, invoices: allInvoices, getAttendanceForDate, centralDateRange, setCentralDateRange } = useAppData();
+  const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, invoices: allInvoices, getAttendanceForDate } = useAppData();
   const { t } = useTranslation();
+  
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+      from: startOfMonth(new Date()),
+      to: endOfMonth(new Date()),
+  });
   
   const [rangeInvoices, setRangeInvoices] = useState<Invoice[]>([]);
   const [rangeExpenses, setRangeExpenses] = useState<Expense[]>([]);
@@ -70,17 +74,17 @@ export default function Dashboard() {
     const today = new Date();
     setTodayInvoices(getInvoicesForDateRange(today, today));
     setTodayExpenses(getExpensesForDateRange(today, today));
-    setTodayAttendance(getAttendanceForDate(today));
-  }, [getInvoicesForDateRange, getExpensesForDateRange, getAttendanceForDate]);
+    // setTodayAttendance(getAttendanceForDate(today));
+  }, [getInvoicesForDateRange, getExpensesForDateRange]);
 
   // This useEffect updates the date range data when the range changes.
   useEffect(() => {
-    if (centralDateRange?.from && centralDateRange?.to) {
-      setRangeInvoices(getInvoicesForDateRange(centralDateRange.from, centralDateRange.to));
-      setRangeExpenses(getExpensesForDateRange(centralDateRange.from, centralDateRange.to));
-      setRangeSalaries(getSalaryPaymentsForDateRange(centralDateRange.from, centralDateRange.to));
+    if (dateRange?.from && dateRange?.to) {
+      setRangeInvoices(getInvoicesForDateRange(dateRange.from, dateRange.to));
+      setRangeExpenses(getExpensesForDateRange(dateRange.from, dateRange.to));
+      setRangeSalaries(getSalaryPaymentsForDateRange(dateRange.from, dateRange.to));
     }
-  }, [centralDateRange, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange]);
+  }, [dateRange, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange]);
 
 
   const calculateUnitsSold = useCallback((invoices: Invoice[], products: Product[]) => {
@@ -127,9 +131,9 @@ export default function Dashboard() {
   }, [todayInvoices, todayExpenses, todayAttendance, getGrossProfitForDateRange, products, calculateUnitsSold]);
   
   const { salesChartData, expensesChartData } = useMemo(() => {
-    if (!centralDateRange?.from || !centralDateRange?.to) return { salesChartData: [], expensesChartData: [] };
+    if (!dateRange?.from || !dateRange?.to) return { salesChartData: [], expensesChartData: [] };
 
-    const daysInRange = eachDayOfInterval({ start: centralDateRange.from, end: centralDateRange.to });
+    const daysInRange = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
     
     const salesData = daysInRange.map(day => ({
         name: format(day, 'd'),
@@ -146,14 +150,7 @@ export default function Dashboard() {
     }));
 
     return { salesChartData: salesData, expensesChartData: expensesData };
-  }, [rangeInvoices, rangeExpenses, centralDateRange]);
-
-  const handleReset = useCallback(() => {
-    setCentralDateRange({
-        from: startOfMonth(new Date()),
-        to: endOfMonth(new Date()),
-    });
-  }, [setCentralDateRange]);
+  }, [rangeInvoices, rangeExpenses, dateRange]);
 
 
   const chartConfig: ChartConfig = {
@@ -162,18 +159,18 @@ export default function Dashboard() {
   };
 
   const rangeTitle = useMemo(() => {
-    if (!centralDateRange?.from) return "This Month";
-    if (centralDateRange.to) {
-        if (isSameDay(centralDateRange.from, startOfMonth(centralDateRange.from)) && isSameDay(centralDateRange.to, endOfMonth(centralDateRange.from))) {
-            return format(centralDateRange.from, 'MMMM yyyy');
+    if (!dateRange?.from) return "This Month";
+    if (dateRange.to) {
+        if (isSameDay(dateRange.from, startOfMonth(dateRange.from)) && isSameDay(dateRange.to, endOfMonth(dateRange.from))) {
+            return format(dateRange.from, 'MMMM yyyy');
         }
-        if (isSameDay(centralDateRange.from, centralDateRange.to)) {
-            return format(centralDateRange.from, 'PPP');
+        if (isSameDay(dateRange.from, dateRange.to)) {
+            return format(dateRange.from, 'PPP');
         }
-        return `${format(centralDateRange.from, 'PP')} - ${format(centralDateRange.to, 'PP')}`;
+        return `${format(dateRange.from, 'PP')} - ${format(dateRange.to, 'PP')}`;
     }
-    return format(centralDateRange.from, 'PPP');
-  }, [centralDateRange]);
+    return format(dateRange.from, 'PPP');
+  }, [dateRange]);
 
   return (
     <>
@@ -183,48 +180,7 @@ export default function Dashboard() {
               <h1 className="text-2xl font-bold">{t('dashboard_sidebar')}</h1>
               <p className="text-muted-foreground">{t('welcome_back_header')}</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  id="date"
-                  variant={"outline"}
-                  className="w-full sm:w-auto justify-start text-left font-normal"
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {centralDateRange?.from ? (
-                    centralDateRange.to ? (
-                      <>
-                        {format(centralDateRange.from, "LLL dd, y")} -{" "}
-                        {format(centralDateRange.to, "LLL dd, y")}
-                      </>
-                    ) : (
-                      format(centralDateRange.from, "LLL dd, y")
-                    )
-                  ) : (
-                    <span>Pick a date</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  initialFocus
-                  mode="range"
-                  defaultMonth={centralDateRange?.from}
-                  selected={centralDateRange}
-                  onSelect={setCentralDateRange}
-                  numberOfMonths={1}
-                  captionLayout="dropdown-buttons"
-                  fromYear={2025}
-                  toYear={2050}
-                />
-              </PopoverContent>
-            </Popover>
-            <Button variant="outline" size="icon" onClick={handleReset}>
-                <RotateCw className="h-4 w-4" />
-                <span className="sr-only">Reset Date</span>
-            </Button>
-          </div>
+          <DateRangePicker initialDateRange={dateRange} onDateChange={setDateRange} />
         </div>
         
         <div>
@@ -233,14 +189,15 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                     {recentMemos.map(invoice => (
                         <button key={invoice.id} onClick={() => setSelectedInvoice(invoice)} className="group bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 overflow-hidden">
-                            <div className="p-4 border-b border-gray-200 bg-repeat bg-center" style={{backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e5e7eb' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`}}>
+                           <div className="p-4 bg-white relative overflow-hidden">
+                                <div className="absolute top-0 right-0 h-8 w-8 bg-gray-100" style={{clipPath: 'polygon(100% 0, 0 0, 100% 100%)'}}></div>
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="font-bold text-base text-gray-700">Inv #{invoice.id}</span>
                                     <span className={`text-xs font-bold px-2 py-1 rounded-full ${invoice.dueAmount > 0 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{invoice.dueAmount > 0 ? 'DUE' : 'PAID'}</span>
                                 </div>
                                 <p className="text-left text-sm text-gray-600 truncate">{invoice.customerName}</p>
                             </div>
-                            <div className="p-4 bg-gray-50/50">
+                            <div className="p-4 bg-gray-50/50 border-t border-dashed">
                                 <p className="text-left text-2xl font-bold font-mono text-gray-800">৳ {invoice.subtotal.toFixed(2)}</p>
                             </div>
                             <div className="bg-gray-100 px-4 py-1.5">
@@ -256,7 +213,7 @@ export default function Dashboard() {
 
         <div>
             <h2 className="text-lg font-semibold mb-4">{t('todays_summary_title')}</h2>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                 <Card as="button" onClick={() => setDailySalesReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
                   <div className="bg-blue-100 p-3 rounded-full"><DollarSign className="h-6 w-6 text-blue-600" /></div>
                   <div>
@@ -383,7 +340,7 @@ export default function Dashboard() {
               <CardHeader>
                   <CardTitle>{t('daily_expenses_chart_title', { range: rangeTitle })}</CardTitle>
                   <CardDescription>{t('daily_expenses_chart_description')}</CardDescription>
-              </CardHeader>
+              </Header>
               <CardContent>
                   <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
                       <BarChart data={expensesChartData}>
@@ -435,33 +392,33 @@ export default function Dashboard() {
         open={isMonthlySalesReportOpen}
         onOpenChange={setMonthlySalesReportOpen}
         invoices={rangeInvoices}
-        dateRange={centralDateRange}
+        dateRange={dateRange}
       /> }
       { isMonthlyExpensesReportOpen && <MonthlyExpensesDialog
         open={isMonthlyExpensesReportOpen}
         onOpenChange={setMonthlyExpensesReportOpen}
         expenses={rangeExpenses}
-        dateRange={centralDateRange}
+        dateRange={dateRange}
       /> }
       { isMonthlyDueReportOpen && <MonthlyDueDialog
         open={isMonthlyDueReportOpen}
         onOpenChange={setMonthlyDueReportOpen}
         invoices={rangeInvoices}
-        dateRange={centralDateRange}
+        dateRange={dateRange}
       /> }
       { isMonthlyUnitsSoldReportOpen && <MonthlyUnitsSoldDialog
         open={isMonthlyUnitsSoldReportOpen}
         onOpenChange={setMonthlyUnitsSoldReportOpen}
         invoices={rangeInvoices}
         products={products}
-        dateRange={centralDateRange}
+        dateRange={dateRange}
       /> }
       { isMonthlySalaryReportOpen && <MonthlySalaryReportDialog
         open={isMonthlySalaryReportOpen}
         onOpenChange={setMonthlySalaryReportOpen}
         salaryPayments={rangeSalaries}
         employees={employees}
-        dateRange={centralDateRange}
+        dateRange={dateRange}
       /> }
        { selectedInvoice && <InvoicePreviewDialog
         invoice={selectedInvoice}
@@ -471,3 +428,4 @@ export default function Dashboard() {
     </>
   );
 }
+
