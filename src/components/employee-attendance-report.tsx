@@ -42,7 +42,7 @@ const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, EmployeeAttend
     };
 
     return (
-      <div ref={ref} className="bg-white p-4 print:p-2">
+      <div ref={ref} className="hidden print-source print:block print:bg-white">
         <Card className="w-full max-w-4xl mx-auto shadow-none border-0 print:shadow-none print:border-0 print:bg-white print:text-black">
           <CardHeader className="text-center space-y-2 mb-2 print:mb-1 print:space-y-1">
             <div className="flex justify-center items-center gap-2">
