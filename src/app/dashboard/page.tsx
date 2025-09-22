@@ -35,7 +35,7 @@ const InvoicePreviewDialog = dynamic(() => import('@/components/invoice-preview-
 
 
 export default function Dashboard() {
-  const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, invoices: allInvoices, getAttendanceForDate } = useAppData();
+  const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, invoices: allInvoices } = useAppData();
   const { t } = useTranslation();
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
@@ -78,8 +78,9 @@ export default function Dashboard() {
     const today = new Date();
     setTodayInvoices(getInvoicesForDateRange(today, today));
     setTodayExpenses(getExpensesForDateRange(today, today));
-    setTodayAttendance(getAttendanceForDate(today));
-  }, [getInvoicesForDateRange, getExpensesForDateRange, getAttendanceForDate]);
+    // The original call to getAttendanceForDate was here but it's not defined in useAppData, so it's removed to prevent runtime errors.
+    // If you have attendance data, ensure getAttendanceForDate is provided by the hook.
+  }, [getInvoicesForDateRange, getExpensesForDateRange]);
 
   // This useEffect updates the date range data when the range changes.
   useEffect(() => {
@@ -237,19 +238,25 @@ export default function Dashboard() {
 
         <div>
             <h2 className="text-lg font-semibold mb-4">Recent Memos</h2>
-            {recentMemos.length > 0 ? (
-                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+             {recentMemos.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                     {recentMemos.map(invoice => (
-                        <Card as="button" key={invoice.id} onClick={() => setSelectedInvoice(invoice)} className="text-left hover:bg-muted/50 transition-colors flex flex-col">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-base">Inv #{invoice.id}</CardTitle>
-                                <CardDescription className="truncate">{invoice.customerName}</CardDescription>
-                            </CardHeader>
-                            <CardContent className="flex-1 flex flex-col justify-end">
-                                <div className="text-lg font-bold font-mono">৳ {invoice.subtotal.toFixed(2)}</div>
-                                <p className="text-xs text-muted-foreground">{format(new Date(invoice.date), 'PP p')}</p>
-                            </CardContent>
-                        </Card>
+                        <button key={invoice.id} onClick={() => setSelectedInvoice(invoice)} className="group bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            <div className="p-4 border-b-2 border-dashed border-gray-200">
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="font-bold text-lg text-gray-700">Inv #{invoice.id}</span>
+                                    <span className="text-sm font-semibold text-primary">{invoice.dueAmount > 0 ? 'DUE' : 'PAID'}</span>
+                                </div>
+                                <p className="text-left text-sm text-gray-600 truncate">{invoice.customerName}</p>
+                            </div>
+                            <div className="p-4">
+                                <p className="text-left text-xs text-gray-500 mb-1">Total Amount</p>
+                                <p className="text-left text-2xl font-bold font-mono text-gray-800">৳ {invoice.subtotal.toFixed(2)}</p>
+                            </div>
+                            <div className="bg-gray-50 rounded-b-lg px-4 py-2 mt-auto">
+                                <p className="text-xs text-gray-500 text-center">{format(new Date(invoice.date), 'PP')}</p>
+                            </div>
+                        </button>
                     ))}
                 </div>
             ) : (
@@ -524,3 +531,4 @@ export default function Dashboard() {
     </>
   );
 }
+
