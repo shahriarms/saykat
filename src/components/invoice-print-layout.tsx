@@ -173,7 +173,18 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
                             <rect x="2" y="2" width="296" height="96" rx="10" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="4" fill="none"/>
                              <rect x="8" y="8" width="284" height="84" rx="6" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="2" fill="none"/>
                             <line x1="220" y1="2" x2="220" y2="98" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="4" />
-                            <text x="110" y="68" fontFamily="Impact, Arial Black, sans-serif" fontSize="60" fontWeight="bold" textAnchor="middle">{isPaid ? 'PAID' : 'DUE'}</text>
+                            <text
+                                x="110"
+                                y="68"
+                                fontFamily="Impact, Arial Black, sans-serif"
+                                fontSize="56"
+                                fontWeight="bold"
+                                textAnchor="middle"
+                                lengthAdjust="spacingAndGlyphs"
+                                textLength="200"
+                            >
+                                {isPaid ? 'PAID' : 'DUE'}
+                            </text>
                             <text x="255" y="70" fontFamily="Arial, sans-serif" fontSize="56" fontWeight="bold" textAnchor="middle">৳</text>
                         </g>
                     </svg>
