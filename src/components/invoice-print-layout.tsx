@@ -182,14 +182,18 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
                         </tr>
                     </thead>
                     <tbody>
-                        {invoiceItems && invoiceItems.length > 0 ? invoiceItems.map(item => (
-                            <tr key={item.id}>
-                                <td style={tdStyles}>{item.name}</td>
-                                <td style={{...tdStyles, textAlign: 'center'}}>{item.quantity}</td>
-                                <td style={{...tdStyles, textAlign: 'right'}}>৳ {item.price.toFixed(2)}</td>
-                                <td style={{...tdStyles, textAlign: 'right', fontWeight: 500}}>৳ {(item.price * item.quantity).toFixed(2)}</td>
-                            </tr>
-                        )) : (
+                        {invoiceItems && invoiceItems.length > 0 ? invoiceItems.map(item => {
+                            const price = parseFloat(String(item.price)) || 0;
+                            const quantity = parseFloat(String(item.quantity)) || 0;
+                            return (
+                                <tr key={item.id}>
+                                    <td style={tdStyles}>{item.name}</td>
+                                    <td style={{...tdStyles, textAlign: 'center'}}>{quantity}</td>
+                                    <td style={{...tdStyles, textAlign: 'right'}}>৳ {price.toFixed(2)}</td>
+                                    <td style={{...tdStyles, textAlign: 'right', fontWeight: 500}}>৳ {(price * quantity).toFixed(2)}</td>
+                                </tr>
+                            );
+                        }) : (
                             <tr>
                                 <td colSpan={4} style={{...tdStyles, textAlign: 'center', padding: '1.5rem', color: '#6b7280'}}>{t('no_items_added')}</td>
                             </tr>
