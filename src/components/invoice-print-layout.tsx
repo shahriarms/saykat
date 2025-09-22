@@ -51,8 +51,10 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
     const isBn = locale === 'bn';
 
     const amountInWords = isBn ? numberToWordsBn(subtotal) : numberToWords(subtotal);
+    const isPaid = dueAmount <= 0.001;
 
     const memoStyles: React.CSSProperties = {
+        position: 'relative', // Needed for the paid seal positioning
         background: '#fff',
         color: '#000',
         fontFamily: isBn ? "'SolaimanLipi', 'Times New Roman', sans-serif" : "'Times New Roman', sans-serif",
@@ -132,6 +134,22 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
         fontSize: '12px',
         color: '#666',
     };
+    
+    const paidSealStyles: React.CSSProperties = {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%) rotate(-30deg)',
+        fontSize: isPos ? '2rem' : '5rem',
+        fontWeight: 'bold',
+        color: 'rgba(0, 128, 0, 0.15)',
+        border: `5px solid rgba(0, 128, 0, 0.15)`,
+        padding: '0.5rem 2rem',
+        borderRadius: '10px',
+        zIndex: 1,
+        pointerEvents: 'none',
+        textTransform: 'uppercase',
+    };
 
     return (
         <div ref={ref}>
@@ -146,6 +164,8 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
                 `}
             </style>
             <div style={memoStyles}>
+                {isPaid && <div style={paidSealStyles}>Paid</div>}
+                
                 <header style={headerStyles}>
                     <h1 style={h1Styles}>{t('memo_title')}</h1>
                     <h2 style={h2Styles}>{t('shop_name')}</h2>
