@@ -478,7 +478,7 @@ function InvoicePage() {
                   </CardHeader>
                   <CardContent>
                       <ScrollArea className="h-96">
-                          <div className="p-4 bg-muted/50 rounded-lg min-w-[820px]">
+                          <div className="p-4 bg-muted/50 rounded-lg transform origin-top scale-[var(--tw-scale-x)] md:scale-100 [--tw-scale-x:0.4] sm:[--tw-scale-x:0.6]">
                               <InvoicePrintLayout 
                                   invoiceId={draftId}
                                   currentDate={new Date().toLocaleDateString()}
