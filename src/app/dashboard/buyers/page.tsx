@@ -32,11 +32,10 @@ import { InvoicePrintLayout } from '@/components/invoice-print-layout';
 import { useTranslation } from '@/hooks/use-translation';
 import { cn } from '@/lib/utils';
 import { format, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
-import { Users, FileText, ChevronRight, Calendar, DollarSign, Search, Printer, Loader2, Trash2, CalendarIcon, RotateCw } from 'lucide-react';
+import { Users, FileText, ChevronRight, Calendar, DollarSign, Search, Printer, Loader2, Trash2 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarPicker } from '@/components/ui/calendar';
 import type { DateRange } from 'react-day-picker';
+import { DateRangePicker } from '@/components/date-range-picker';
 
 
 export default function BuyersPage() {
@@ -58,10 +57,6 @@ export default function BuyersPage() {
   useEffect(() => {
     setLocalDateRange(centralDateRange);
   }, [centralDateRange]);
-
-  const handleResetDateRange = useCallback(() => {
-      setLocalDateRange(centralDateRange);
-  }, [centralDateRange]);
   
   // Effect to handle data refreshes and keep selected items up-to-date
   useEffect(() => {
@@ -82,7 +77,7 @@ export default function BuyersPage() {
             setSelectedInvoice(null);
         }
     }
-  }, [buyers, invoices]);
+  }, [buyers, invoices, selectedBuyer?.id, selectedInvoice?.id]);
   
   const handleSelectBuyer = (buyer: Buyer) => {
     setSelectedBuyer(buyer);
@@ -200,20 +195,11 @@ export default function BuyersPage() {
               <Users className="w-6 h-6" />
               {t('buyers_page_title')}
           </h1>
-           <div className="flex items-center gap-2">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button id="date" variant={"outline"} className="w-full sm:w-auto justify-start text-left font-normal">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {localDateRange?.from ? (localDateRange.to ? (<>{format(localDateRange.from, "LLL dd, y")} - {format(localDateRange.to, "LLL dd, y")}</>) : (format(localDateRange.from, "LLL dd, y"))) : (<span>Pick a date</span>)}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <CalendarPicker initialFocus mode="range" defaultMonth={localDateRange?.from} selected={localDateRange} onSelect={setLocalDateRange} numberOfMonths={1}/>
-              </PopoverContent>
-            </Popover>
-            <Button variant="outline" size="icon" onClick={handleResetDateRange}><RotateCw className="h-4 w-4" /></Button>
-          </div>
+          <DateRangePicker
+            initialDateRange={localDateRange}
+            onDateChange={setLocalDateRange}
+            centralDateRange={centralDateRange}
+          />
         </div>
         <div className="grid md:grid-cols-5 gap-6 flex-1">
           {/* Buyers List */}

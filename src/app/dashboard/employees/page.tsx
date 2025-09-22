@@ -52,7 +52,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useTranslation } from '@/hooks/use-translation';
 import dynamic from 'next/dynamic';
-import type { DateRange } from 'react-day-picker';
 
 const EmployeeDialog = dynamic(() => import('@/components/employee-dialog').then(mod => mod.EmployeeDialog), {
     ssr: false,
@@ -68,7 +67,7 @@ export default function EmployeesPage() {
     const [employeeToEdit, setEmployeeToEdit] = useState<Employee | null>(null);
     const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null);
     
-    const [localDate, setLocalDate] = useState<Date>(new Date());
+    const [localDate, setLocalDate] = useState<Date>(centralDateRange?.from || new Date());
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
@@ -170,6 +169,9 @@ export default function EmployeesPage() {
                             mode="single"
                             selected={localDate}
                             onSelect={(date) => setLocalDate(date || new Date())}
+                            captionLayout="dropdown-buttons"
+                            fromYear={2020}
+                            toYear={new Date().getFullYear() + 5}
                             initialFocus
                         />
                         </PopoverContent>

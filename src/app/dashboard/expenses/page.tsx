@@ -37,9 +37,7 @@ import {
   ChartConfig,
 } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
-import { PlusCircle, Download, MoreHorizontal, Search, Trash2, Pencil, PackageOpen, Loader2, Receipt, CalendarIcon, RotateCw } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
+import { PlusCircle, Download, MoreHorizontal, Search, Trash2, Pencil, PackageOpen, Loader2, Receipt } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,6 +56,8 @@ import { useTranslation } from '@/hooks/use-translation';
 import { useUser } from '@/hooks/use-user';
 import dynamic from 'next/dynamic';
 import type { DateRange } from 'react-day-picker';
+import { DateRangePicker } from '@/components/date-range-picker';
+
 
 const ExpenseDialog = dynamic(() => import('@/components/expense-dialog').then(mod => mod.ExpenseDialog), {
     ssr: false,
@@ -94,11 +94,6 @@ export default function ExpensesPage() {
     useEffect(() => {
       setLocalDateRange(centralDateRange);
     }, [centralDateRange]);
-
-    const handleResetDateRange = useCallback(() => {
-        setLocalDateRange(centralDateRange);
-    }, [centralDateRange]);
-
 
     const handleAddNew = () => {
         setExpenseToEdit(null);
@@ -216,18 +211,12 @@ export default function ExpensesPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h1 className="text-2xl font-semibold flex items-center gap-2"><Receipt className="w-6 h-6"/> {t('expenses_page_title')}</h1>
           <div className="flex gap-2 w-full sm:w-auto">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button id="date" variant={"outline"} className="w-full sm:w-auto justify-start text-left font-normal">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {localDateRange?.from ? (localDateRange.to ? (<>{format(localDateRange.from, "LLL dd, y")} - {format(localDateRange.to, "LLL dd, y")}</>) : (format(localDateRange.from, "LLL dd, y"))) : (<span>Pick a date</span>)}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar initialFocus mode="range" defaultMonth={localDateRange?.from} selected={localDateRange} onSelect={setLocalDateRange} numberOfMonths={1}/>
-              </PopoverContent>
-            </Popover>
-            <Button variant="outline" size="icon" onClick={handleResetDateRange}><RotateCw className="h-4 w-4" /></Button>
+            <DateRangePicker
+              initialDateRange={localDateRange}
+              onDateChange={setLocalDateRange}
+              centralDateRange={centralDateRange}
+              className="w-full sm:w-auto"
+            />
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

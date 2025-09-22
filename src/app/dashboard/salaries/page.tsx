@@ -49,14 +49,14 @@ export default function SalariesPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastSuccessfulPayment, setLastSuccessfulPayment] = useState<{payment: SalaryPayment, employee: Employee} | null>(null);
   
-  const [localDateRange, setLocalDateRange] = useState<DateRange | undefined>(centralDateRange);
+  const [localDate, setLocalDate] = useState<Date>(centralDateRange?.from || new Date());
 
   useEffect(() => {
-    setLocalDateRange(centralDateRange);
+    setLocalDate(centralDateRange?.from || new Date());
   }, [centralDateRange]);
 
-  const handleResetDateRange = useCallback(() => {
-      setLocalDateRange(centralDateRange);
+  const handleResetDate = useCallback(() => {
+    setLocalDate(centralDateRange?.from || new Date());
   }, [centralDateRange]);
   
   const handleSelectEmployee = (employee: Employee) => {
@@ -65,22 +65,22 @@ export default function SalariesPage() {
   };
 
   const { dueSalary, paidThisMonth, paymentsThisMonth } = useMemo(() => {
-    if (!selectedEmployee || !localDateRange?.from) {
+    if (!selectedEmployee || !localDate) {
       return { dueSalary: 0, paidThisMonth: 0, paymentsThisMonth: [] };
     }
-    const firstDay = startOfMonth(localDateRange.from);
-    const lastDay = endOfMonth(localDateRange.to || localDateRange.from);
+    const firstDay = startOfMonth(localDate);
+    const lastDay = endOfMonth(localDate);
     
     const payments = getPaymentsForMonth(selectedEmployee.id, firstDay, lastDay);
     const paid = payments.reduce((acc, p) => acc + (p.amount || 0), 0);
-    const due = getDueSalaryForMonth(selectedEmployee, localDateRange.from);
+    const due = getDueSalaryForMonth(selectedEmployee, localDate);
 
     return {
       dueSalary: due,
       paidThisMonth: paid,
       paymentsThisMonth: payments,
     };
-  }, [selectedEmployee, getPaymentsForMonth, getDueSalaryForMonth, localDateRange]);
+  }, [selectedEmployee, getPaymentsForMonth, getDueSalaryForMonth, localDate]);
 
   const isOverpayment = useMemo(() => {
       if (typeof paymentAmount !== 'number' || !selectedEmployee) return false;
@@ -188,18 +188,29 @@ export default function SalariesPage() {
           {t('salaries_page_title')}
         </h1>
          <div className="flex items-center gap-2">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button id="date" variant={"outline"} className="w-full sm:w-auto justify-start text-left font-normal">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {localDateRange?.from ? (localDateRange.to ? (<>{format(localDateRange.from, "LLL dd, y")} - {format(localDateRange.to, "LLL dd, y")}</>) : (format(localDateRange.from, "LLL dd, y"))) : (<span>Pick a date</span>)}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar initialFocus mode="range" defaultMonth={localDateRange?.from} selected={localDateRange} onSelect={setLocalDateRange} numberOfMonths={1}/>
-              </PopoverContent>
-            </Popover>
-            <Button variant="outline" size="icon" onClick={handleResetDateRange}>
+             <Popover>
+                  <PopoverTrigger asChild>
+                  <Button
+                      variant={"outline"}
+                      className={cn("w-full sm:w-[280px] justify-start text-left font-normal")}
+                  >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {localDate ? format(localDate, "MMMM yyyy") : <span>{t('pick_a_date')}</span>}
+                  </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                  <Calendar
+                      mode="single"
+                      selected={localDate}
+                      onSelect={(date) => setLocalDate(date || new Date())}
+                      captionLayout="dropdown-buttons"
+                      fromYear={2020}
+                      toYear={new Date().getFullYear() + 5}
+                      initialFocus
+                  />
+                  </PopoverContent>
+              </Popover>
+            <Button variant="outline" size="icon" onClick={handleResetDate}>
                 <RotateCw className="h-4 w-4" />
                 <span className="sr-only">Reset Date</span>
             </Button>

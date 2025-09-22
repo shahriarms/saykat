@@ -1,9 +1,10 @@
 
+
 'use client';
 
 import * as React from 'react';
 import { addDays, format, startOfMonth, endOfMonth, differenceInDays } from 'date-fns';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar as CalendarIcon, RotateCw } from 'lucide-react';
 import type { DateRange } from 'react-day-picker';
 
 import { cn } from '@/lib/utils';
@@ -17,12 +18,14 @@ interface DateRangePickerProps {
   className?: React.HTMLAttributes<HTMLDivElement>['className'];
   initialDateRange?: DateRange;
   onDateChange: (range: DateRange | undefined) => void;
+  centralDateRange?: DateRange;
 }
 
 export function DateRangePicker({
   className,
   initialDateRange,
   onDateChange,
+  centralDateRange,
 }: DateRangePickerProps) {
   const { toast } = useToast();
   const [date, setDate] = React.useState<DateRange | undefined>(initialDateRange);
@@ -30,21 +33,20 @@ export function DateRangePicker({
   const [mode, setMode] = React.useState<'range' | 'month'>('range');
 
   React.useEffect(() => {
-    onDateChange(date);
-  }, [date, onDateChange]);
+    setDate(initialDateRange);
+  }, [initialDateRange]);
 
-  const handleRangeSelect = (range: DateRange | undefined) => {
-    if (range?.from && range?.to) {
-      if (differenceInDays(range.to, range.from) > 365) {
-        toast({
-            variant: 'destructive',
-            title: 'Date Range Too Large',
-            description: 'The selected date range cannot be longer than 1 year.',
-        });
-        return;
-      }
+  const handleDateChange = (newDate: DateRange | undefined) => {
+    if (newDate?.from && newDate?.to && differenceInDays(newDate.to, newDate.from) > 365) {
+      toast({
+        variant: 'destructive',
+        title: 'Date Range Too Large',
+        description: 'The selected date range cannot be longer than 1 year.',
+      });
+      return;
     }
-    setDate(range);
+    setDate(newDate);
+    onDateChange(newDate);
   };
   
   const handleMonthSelect = (selectedMonth: Date | undefined) => {
@@ -54,19 +56,23 @@ export function DateRangePicker({
             from: startOfMonth(selectedMonth),
             to: endOfMonth(selectedMonth),
         };
-        setDate(newRange);
+        handleDateChange(newRange);
     }
   }
 
+  const handleReset = () => {
+    handleDateChange(centralDateRange);
+  };
+
   return (
-    <div className={cn('grid gap-2', className)}>
+    <div className={cn('flex items-center gap-2', className)}>
       <Popover>
         <PopoverTrigger asChild>
           <Button
             id="date"
             variant={'outline'}
             className={cn(
-              'w-[300px] justify-start text-left font-normal',
+              'w-full sm:w-[300px] justify-start text-left font-normal',
               !date && 'text-muted-foreground'
             )}
           >
@@ -84,7 +90,7 @@ export function DateRangePicker({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto p-0" align="end">
           <Tabs value={mode} onValueChange={(value) => setMode(value as 'range' | 'month')} className="w-auto">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="range">Custom Range</TabsTrigger>
@@ -96,8 +102,11 @@ export function DateRangePicker({
                     mode="range"
                     defaultMonth={date?.from}
                     selected={date}
-                    onSelect={handleRangeSelect}
+                    onSelect={handleDateChange}
                     numberOfMonths={2}
+                    captionLayout="dropdown-buttons"
+                    fromYear={2020}
+                    toYear={new Date().getFullYear() + 5}
                 />
             </TabsContent>
             <TabsContent value="month">
@@ -115,6 +124,7 @@ export function DateRangePicker({
           </Tabs>
         </PopoverContent>
       </Popover>
+      {centralDateRange && <Button variant="outline" size="icon" onClick={handleReset}><RotateCw className="h-4 w-4" /></Button>}
     </div>
   );
 }

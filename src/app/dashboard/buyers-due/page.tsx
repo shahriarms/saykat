@@ -27,7 +27,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Users, FileText, ChevronRight, DollarSign, HandCoins, History, Printer, Search, Loader2, Trash2, CalendarIcon, RotateCw } from 'lucide-react';
+import { Users, FileText, ChevronRight, DollarSign, HandCoins, History, Printer, Search, Loader2, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { PaymentReceipt } from '@/components/payment-receipt';
 import { useTranslation } from '@/hooks/use-translation';
@@ -36,9 +36,9 @@ import { format, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 import { useUser } from '@/hooks/use-user';
 import { InvoicePrintLayout } from '@/components/invoice-print-layout';
 import { useSettings } from '@/hooks/use-settings';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
 import type { DateRange } from 'react-day-picker';
+import { DateRangePicker } from '@/components/date-range-picker';
+
 
 export default function BuyersDuePage() {
   const { invoices: allInvoices, buyers, getInvoicesForBuyer, addPayment, getPaymentsForInvoice, deleteInvoice, printInvoice: appPrintInvoice, centralDateRange } = useAppData();
@@ -71,10 +71,6 @@ export default function BuyersDuePage() {
     setLocalDateRange(centralDateRange);
   }, [centralDateRange]);
 
-  const handleResetDateRange = useCallback(() => {
-      setLocalDateRange(centralDateRange);
-  }, [centralDateRange]);
-  
   useEffect(() => {
     if (selectedBuyer) {
       const refreshedBuyer = buyers.find(b => b.id === selectedBuyer.id);
@@ -99,7 +95,7 @@ export default function BuyersDuePage() {
             setSelectedInvoice(null);
         }
     }
-  }, [allInvoices, buyers]);
+  }, [allInvoices, buyers, getInvoicesForBuyer, selectedBuyer?.id, selectedInvoice?.id]);
 
   const handleOpenConfirmation = () => {
     if (!selectedInvoice || !selectedBuyer || numericPaymentAmount <= 0) {
@@ -297,20 +293,11 @@ export default function BuyersDuePage() {
             <HandCoins className="w-6 h-6" />
             {t('buyers_due_page_title')}
             </h1>
-            <div className="flex items-center gap-2">
-                <Popover>
-                <PopoverTrigger asChild>
-                    <Button id="date" variant={"outline"} className="w-full sm:w-auto justify-start text-left font-normal">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {localDateRange?.from ? (localDateRange.to ? (<>{format(localDateRange.from, "LLL dd, y")} - {format(localDateRange.to, "LLL dd, y")}</>) : (format(localDateRange.from, "LLL dd, y"))) : (<span>Pick a date</span>)}
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="end">
-                    <Calendar initialFocus mode="range" defaultMonth={localDateRange?.from} selected={localDateRange} onSelect={setLocalDateRange} numberOfMonths={1}/>
-                </PopoverContent>
-                </Popover>
-                <Button variant="outline" size="icon" onClick={handleResetDateRange}><RotateCw className="h-4 w-4" /></Button>
-            </div>
+            <DateRangePicker
+              initialDateRange={localDateRange}
+              onDateChange={setLocalDateRange}
+              centralDateRange={centralDateRange}
+            />
         </div>
         <div className="grid md:grid-cols-5 gap-6 flex-1">
           <Card className="md:col-span-2 lg:col-span-1 flex flex-col no-print">
