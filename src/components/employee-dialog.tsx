@@ -235,4 +235,4 @@ export function EmployeeDialog({ open, onOpenChange, employee }: EmployeeDialogP
     );
 }
 
-    
+export default EmployeeDialog;
