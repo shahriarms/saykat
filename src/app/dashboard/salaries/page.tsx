@@ -363,7 +363,7 @@ export default function SalariesPage() {
                 </div>
              ) : (
                 <ScrollArea className="flex-1">
-                    <div className="bg-muted/20 p-1 rounded-lg">
+                    <div className="bg-muted/20 p-1 rounded-lg transform origin-top scale-[var(--tw-scale-x)] [--tw-scale-x:0.4] sm:[--tw-scale-x:0.6] md:scale-100">
                         <SalaryReceipt 
                             employee={selectedEmployee}
                             paymentAmount={typeof paymentAmount === 'number' ? paymentAmount : 0}
