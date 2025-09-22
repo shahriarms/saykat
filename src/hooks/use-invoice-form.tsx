@@ -92,9 +92,10 @@ const calculateTotals = (items: (DraftInvoiceItem | { quantity: number | string,
     const changeAmount = (cashReceived && cashReceived > validPaidAmount) ? cashReceived - validPaidAmount : 0;
     
     let dueAmount = 0;
-    if (validPaidAmount > 0) {
+    if(paidAmount && paidAmount > 0) {
         dueAmount = subtotal - validPaidAmount;
     }
+
 
     return { subtotal, changeAmount, paidAmount: validPaidAmount, dueAmount };
 };
@@ -252,7 +253,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                 const newItem: DraftInvoiceItem = {
                     id: product.id,
                     name: product.name,
-                    quantity: 1,
+                    quantity: 0,
                     price: product.sellingPrice,
                     originalPrice: product.sellingPrice,
                 } as DraftInvoiceItem;
