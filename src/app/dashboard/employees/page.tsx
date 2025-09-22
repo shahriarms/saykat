@@ -21,28 +21,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { PlusCircle, CalendarIcon, Users, UserCheck, UserX, NotebookText, Loader2, RotateCw } from 'lucide-react';
-import { format, isToday } from 'date-fns';
+import { PlusCircle, Users, UserCheck, UserX, NotebookText, Loader2 } from 'lucide-react';
+import { isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useUser } from '@/hooks/use-user';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useTranslation } from '@/hooks/use-translation';
 import dynamic from 'next/dynamic';
+import type { DateRange } from 'react-day-picker';
+import { DateRangePicker } from '@/components/date-range-picker';
+import { BookUser } from 'lucide-react';
 
 const EmployeeDialog = dynamic(() => import('@/components/employee-dialog'), {
     ssr: false,
@@ -54,36 +41,36 @@ const EmployeeListDialog = dynamic(() => import('@/components/employee-list-dial
     loading: () => <Loader2 className="h-5 w-5 animate-spin" />
 });
 
+const AttendanceRegisterDialog = dynamic(() => import('@/components/attendance-register-dialog'), {
+    ssr: false,
+    loading: () => <Loader2 className="h-5 w-5 animate-spin" />
+});
+
 export default function EmployeesPage() {
-    const { employees, markAttendance, getAttendanceForDate, getAttendanceForMonth, centralDateRange } = useAppData();
+    const { employees, markAttendance, getAttendanceForDate, centralDateRange } = useAppData();
     const { user } = useUser();
     const { t } = useTranslation();
     
     const [isAddEmployeeDialogOpen, setAddEmployeeDialogOpen] = useState(false);
     const [isEmployeeListDialogOpen, setEmployeeListDialogOpen] = useState(false);
+    const [isRegisterOpen, setRegisterOpen] = useState(false);
     
-    const [localDate, setLocalDate] = useState<Date>(centralDateRange?.from || new Date());
+    const [localDateRange, setLocalDateRange] = useState<DateRange | undefined>(centralDateRange);
+
+    const singleDateForDailyView = useMemo(() => localDateRange?.from || new Date(), [localDateRange]);
 
     useEffect(() => {
-        if (centralDateRange?.from && !isToday(centralDateRange.from)) {
-            setLocalDate(centralDateRange.from);
-        } else if (!localDate) {
-             setLocalDate(new Date());
-        }
+        setLocalDateRange(centralDateRange);
     }, [centralDateRange]);
 
-    const handleResetDate = useCallback(() => {
-        setLocalDate(centralDateRange?.from || new Date());
-    }, [centralDateRange]);
-
-    const dailyAttendance = useMemo(() => getAttendanceForDate(localDate), [getAttendanceForDate, localDate]);
+    const dailyAttendance = useMemo(() => getAttendanceForDate(singleDateForDailyView), [getAttendanceForDate, singleDateForDailyView]);
     
     const handleAttendanceChange = (employeeId: string, status: AttendanceStatus) => {
-        if (user?.role !== 'admin' && !isToday(localDate)) {
+        if (user?.role !== 'admin' && !isToday(singleDateForDailyView)) {
             alert("You can only change attendance for the current day.");
             return;
         }
-        markAttendance(employeeId, localDate, status);
+        markAttendance(employeeId, singleDateForDailyView, status);
     };
 
     const getStatusForEmployee = (employeeId: string): AttendanceStatus => {
@@ -115,32 +102,14 @@ export default function EmployeesPage() {
         <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <h1 className="text-2xl font-semibold flex items-center gap-2"><Users className="w-6 h-6"/>{t('attendance_page_title')}</h1>
-                <div className="flex gap-2">
-                    <Popover>
-                        <PopoverTrigger asChild>
-                        <Button
-                            variant={"outline"}
-                            className={cn("w-full sm:w-[280px] justify-start text-left font-normal")}
-                        >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {localDate ? format(localDate, "PPP") : <span>{t('pick_a_date')}</span>}
-                        </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                        <Calendar
-                            mode="single"
-                            selected={localDate}
-                            onSelect={(date) => setLocalDate(date || new Date())}
-                            captionLayout="dropdown-buttons"
-                            fromYear={2020}
-                            toYear={new Date().getFullYear() + 5}
-                            initialFocus
-                        />
-                        </PopoverContent>
-                    </Popover>
-                    <Button variant="outline" size="icon" onClick={handleResetDate}>
-                        <RotateCw className="h-4 w-4" />
-                        <span className="sr-only">Reset Date</span>
+                <div className="flex gap-2 flex-wrap">
+                   <DateRangePicker
+                        initialDateRange={localDateRange}
+                        onDateChange={setLocalDateRange}
+                        centralDateRange={centralDateRange}
+                    />
+                    <Button onClick={() => setRegisterOpen(true)} variant="outline">
+                        <BookUser className="mr-2 h-4 w-4"/> View Attendance Register
                     </Button>
                     <Button onClick={() => setEmployeeListDialogOpen(true)} variant="outline">
                         <Users className="mr-2 h-4 w-4" /> Employee List
@@ -151,11 +120,12 @@ export default function EmployeesPage() {
                 </div>
             </div>
             <div className="grid grid-cols-1 gap-6">
-                {/* Attendance Section */}
                 <Card>
                     <CardHeader>
                         <CardTitle>{t('daily_attendance_title')}</CardTitle>
-                        <CardDescription>{t('daily_attendance_description')}</CardDescription>
+                        <CardDescription>
+                            {t('daily_attendance_description')} Use the date picker to view or edit attendance for a specific day.
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex flex-col md:flex-row gap-4 items-center">
@@ -220,6 +190,12 @@ export default function EmployeesPage() {
         {isEmployeeListDialogOpen && <EmployeeListDialog
             open={isEmployeeListDialogOpen}
             onOpenChange={setEmployeeListDialogOpen}
+        />}
+
+        {isRegisterOpen && <AttendanceRegisterDialog
+            open={isRegisterOpen}
+            onOpenChange={setRegisterOpen}
+            dateRange={localDateRange}
         />}
         </>
     );
