@@ -91,10 +91,11 @@ export default function Dashboard() {
           invoice.items.forEach(item => {
               const product = productMap.get(item.id);
               if (product) {
+                  const quantity = parseFloat(String(item.quantity)) || 0;
                   if (product.mainCategory === 'Material') {
-                      materialSoldKg += item.quantity;
+                      materialSoldKg += quantity;
                   } else if (product.mainCategory === 'Hardware') {
-                      hardwareSoldPcs += item.quantity;
+                      hardwareSoldPcs += quantity;
                   }
               }
           });
@@ -437,7 +438,7 @@ export default function Dashboard() {
       /> }
       { isDailyUnitsSoldReportOpen && <DailyUnitsSoldReportDialog
         open={isDailyUnitsSoldReportOpen}
-        onOpenchaUnge={setDailyUnitsSoldReportOpen}
+        onOpenChange={setDailyUnitsSoldReportOpen}
         invoices={todayInvoices}
         products={products}
       /> }
