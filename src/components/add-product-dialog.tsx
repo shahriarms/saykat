@@ -36,7 +36,7 @@ const productSchema = z.object({
   buyingPrice: z.coerce.number().positive({ message: 'Buying price must be a positive number.' }),
   profitMargin: z.coerce.number().min(0, { message: 'Profit margin cannot be negative.' }),
   sellingPrice: z.coerce.number(),
-  stock: z.coerce.number().int().nonnegative({ message: 'Stock must be a non-negative integer.' }),
+  stock: z.coerce.number().nonnegative({ message: 'Stock must be a non-negative number.' }),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -266,5 +266,3 @@ export function AddProductDialog({ open, onOpenChange }: AddProductDialogProps) 
     </Dialog>
   );
 }
-
-    
