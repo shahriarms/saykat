@@ -60,7 +60,7 @@ function InvoicePage() {
   const [isPrintConfirmOpen, setPrintConfirmOpen] = useState(false);
   const [invoiceToPrint, setInvoiceToPrint] = useState<DraftInvoice | null>(null);
   
-  const { id: draftId, customerName, customerAddress, customerPhone, paidAmount, subtotal, items, cashReceived, changeAmount } = activeDraft || {};
+  const { id: draftId, customerName, customerAddress, customerPhone, paidAmount, subtotal, items, cashReceived, changeAmount, dueAmount } = activeDraft || {};
 
   const handleCustomerNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value;
@@ -445,7 +445,7 @@ function InvoicePage() {
                 </CardContent>
                 <CardFooter className="flex-col items-stretch space-y-2 pt-4">
                     <div className="w-full md:w-80 ml-auto space-y-2">
-                    <div className="flex justify-between items-center font-bold text-base border-t pt-2 mt-2">
+                    <div className="flex justify-between items-center font-semibold text-lg border-t pt-2 mt-2">
                         <span>{t('subtotal_label')}</span>
                         <span className="font-medium">৳ {(subtotal ?? 0).toFixed(2)}</span>
                     </div>
@@ -463,6 +463,10 @@ function InvoicePage() {
                                     placeholder='0'
                                 />
                         </div>
+                    </div>
+                     <div className="flex justify-between items-center font-semibold text-destructive">
+                        <Label htmlFor='dueAmount' className="shrink-0 text-sm">{t('due_label')}</Label>
+                        <span className="font-medium">৳ {(dueAmount ?? 0).toFixed(2)}</span>
                     </div>
                     </div>
                 </CardFooter>
@@ -483,6 +487,7 @@ function InvoicePage() {
                                   invoiceItems={items}
                                   subtotal={subtotal}
                                   paidAmount={paidAmount || 0}
+                                  dueAmount={dueAmount || 0}
                                   printFormat={settings.printFormat}
                                   locale={settings.locale}
                               />
@@ -504,6 +509,7 @@ function InvoicePage() {
                 invoiceItems={invoiceToPrint.items}
                 subtotal={invoiceToPrint.subtotal}
                 paidAmount={invoiceToPrint.paidAmount || 0}
+                dueAmount={invoiceToPrint.dueAmount || 0}
                 printFormat={settings.printFormat}
                 locale={settings.locale}
             />

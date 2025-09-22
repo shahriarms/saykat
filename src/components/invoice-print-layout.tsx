@@ -16,6 +16,7 @@ interface InvoicePrintLayoutProps {
     invoiceItems: DraftInvoiceItem[] | InvoiceItem[];
     subtotal: number;
     paidAmount: number;
+    dueAmount: number;
     printFormat?: PrintFormat;
     locale?: Locale;
 }
@@ -31,6 +32,7 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
         invoiceItems,
         subtotal,
         paidAmount,
+        dueAmount,
         printFormat = 'normal',
         locale = 'en',
     } = props;
@@ -202,6 +204,10 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
                              <tr>
                                 <td style={{ textAlign: 'right', padding: '0.25rem' }}>{t('paid_label')}:</td>
                                 <td style={{ textAlign: 'right', padding: '0.25rem' }}>৳ {paidAmount.toFixed(2)}</td>
+                            </tr>
+                             <tr style={{ fontWeight: 'bold' }}>
+                                <td style={{ textAlign: 'right', padding: '0.25rem' }}>{t('due_label')}:</td>
+                                <td style={{ textAlign: 'right', padding: '0.25rem' }}>৳ {dueAmount.toFixed(2)}</td>
                             </tr>
                         </tbody>
                      </table>
