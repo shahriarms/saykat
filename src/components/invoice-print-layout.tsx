@@ -176,7 +176,7 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
                             {isPaid ? (
                                 <>
                                     <line x1="210" y1="2" x2="210" y2="98" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="4" />
-                                    <text x="105" y="65" fontFamily="Arial, sans-serif" fontSize="48" fontWeight="bold" textAnchor="middle">PAID</text>
+                                    <text x="105" y="68" fontFamily="Arial, sans-serif" fontSize="60" fontWeight="bold" textAnchor="middle">PAID</text>
                                     <text x="255" y="70" fontFamily="Arial, sans-serif" fontSize="56" fontWeight="bold" textAnchor="middle">৳</text>
                                 </>
                             ) : (
