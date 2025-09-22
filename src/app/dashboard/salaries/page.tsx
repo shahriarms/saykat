@@ -36,6 +36,7 @@ import { SalaryReceipt } from '@/components/salary-receipt';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import type { DateRange } from 'react-day-picker';
+import { cn } from '@/lib/utils';
 
 export default function SalariesPage() {
   const { employees, getPaymentsForMonth, addSalaryPayment, getDueSalaryForMonth, centralDateRange } = useAppData();
