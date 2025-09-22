@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { createContext, useContext, ReactNode, useMemo, useCallback, useState, useEffect } from 'react';
@@ -253,9 +252,10 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                     let value = itemUpdate[key];
                     
                     if (key === 'quantity' || key === 'price') {
+                        // Allow empty string for temporary user input, but parse to a number
                         if (value === '' || value === null) {
                             // @ts-ignore
-                            updatedItem[key] = 0; // Or handle as you see fit, maybe keep original value
+                            updatedItem[key] = ''; // Keep it as an empty string for the input field
                         } else {
                             const parsedValue = parseFloat(value);
                             // @ts-ignore
@@ -270,7 +270,14 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                 return item;
             });
     
-            const { subtotal, dueAmount, changeAmount } = calculateTotals(newItems, draft.paidAmount, draft.cashReceived);
+            // Ensure values used for calculation are numbers
+            const itemsForCalc = newItems.map(item => ({
+                ...item,
+                quantity: typeof item.quantity === 'number' ? item.quantity : 0,
+                price: typeof item.price === 'number' ? item.price : 0,
+            }));
+
+            const { subtotal, dueAmount, changeAmount } = calculateTotals(itemsForCalc, draft.paidAmount, draft.cashReceived);
             return { ...draft, items: newItems, subtotal, dueAmount, changeAmount };
         }));
     }, [activeDraftIndex]);
@@ -327,3 +334,5 @@ export function useInvoiceForm() {
     }
     return context;
 }
+
+    
