@@ -35,7 +35,7 @@ const InvoicePreviewDialog = dynamic(() => import('@/components/invoice-preview-
 
 
 export default function Dashboard() {
-  const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, invoices: allInvoices } = useAppData();
+  const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, invoices: allInvoices, getAttendanceForDate } = useAppData();
   const { t } = useTranslation();
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
@@ -452,7 +452,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Daily Report Dialogs */}
       { isDailySalesReportOpen && <DailySalesDialog
         open={isDailySalesReportOpen}
         onOpenChange={setDailySalesReportOpen}
