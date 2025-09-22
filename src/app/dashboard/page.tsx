@@ -234,6 +234,28 @@ export default function Dashboard() {
             </Button>
           </div>
         </div>
+
+        <div>
+            <h2 className="text-lg font-semibold mb-4">Recent Memos</h2>
+            {recentMemos.length > 0 ? (
+                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    {recentMemos.map(invoice => (
+                        <Card as="button" key={invoice.id} onClick={() => setSelectedInvoice(invoice)} className="text-left hover:bg-muted/50 transition-colors flex flex-col">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-base">Inv #{invoice.id}</CardTitle>
+                                <CardDescription className="truncate">{invoice.customerName}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex-1 flex flex-col justify-end">
+                                <div className="text-lg font-bold font-mono">৳ {invoice.subtotal.toFixed(2)}</div>
+                                <p className="text-xs text-muted-foreground">{format(new Date(invoice.date), 'PP p')}</p>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            ) : (
+                <div className="text-center text-muted-foreground p-8 border rounded-lg">No recent invoices found.</div>
+            )}
+        </div>
         
         {/* Today's Summary Cards */}
         <div>
@@ -309,29 +331,6 @@ export default function Dashboard() {
                 </Card>
             </div>
         </div>
-
-        <div>
-            <h2 className="text-lg font-semibold mb-4">Recent Memos</h2>
-            {recentMemos.length > 0 ? (
-                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                    {recentMemos.map(invoice => (
-                        <Card as="button" key={invoice.id} onClick={() => setSelectedInvoice(invoice)} className="text-left hover:bg-muted/50 transition-colors flex flex-col">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-base">Inv #{invoice.id}</CardTitle>
-                                <CardDescription className="truncate">{invoice.customerName}</CardDescription>
-                            </CardHeader>
-                            <CardContent className="flex-1 flex flex-col justify-end">
-                                <div className="text-lg font-bold font-mono">৳ {invoice.subtotal.toFixed(2)}</div>
-                                <p className="text-xs text-muted-foreground">{format(new Date(invoice.date), 'PP p')}</p>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            ) : (
-                <div className="text-center text-muted-foreground p-8 border rounded-lg">No recent invoices found.</div>
-            )}
-        </div>
-
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-3 grid grid-cols-1 gap-6">
