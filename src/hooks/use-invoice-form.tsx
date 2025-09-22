@@ -248,7 +248,8 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
             const existingItem = draft.items.find(item => item.id === product.id);
             let newItems;
             if (existingItem) {
-                newItems = draft.items.map(item => item.id === product.id ? { ...item, quantity: (parseFloat(String(item.quantity)) || 0) + 1 } : item);
+                // If item exists, do not auto-increment. Keep the existing items array.
+                newItems = draft.items;
             } else {
                 const newItem: DraftInvoiceItem = {
                     id: product.id,
@@ -271,11 +272,12 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
             const newItems = draft.items.map(item => {
                 if (item.id === itemId) {
                     const updatedItem = { ...item, ...itemUpdate };
-                    const newQuantity = parseFloat(String(updatedItem.quantity));
-                    const newPrice = parseFloat(String(updatedItem.price));
-
-                    updatedItem.quantity = isNaN(newQuantity) ? item.quantity : newQuantity;
-                    updatedItem.price = isNaN(newPrice) ? item.price : newPrice;
+                    // Allow empty string for user input, but treat as 0 for calculation
+                    const newQuantity = String(updatedItem.quantity);
+                    const newPrice = String(updatedItem.price);
+                    
+                    updatedItem.quantity = newQuantity;
+                    updatedItem.price = newPrice;
                     
                     return updatedItem;
                 }
