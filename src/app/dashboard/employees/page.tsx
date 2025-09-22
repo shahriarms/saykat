@@ -237,7 +237,7 @@ export default function EmployeesPage() {
                 onOpenChange={setEmployeeListDialogOpen}
             />}
             
-             <div className="print-source">
+             <div className="print-source hidden">
               {selectedEmployee && (
                 <EmployeeAttendanceReport
                     ref={reportComponentRef}
