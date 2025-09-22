@@ -60,7 +60,7 @@ function InvoicePage() {
   const [isPrintConfirmOpen, setPrintConfirmOpen] = useState(false);
   const [invoiceToPrint, setInvoiceToPrint] = useState<DraftInvoice | null>(null);
   
-  const { id: draftId, customerName, customerAddress, customerPhone, paidAmount, subtotal, dueAmount, items, cashReceived, changeAmount } = activeDraft || {};
+  const { id: draftId, customerName, customerAddress, customerPhone, paidAmount, subtotal, items, cashReceived, changeAmount } = activeDraft || {};
 
   const handleCustomerNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value;
@@ -429,7 +429,7 @@ function InvoicePage() {
                                                 <Input type="text" inputMode="decimal" value={item.price} onChange={e => updateInvoiceItem(item.id, { price: e.target.value })} className="pl-5 text-right font-medium h-9" />
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-right font-semibold">৳ {(item.price * item.quantity).toFixed(2)}</TableCell>
+                                        <TableCell className="text-right font-semibold">৳ {(parseFloat(String(item.price)) * parseFloat(String(item.quantity))).toFixed(2)}</TableCell>
                                         <TableCell>
                                             <Button variant="ghost" size="icon" onClick={() => removeInvoiceItem(item.id)} className="h-9 w-9">
                                                 <Trash2 className="w-4 h-4 text-destructive" />
@@ -445,8 +445,8 @@ function InvoicePage() {
                 </CardContent>
                 <CardFooter className="flex-col items-stretch space-y-2 pt-4">
                     <div className="w-full md:w-80 ml-auto space-y-2">
-                    <div className="flex justify-between items-center text-sm">
-                        <span className='text-muted-foreground'>{t('subtotal_label')}</span>
+                    <div className="flex justify-between items-center font-bold text-base border-t pt-2 mt-2">
+                        <span>{t('subtotal_label')}</span>
                         <span className="font-medium">৳ {(subtotal ?? 0).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between items-center">
@@ -463,10 +463,6 @@ function InvoicePage() {
                                     placeholder='0'
                                 />
                         </div>
-                    </div>
-                    <div className="flex justify-between items-center font-bold text-base border-t pt-2 mt-2">
-                        <span>{t('due_label')}</span>
-                        <span>৳ {(dueAmount ?? 0).toFixed(2)}</span>
                     </div>
                     </div>
                 </CardFooter>
@@ -487,7 +483,6 @@ function InvoicePage() {
                                   invoiceItems={items}
                                   subtotal={subtotal}
                                   paidAmount={paidAmount || 0}
-                                  dueAmount={dueAmount}
                                   printFormat={settings.printFormat}
                                   locale={settings.locale}
                               />
@@ -509,7 +504,6 @@ function InvoicePage() {
                 invoiceItems={invoiceToPrint.items}
                 subtotal={invoiceToPrint.subtotal}
                 paidAmount={invoiceToPrint.paidAmount || 0}
-                dueAmount={invoiceToPrint.dueAmount}
                 printFormat={settings.printFormat}
                 locale={settings.locale}
             />

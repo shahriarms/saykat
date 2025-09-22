@@ -19,7 +19,6 @@ export interface DraftInvoice {
     customerPhone: string;
     paidAmount?: number;
     subtotal: number;
-    dueAmount: number;
     cashReceived?: number;
     changeAmount?: number;
     buyerId?: string;
@@ -32,9 +31,9 @@ interface InvoiceFormContextType {
     addNewDraft: () => void;
     removeDraft: (draftId: string | number) => void;
     setActiveDraftIndex: (index: number) => void;
-    updateActiveDraft: (update: Partial<Omit<DraftInvoice, 'subtotal' | 'dueAmount' | 'changeAmount' | 'label'>>) => Promise<DraftInvoice>;
+    updateActiveDraft: (update: Partial<Omit<DraftInvoice, 'subtotal' | 'changeAmount' | 'label'>>) => Promise<DraftInvoice>;
     addInvoiceItem: (product: Product) => void;
-    updateInvoiceItem: (itemId: string, update: { [key: string]: any }) => void;
+    updateInvoiceItem: (itemId: string, itemUpdate: { [key: string]: any }) => void;
     removeInvoiceItem: (itemId: string) => void;
     resetActiveDraft: () => void;
     isFormLoading: boolean;
@@ -64,7 +63,6 @@ const createNewDraft = (index: number, lastInvoiceId: number, isLoading: boolean
         customerPhone: '',
         paidAmount: undefined,
         subtotal: 0,
-        dueAmount: 0,
         cashReceived: undefined,
         changeAmount: 0,
         buyerId: undefined,
@@ -78,15 +76,12 @@ const calculateTotals = (items: (DraftInvoiceItem | { quantity: number | string,
         return acc + price * quantity;
     }, 0);
 
-    const validPaidAmount = (typeof paidAmount === 'number' && !isNaN(paidAmount)) ? paidAmount : 0;
+    let validPaidAmount = (typeof paidAmount === 'number' && !isNaN(paidAmount)) ? paidAmount : 0;
     
-    // Due amount is simply the subtotal minus what's been paid.
-    const dueAmount = subtotal - validPaidAmount;
-
-    // Change amount calculation is separate from due amount.
+    // Change amount calculation is separate.
     const changeAmount = (cashReceived && cashReceived > validPaidAmount) ? cashReceived - validPaidAmount : 0;
     
-    return { subtotal, dueAmount, changeAmount, paidAmount: validPaidAmount };
+    return { subtotal, changeAmount, paidAmount: validPaidAmount };
 };
 
 const STORAGE_KEYS = {
@@ -198,7 +193,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
         });
     }, [activeDraftIndex, lastInvoiceId, isAppDataLoading]);
 
-    const updateActiveDraft = useCallback((update: Partial<Omit<DraftInvoice, 'subtotal' | 'dueAmount' | 'changeAmount' | 'label'>>): Promise<DraftInvoice> => {
+    const updateActiveDraft = useCallback((update: Partial<Omit<DraftInvoice, 'subtotal' | 'changeAmount' | 'label'>>): Promise<DraftInvoice> => {
         return new Promise((resolve) => {
             setDrafts(prev => {
                 let resolvedDraft: DraftInvoice | undefined;
@@ -206,11 +201,10 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                     if (index === activeDraftIndex) {
                         const newVersion = { ...draft, ...update };
                         
-                        const { subtotal, dueAmount, changeAmount, paidAmount } = calculateTotals(newVersion.items, newVersion.paidAmount, newVersion.cashReceived);
+                        const { subtotal, changeAmount, paidAmount } = calculateTotals(newVersion.items, newVersion.paidAmount, newVersion.cashReceived);
                         
                         newVersion.subtotal = subtotal;
                         newVersion.paidAmount = paidAmount;
-                        newVersion.dueAmount = dueAmount;
                         newVersion.changeAmount = changeAmount;
 
                         if(typeof newVersion.id === 'string' || (typeof newVersion.id === 'number' && update.customerName && newVersion.label.startsWith('Memo'))) {
@@ -248,8 +242,8 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                 };
                 newItems = [...draft.items, newItem];
             }
-            const { subtotal, dueAmount, changeAmount, paidAmount } = calculateTotals(newItems, draft.paidAmount, draft.cashReceived);
-            return { ...draft, items: newItems, subtotal, dueAmount, changeAmount, paidAmount };
+            const { subtotal, changeAmount, paidAmount } = calculateTotals(newItems, draft.paidAmount, draft.cashReceived);
+            return { ...draft, items: newItems, subtotal, changeAmount, paidAmount };
         }));
     }, [activeDraftIndex]);
     
@@ -271,8 +265,8 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                 return item;
             });
     
-            const { subtotal, dueAmount, changeAmount, paidAmount } = calculateTotals(newItems, draft.paidAmount, draft.cashReceived);
-            return { ...draft, items: newItems, subtotal, dueAmount, changeAmount, paidAmount };
+            const { subtotal, changeAmount, paidAmount } = calculateTotals(newItems, draft.paidAmount, draft.cashReceived);
+            return { ...draft, items: newItems, subtotal, changeAmount, paidAmount };
         }));
     }, [activeDraftIndex]);
 
@@ -280,8 +274,8 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
         setDrafts(prev => prev.map((draft, index) => {
             if (index !== activeDraftIndex) return draft;
             const newItems = draft.items.filter(item => item.id !== itemId);
-            const { subtotal, dueAmount, changeAmount, paidAmount } = calculateTotals(newItems, draft.paidAmount, draft.cashReceived);
-            return { ...draft, items: newItems, subtotal, dueAmount, changeAmount, paidAmount };
+            const { subtotal, changeAmount, paidAmount } = calculateTotals(newItems, draft.paidAmount, draft.cashReceived);
+            return { ...draft, items: newItems, subtotal, changeAmount, paidAmount };
         }));
     }, [activeDraftIndex]);
 

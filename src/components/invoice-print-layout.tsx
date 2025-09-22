@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React from 'react';
@@ -17,7 +16,6 @@ interface InvoicePrintLayoutProps {
     invoiceItems: DraftInvoiceItem[] | InvoiceItem[];
     subtotal: number;
     paidAmount: number;
-    dueAmount: number;
     printFormat?: PrintFormat;
     locale?: Locale;
 }
@@ -33,7 +31,6 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
         invoiceItems,
         subtotal,
         paidAmount,
-        dueAmount,
         printFormat = 'normal',
         locale = 'en',
     } = props;
@@ -125,12 +122,6 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
         fontSize: isPos ? '12px' : '14px',
     };
 
-    const totalRowStyles: React.CSSProperties = {
-        fontWeight: 'bold',
-        fontSize: isPos ? '1.1em' : '1.1rem',
-        borderTop: '2px solid #333',
-    };
-
     const footerStyles: React.CSSProperties = {
         textAlign: 'center',
         marginTop: isPos ? '1rem' : '3rem',
@@ -204,17 +195,13 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
                 <div style={totalsSectionStyles}>
                      <table style={totalsTableStyles}>
                         <tbody>
-                            <tr>
-                                <td style={{ textAlign: 'right', padding: '0.25rem' }}>{t('subtotal_label')}:</td>
-                                <td style={{ textAlign: 'right', padding: '0.25rem', fontWeight: 600 }}>৳ {subtotal.toFixed(2)}</td>
+                            <tr style={{fontWeight: 'bold', fontSize: isPos ? '1.1em' : '1.1rem', borderTop: '2px solid #333' }}>
+                                <td style={{ textAlign: 'right', padding: '0.5rem 0.25rem' }}>{t('subtotal_label')}:</td>
+                                <td style={{ textAlign: 'right', padding: '0.5rem 0.25rem', fontWeight: 600 }}>৳ {subtotal.toFixed(2)}</td>
                             </tr>
                              <tr>
                                 <td style={{ textAlign: 'right', padding: '0.25rem' }}>{t('paid_label')}:</td>
                                 <td style={{ textAlign: 'right', padding: '0.25rem' }}>৳ {paidAmount.toFixed(2)}</td>
-                            </tr>
-                             <tr style={totalRowStyles}>
-                                <td style={{ textAlign: 'right', padding: '0.5rem 0.25rem' }}>{t('due_label')}:</td>
-                                <td style={{ textAlign: 'right', padding: '0.5rem 0.25rem' }}>{dueAmount < 0 ? '(৳ ' + Math.abs(dueAmount).toFixed(2) + ')' : '৳ ' + dueAmount.toFixed(2)}</td>
                             </tr>
                         </tbody>
                      </table>
