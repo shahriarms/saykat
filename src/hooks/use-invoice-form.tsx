@@ -222,7 +222,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                         newVersion.subtotal = subtotal;
                         newVersion.paidAmount = paidAmount;
                         newVersion.changeAmount = changeAmount;
-                        newVersion.dueAmount = dueAmount;
+                        newVersion.dueAmount = subtotal - paidAmount;
 
                         if(typeof newVersion.id === 'string' || (typeof newVersion.id === 'number' && update.customerName && newVersion.label.startsWith('Memo'))) {
                             newVersion.label = update.customerName || `Memo #${newVersion.id}`;
@@ -261,7 +261,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                 newItems = [...draft.items, newItem];
             }
             const { subtotal, changeAmount, paidAmount, dueAmount } = calculateTotals(newItems, draft.paidAmount, draft.cashReceived);
-            return { ...draft, items: newItems, subtotal, changeAmount, paidAmount, dueAmount };
+            return { ...draft, items: newItems, subtotal, changeAmount, paidAmount, dueAmount: subtotal - paidAmount };
         }));
     }, [activeDraftIndex]);
     
@@ -285,7 +285,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
             });
     
             const { subtotal, changeAmount, paidAmount, dueAmount } = calculateTotals(newItems, draft.paidAmount, draft.cashReceived);
-            return { ...draft, items: newItems, subtotal, changeAmount, paidAmount, dueAmount };
+            return { ...draft, items: newItems, subtotal, changeAmount, paidAmount, dueAmount: subtotal - paidAmount };
         }));
     }, [activeDraftIndex]);
 
@@ -294,7 +294,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
             if (index !== activeDraftIndex) return draft;
             const newItems = draft.items.filter(item => item.id !== itemId);
             const { subtotal, changeAmount, paidAmount, dueAmount } = calculateTotals(newItems, draft.paidAmount, draft.cashReceived);
-            return { ...draft, items: newItems, subtotal, changeAmount, paidAmount, dueAmount };
+            return { ...draft, items: newItems, subtotal, changeAmount, paidAmount, dueAmount: subtotal - paidAmount };
         }));
     }, [activeDraftIndex]);
 

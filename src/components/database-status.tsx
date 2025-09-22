@@ -23,11 +23,11 @@ export const DatabaseStatus = React.memo(function DatabaseStatus() {
         <div className="flex items-center justify-center gap-2 p-2 rounded-md border bg-background text-foreground text-sm shadow-inner">
           <span
             className={`h-2.5 w-2.5 rounded-full ${
-              isDbConnected ? 'bg-green-500' : 'bg-yellow-500'
+              isDbConnected ? 'bg-green-500' : 'bg-red-500'
             }`}
           />
           <span className="font-mono text-xs font-semibold">
-            {isDbConnected ? 'Online' : 'Local'}
+            {isDbConnected ? 'Online' : 'Offline'}
           </span>
         </div>
       </TooltipTrigger>
@@ -35,7 +35,7 @@ export const DatabaseStatus = React.memo(function DatabaseStatus() {
         <p>
           {isDbConnected
             ? 'Connected to PostgreSQL database.'
-            : 'Running in local storage mode.'}
+            : 'Database connection failed.'}
         </p>
       </TooltipContent>
     </Tooltip>
