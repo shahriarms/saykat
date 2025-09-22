@@ -249,13 +249,21 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
             const newItems = draft.items.map(item => {
                 if (item.id === itemId) {
                     const updatedItem = { ...item };
-                    const key = Object.keys(itemUpdate)[0];
+                    const key = Object.keys(itemUpdate)[0] as keyof DraftInvoiceItem;
                     let value = itemUpdate[key];
                     
                     if (key === 'quantity' || key === 'price') {
-                        const parsedValue = parseFloat(value);
+                        if (value === '' || value === null) {
+                            // @ts-ignore
+                            updatedItem[key] = 0; // Or handle as you see fit, maybe keep original value
+                        } else {
+                            const parsedValue = parseFloat(value);
+                            // @ts-ignore
+                            updatedItem[key] = isNaN(parsedValue) ? item[key] : parsedValue;
+                        }
+                    } else {
                         // @ts-ignore
-                        updatedItem[key] = isNaN(parsedValue) ? '' : parsedValue;
+                        updatedItem[key] = value;
                     }
                     return updatedItem;
                 }
