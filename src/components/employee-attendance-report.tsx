@@ -19,7 +19,7 @@ interface EmployeeAttendanceReportProps {
   attendanceData: AttendanceReportItem[];
 }
 
-export const EmployeeAttendanceReport = React.memo(React.forwardRef<HTMLDivElement, EmployeeAttendanceReportProps>(
+export const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, EmployeeAttendanceReportProps>(
   ({ employee, month, attendanceData }, ref) => {
     const { t } = useTranslation();
 
@@ -102,6 +102,6 @@ export const EmployeeAttendanceReport = React.memo(React.forwardRef<HTMLDivEleme
       </div>
     );
   }
-));
+);
 
 EmployeeAttendanceReport.displayName = 'EmployeeAttendanceReport';
