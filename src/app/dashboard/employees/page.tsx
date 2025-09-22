@@ -15,7 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { PlusCircle, Users, UserCheck, UserX, NotebookText, Loader2, BookUser, Download, Printer, ChevronRight, Calendar as CalendarIcon, RotateCw, UserCog } from 'lucide-react';
-import { isToday, format, eachDayOfInterval, isSameDay, isFriday, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+import { isToday, format, eachDayOfInterval, isSameDay, startOfMonth, endOfMonth } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useUser } from '@/hooks/use-user';
 import { useTranslation } from '@/hooks/use-translation';
@@ -23,7 +23,7 @@ import dynamic from 'next/dynamic';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-
+import { useReactToPrint } from 'react-to-print';
 
 const EmployeeDialog = dynamic(() => import('@/components/employee-dialog'), {
     ssr: false,
@@ -35,8 +35,13 @@ const EmployeeListDialog = dynamic(() => import('@/components/employee-list-dial
     loading: () => <Loader2 className="h-5 w-5 animate-spin" />
 });
 
+const EmployeeAttendanceReport = dynamic(() => import('@/components/employee-attendance-report').then(mod => mod.EmployeeAttendanceReport), {
+    ssr: false,
+    loading: () => <div className="p-4">Loading report...</div>
+});
+
 export default function EmployeesPage() {
-    const { employees, attendance, markAttendance, getAttendanceForDate, centralDateRange } = useAppData();
+    const { employees, attendance, markAttendance } = useAppData();
     const { user } = useUser();
     const { t } = useTranslation();
     
@@ -45,6 +50,11 @@ export default function EmployeesPage() {
     
     const [isAddEmployeeDialogOpen, setAddEmployeeDialogOpen] = useState(false);
     const [isEmployeeListDialogOpen, setEmployeeListDialogOpen] = useState(false);
+    
+    const reportComponentRef = useRef<HTMLDivElement>(null);
+    const handlePrint = useReactToPrint({
+        content: () => reportComponentRef.current,
+    });
     
     useEffect(() => {
         if (employees.length > 0 && !selectedEmployee) {
@@ -84,10 +94,6 @@ export default function EmployeesPage() {
         return { report, summary };
 
     }, [attendance, selectedEmployee, month]);
-    
-     const handlePrint = () => {
-        window.print();
-    };
 
     const getStatusClasses = (status: AttendanceStatus) => {
         switch(status) {
@@ -101,8 +107,8 @@ export default function EmployeesPage() {
 
     return (
         <>
-            <div className="flex flex-col gap-6 h-full">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 no-print">
+            <div className="flex flex-col gap-6 h-full no-print">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <h1 className="text-2xl font-semibold flex items-center gap-2"><UserCog className="w-6 h-6"/>{t('attendance_page_title')}</h1>
                     <div className="flex gap-2 flex-wrap">
                         <Button onClick={() => setEmployeeListDialogOpen(true)} variant="outline">
@@ -115,7 +121,7 @@ export default function EmployeesPage() {
                 </div>
 
                 <div className="grid lg:grid-cols-3 gap-6 flex-1">
-                    <Card className="lg:col-span-1 flex flex-col no-print">
+                    <Card className="lg:col-span-1 flex flex-col">
                          <CardHeader>
                             <CardTitle>{t('employee_list_title')}</CardTitle>
                          </CardHeader>
@@ -153,7 +159,7 @@ export default function EmployeesPage() {
                                         Viewing attendance for {format(month, 'MMMM yyyy')}
                                     </CardDescription>
                                 </div>
-                                <div className="flex gap-2 no-print">
+                                <div className="flex gap-2">
                                      <Popover>
                                         <PopoverTrigger asChild>
                                             <Button variant="outline"><CalendarIcon className="mr-2 h-4 w-4"/> {format(month, 'MMMM yyyy')}</Button>
@@ -222,6 +228,17 @@ export default function EmployeesPage() {
                 open={isEmployeeListDialogOpen}
                 onOpenChange={setEmployeeListDialogOpen}
             />}
+            
+             <div className="print-source">
+              {selectedEmployee && (
+                <EmployeeAttendanceReport
+                    ref={reportComponentRef}
+                    employee={selectedEmployee}
+                    month={month}
+                    attendanceData={monthlyAttendanceData.report}
+                />
+              )}
+            </div>
         </>
     );
 }
