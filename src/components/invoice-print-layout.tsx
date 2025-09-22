@@ -162,29 +162,21 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
             </style>
             <div style={memoStyles}>
                  <div style={sealContainerStyles}>
-                    {isPaid ? (
-                        <svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
-                            <g fill="#22c55e">
-                                <path d="M10 5 C5 5, 5 10, 5 15 V85 C5 90, 5 95, 10 95 H290 C295 95, 295 90, 295 85 V15 C295 10, 295 5, 290 5 H10 Z M15 10 H285 C285 10, 290 10, 290 15 V85 C290 90, 285 90, 285 90 H15 C15 90, 10 90, 10 85 V15 C10 10, 15 10, 15 10 Z" />
-                                <text x="150" y="65" font-family="Arial, sans-serif" font-size="40" font-weight="bold" text-anchor="middle">PAID</text>
-                                <circle cx="25" cy="25" r="1.5" />
-                                <circle cx="270" cy="75" r="2" />
-                                <circle cx="150" cy="20" r="1" />
-                                <circle cx="80" cy="80" r="1.5" />
-                            </g>
-                        </svg>
-                    ) : (
-                        <svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
-                            <g fill="#dc2626">
-                                <path d="M10 5 C5 5, 5 10, 5 15 V85 C5 90, 5 95, 10 95 H290 C295 95, 295 90, 295 85 V15 C295 10, 295 5, 290 5 H10 Z M15 10 H285 C285 10, 290 10, 290 15 V85 C290 90, 285 90, 285 90 H15 C15 90, 10 90, 10 85 V15 C10 10, 15 10, 15 10 Z" />
-                                <text x="150" y="65" font-family="Arial, sans-serif" font-size="40" font-weight="bold" text-anchor="middle">DUE</text>
-                                <circle cx="25" cy="25" r="1.5" />
-                                <circle cx="270" cy="75" r="2" />
-                                <circle cx="150" cy="20" r="1" />
-                                <circle cx="80" cy="80" r="1.5" />
-                            </g>
-                        </svg>
-                    )}
+                    <svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <filter id="grunge">
+                                <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" result="noise" />
+                                <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" xChannelSelector="R" yChannelSelector="G" />
+                            </filter>
+                        </defs>
+                        <g filter="url(#grunge)" fill={isPaid ? '#22c55e' : '#dc2626'}>
+                            <path d="M290 5 H10 C5 5 5 10 5 15 V25 C5 20 10 20 15 20 H285 C290 20 295 20 295 25 V15 C295 10 295 5 290 5Z" />
+                            <path d="M290 95 H10 C5 95 5 90 5 85 V75 C5 80 10 80 15 80 H285 C290 80 295 80 295 75 V85 C295 90 295 95 290 95Z" />
+                            <path d="M10 95 C5 95 5 90 5 85 V15 C5 10 5 5 10 5 H20 C15 5 15 10 15 15 V85 C15 90 15 95 20 95 H10Z" />
+                            <path d="M290 95 C295 95 295 90 295 85 V15 C295 10 295 5 290 5 H280 C285 5 285 10 285 15 V85 C285 90 285 95 280 95 H290Z" />
+                            <text x="150" y="65" fontFamily="Arial, sans-serif" fontSize="40" fontWeight="bold" textAnchor="middle">{isPaid ? 'PAID' : 'DUE'}</text>
+                        </g>
+                    </svg>
                 </div>
                 
                 <header style={headerStyles}>
