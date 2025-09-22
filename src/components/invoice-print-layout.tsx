@@ -143,8 +143,8 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
         opacity: 0.15,
         zIndex: 1,
         pointerEvents: 'none',
-        width: isPos ? '200px' : '350px',
-        height: isPos ? '100px' : '150px',
+        width: isPos ? '150px' : '300px',
+        height: isPos ? '75px' : '100px',
     };
 
 
@@ -162,20 +162,26 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
             </style>
             <div style={memoStyles}>
                  <div style={sealContainerStyles}>
-                    <svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+                    <svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
                         <defs>
                             <filter id="grunge">
-                                <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" result="noise" />
-                                <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" xChannelSelector="R" yChannelSelector="G" />
+                                <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" result="noise" />
+                                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
                             </filter>
                         </defs>
                         <g filter="url(#grunge)" fill={isPaid ? '#22c55e' : '#dc2626'}>
-                            <path d="M296.6,22.4c-1.3-1.2-3.2-1.8-5.1-1.8H8.5c-1.9,0-3.8,0.6-5.1,1.8C2,23.6,1.4,25.5,1.4,27.4v45.1 c0,1.9,0.6,3.8,1.8,5.1c1.3,1.2,3.2,1.8,5.1,1.8h283c1.9,0,3.8-0.6,5.1-1.8c1.2-1.3,1.8-3.2,1.8-5.1V27.4 C298.4,25.5,297.8,23.6,296.6,22.4z M292.9,75.7c-0.4,0.4-1,0.6-1.6,0.6H8.7c-0.6,0-1.2-0.2-1.6-0.6c-0.4-0.4-0.6-1-0.6-1.6V25.9 c0-0.6,0.2-1.2,0.6-1.6c0.4-0.4,1-0.6,1.6-0.6h282.6c0.6,0,1.2,0.2,1.6,0.6c0.4,0.4,0.6,1,0.6,1.6v48.2 C293.5,74.7,293.3,75.3,292.9,75.7z"/>
-                            <circle cx="15.8" cy="27.6" r="3.2"/>
-                            <circle cx="284.2" cy="27.6" r="3.2"/>
-                            <circle cx="15.8" cy="72.4" r="3.2"/>
-                            <circle cx="284.2" cy="72.4" r="3.2"/>
-                            <text x="150" y="65" fontFamily="Arial, sans-serif" fontSize="40" fontWeight="bold" textAnchor="middle">{isPaid ? 'PAID' : 'DUE'}</text>
+                            <rect x="2" y="2" width="296" height="96" rx="10" ry="10" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="4" fill="none"/>
+                            <rect x="2" y="2" width="296" height="96" rx="10" ry="10" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="8" fill="none" strokeDasharray="3 3"/>
+                            
+                            {isPaid ? (
+                                <>
+                                    <line x1="210" y1="2" x2="210" y2="98" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="4" />
+                                    <text x="105" y="65" fontFamily="Arial, sans-serif" fontSize="48" fontWeight="bold" textAnchor="middle">PAID</text>
+                                    <text x="255" y="70" fontFamily="Arial, sans-serif" fontSize="56" fontWeight="bold" textAnchor="middle">৳</text>
+                                </>
+                            ) : (
+                                <text x="150" y="68" fontFamily="Arial, sans-serif" fontSize="60" fontWeight="bold" textAnchor="middle">DUE</text>
+                            )}
                         </g>
                     </svg>
                 </div>
