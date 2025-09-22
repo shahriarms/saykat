@@ -144,7 +144,7 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
         zIndex: 1,
         pointerEvents: 'none',
         width: '300px',
-        height: '300px',
+        height: '100px',
     };
 
 
@@ -170,13 +170,12 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
                             </filter>
                         </defs>
                         <g filter="url(#grunge)" fill={isPaid ? '#22c55e' : '#dc2626'}>
-                           <path d="M 10 2 H 290 L 298 10 V 90 L 290 98 H 10 L 2 90 V 10 Z" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="4" fill="none" />
-                           <path d="M 18 10 H 282 L 290 18 V 82 L 282 90 H 18 L 10 82 V 18 Z" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="2" fill="none" />
-                           <text x="105" y="72" fontFamily="Impact, Arial Black, sans-serif" fontSize="60" fontWeight="bold" textAnchor="middle" lengthAdjust="spacingAndGlyphs" textLength="170" fill={isPaid ? '#22c55e' : '#dc2626'}>
+                            <rect x="2" y="2" width="296" height="96" rx="10" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="4" fill="none" />
+                            <line x1="210" y1="2" x2="210" y2="98" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="4" />
+                            <text x="105" y="68" fontFamily="Impact, Arial Black, sans-serif" fontSize="60" fontWeight="bold" textAnchor="middle" textLength="170" lengthAdjust="spacingAndGlyphs">
                                 {isPaid ? 'PAID' : 'DUE'}
                             </text>
-                            <text x="200" y="68" fontFamily="Impact, Arial Black, sans-serif" fontSize="60" fontWeight="bold" textAnchor="middle" fill={isPaid ? '#22c55e' : '#dc2626'}>|</text>
-                            <text x="245" y="70" fontFamily="Arial, sans-serif" fontSize="56" fontWeight="bold" textAnchor="middle" fill={isPaid ? '#22c55e' : '#dc2626'}>৳</text>
+                            <text x="252" y="70" fontFamily="Arial, sans-serif" fontSize="60" fontWeight="bold" textAnchor="middle">৳</text>
                         </g>
                     </svg>
                 </div>
