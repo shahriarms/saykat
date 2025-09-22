@@ -137,14 +137,14 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
     
     const sealContainerStyles: React.CSSProperties = {
         position: 'absolute',
-        top: '55%',
+        top: isPos ? '30%' : '55%',
         left: '50%',
         transform: 'translate(-50%, -50%) rotate(-15deg)',
         opacity: 0.15,
         zIndex: 1,
         pointerEvents: 'none',
-        width: '350px',
-        height: '115px',
+        width: isPos ? '200px' : '350px',
+        height: isPos ? '65px' : '115px',
     };
 
 
