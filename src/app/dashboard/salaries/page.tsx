@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
@@ -311,7 +309,7 @@ export default function SalariesPage() {
 
                          <div className="flex-1 min-h-0 mt-4">
                             <h3 className="font-semibold text-lg flex items-center gap-2 mb-2"><History className="w-5 h-5"/> {t('monthly_payment_history_title')}</h3>
-                            <ScrollArea className="h-48 rounded-md border">
+                            <ScrollArea className="h-64 rounded-md border">
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
@@ -362,14 +360,12 @@ export default function SalariesPage() {
                     <p className="mt-4">No employee selected.</p>
                 </div>
              ) : (
-                <ScrollArea className="flex-1">
-                    <div className="bg-muted/20 p-1 rounded-lg transform origin-top scale-[var(--tw-scale-x)] [--tw-scale-x:0.4] sm:[--tw-scale-x:0.6] md:scale-100">
-                        <SalaryReceipt 
-                            employee={selectedEmployee}
-                            paymentAmount={typeof paymentAmount === 'number' ? paymentAmount : 0}
-                            paymentDate={new Date()}
-                        />
-                    </div>
+                <ScrollArea className="flex-1 rounded-lg bg-muted/20 p-2">
+                    <SalaryReceipt 
+                        employee={selectedEmployee}
+                        paymentAmount={typeof paymentAmount === 'number' ? paymentAmount : 0}
+                        paymentDate={new Date()}
+                    />
                 </ScrollArea>
              )}
           </CardContent>
