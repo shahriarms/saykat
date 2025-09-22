@@ -42,9 +42,9 @@ const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, EmployeeAttend
     };
 
     return (
-      <div ref={ref} className="hidden print-source print:block print:bg-white">
+      <div ref={ref} className="hidden print-source print:block print:bg-white print:text-[10px]">
         <Card className="w-full max-w-4xl mx-auto shadow-none border-0 print:shadow-none print:border-0 print:bg-white print:text-black">
-          <CardHeader className="text-center space-y-2 mb-2 print:mb-1 print:space-y-1">
+          <CardHeader className="text-center space-y-2 mb-2 print:mb-1 print:space-y-1 print:p-0">
             <div className="flex justify-center items-center gap-2">
                 <svg className="w-8 h-8 print:w-6 print:h-6 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 12l3 3 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 <CardTitle className="text-2xl print:text-xl font-bold tracking-wider">EMPLOYEE ATTENDANCE</CardTitle>
@@ -54,7 +54,7 @@ const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, EmployeeAttend
             <div className="grid grid-cols-2 gap-4 my-4 print:my-2 border-y py-2 print:py-1 text-xs print:text-[10px]">
                 <div>
                     <p><strong className="w-24 inline-block">Employee:</strong> {employee.name}</p>
-                    <p><strong className="w-24 inline-block">Role:</strong> {employee.role}</p>
+                    <p>{employee.role}</p>
                 </div>
                  <div className="text-right">
                     <p><strong className="w-24 inline-block text-left">Month:</strong> {format(month, 'MMMM, yyyy')}</p>
