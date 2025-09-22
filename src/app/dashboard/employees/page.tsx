@@ -24,6 +24,7 @@ import dynamic from 'next/dynamic';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const EmployeeDialog = dynamic(() => import('@/components/employee-dialog'), {
     ssr: false,
@@ -60,21 +61,12 @@ export default function EmployeesPage() {
         }
     }, [employees, selectedEmployee]);
 
-    const handleAttendanceChange = (date: Date, currentStatus: AttendanceStatus) => {
+    const handleAttendanceChange = (date: Date, newStatus: AttendanceStatus) => {
         if (!selectedEmployee) return;
         if (user?.role !== 'admin' && !isSameDay(date, new Date())) {
             alert("You can only change attendance for today.");
             return;
         }
-
-        let newStatus: AttendanceStatus;
-        switch (currentStatus) {
-            case 'Present': newStatus = 'Absent'; break;
-            case 'Absent': newStatus = 'Leave'; break;
-            case 'Leave': newStatus = 'Present'; break;
-            default: newStatus = 'Present';
-        }
-
         markAttendance(selectedEmployee.id, date, newStatus);
     };
 
@@ -106,9 +98,9 @@ export default function EmployeesPage() {
 
     const getStatusClasses = (status: AttendanceStatus) => {
         switch(status) {
-            case 'Present': return "bg-green-100 text-green-700 hover:bg-green-200";
-            case 'Absent': return "bg-red-100 text-red-700 hover:bg-red-200";
-            case 'Leave': return "bg-yellow-100 text-yellow-700 hover:bg-yellow-200";
+            case 'Present': return "bg-green-100 text-green-700 hover:bg-green-200 border-green-200";
+            case 'Absent': return "bg-red-100 text-red-700 hover:bg-red-200 border-red-200";
+            case 'Leave': return "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border-yellow-200";
             default: return "";
         }
     };
@@ -219,14 +211,19 @@ export default function EmployeesPage() {
                                                         <TableCell>{format(date, 'MMM dd, yyyy')}</TableCell>
                                                         <TableCell>{format(date, 'eee')}</TableCell>
                                                         <TableCell>
-                                                            <Button 
-                                                                variant="ghost" 
-                                                                size="sm" 
-                                                                className={cn("w-24 justify-center font-semibold", getStatusClasses(status))}
-                                                                onClick={() => handleAttendanceChange(date, status)}
+                                                            <Select 
+                                                                value={status} 
+                                                                onValueChange={(newStatus: AttendanceStatus) => handleAttendanceChange(date, newStatus)}
                                                             >
-                                                                {status}
-                                                            </Button>
+                                                                <SelectTrigger className={cn("w-28 h-9 font-semibold", getStatusClasses(status))}>
+                                                                    <SelectValue />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="Present">Present</SelectItem>
+                                                                    <SelectItem value="Absent">Absent</SelectItem>
+                                                                    <SelectItem value="Leave">Leave</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
                                                         </TableCell>
                                                     </TableRow>
                                                 ))}
@@ -253,7 +250,7 @@ export default function EmployeesPage() {
                 onOpenChange={setEmployeeListDialogOpen}
             />}
             
-             <div className="print-source hidden">
+             <div className="print-source">
               {selectedEmployee && (
                 <EmployeeAttendanceReport
                     ref={reportComponentRef}
