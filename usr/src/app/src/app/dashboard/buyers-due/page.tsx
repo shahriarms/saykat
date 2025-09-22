@@ -60,6 +60,7 @@ export default function BuyersDuePage() {
 
   const [isPrinting, setIsPrinting] = useState(false);
   const [invoiceToPrint, setInvoiceToPrint] = useState<Invoice | null>(null);
+  
 
   const numericPaymentAmount = useMemo(() => parseFloat(paymentAmount) || 0, [paymentAmount]);
   
@@ -87,7 +88,7 @@ export default function BuyersDuePage() {
             setSelectedInvoice(null);
         }
     }
-  }, [allInvoices, buyers, getInvoicesForBuyer, selectedBuyer, selectedInvoice]);
+  }, [allInvoices, buyers, getInvoicesForBuyer]);
 
   const handleOpenConfirmation = () => {
     if (!selectedInvoice || !selectedBuyer || numericPaymentAmount <= 0) {

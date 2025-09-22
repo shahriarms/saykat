@@ -1,8 +1,7 @@
 
-
 'use client';
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useAppData } from '@/hooks/use-app-data';
 import { useUser } from '@/hooks/use-user';
 import type { Employee, SalaryPayment } from '@/lib/types';
@@ -33,6 +32,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { useTranslation } from '@/hooks/use-translation';
 import { SalaryReceipt } from '@/components/salary-receipt';
+import { useEffect } from 'react';
 
 export default function SalariesPage() {
   const { employees, getPaymentsForMonth, addSalaryPayment, getDueSalaryForMonth } = useAppData();

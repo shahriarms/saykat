@@ -17,6 +17,7 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, differenceInDays } from 'date-fns';
 import { useTranslation } from '@/hooks/use-translation';
+<<<<<<< HEAD
 import type { DateRange, Invoice, Expense, SalaryPayment, Attendance, Product } from '@/lib/types';
 import dynamic from 'next/dynamic';
 
@@ -36,6 +37,23 @@ const InvoicePreviewDialog = dynamic(() => import('@/components/invoice-preview-
 
 export default function Dashboard() {
   const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getAttendanceForDate, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, invoices: allInvoices } = useAppData();
+=======
+import { DailySalesDialog } from '@/components/daily-sales-report-dialog';
+import { DailyExpensesReportDialog } from '@/components/daily-expenses-report-dialog';
+import { DailyDueReportDialog } from '@/components/daily-due-report-dialog';
+import { DailyUnitsSoldReportDialog } from '@/components/daily-units-sold-report-dialog';
+import { DailyAttendanceReportDialog } from '@/components/daily-attendance-report-dialog';
+import { MonthlySalesDialog } from '@/components/monthly-sales-report-dialog';
+import { MonthlyExpensesDialog } from '@/components/monthly-expenses-report-dialog';
+import { MonthlyDueDialog } from '@/components/monthly-due-report-dialog';
+import { MonthlyUnitsSoldDialog } from '@/components/monthly-units-sold-report-dialog';
+import { MonthlySalaryReportDialog } from '@/components/monthly-salary-report-dialog';
+import type { DateRange, Invoice, Expense, SalaryPayment, Attendance, Product } from '@/lib/types';
+
+
+export default function Dashboard() {
+  const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, getAttendanceForDate, invoices: allInvoices } = useAppData();
+>>>>>>> c12da9ec1a8c1d0f5d1139ecc4e7821ddce90eb2
   const { t } = useTranslation();
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);

@@ -471,14 +471,25 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addSalaryPayment, getPaymentsForMonth, getSalaryPaymentsForDateRange, getDueSalaryForMonth
     ]);
     
-    if (isAppDataLoading) {
+    if (isAppDataLoading && !isDbConnected) {
+        return (
+            <div className="flex h-screen w-full items-center justify-center bg-background">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                    <p className="text-muted-foreground">Connecting to database...</p>
+                </div>
+            </div>
+        );
+    }
+    
+     if (isAppDataLoading) {
         return (
             <div className="flex h-svh w-full items-center justify-center bg-background">
                 <Loader2 className="h-8 w-8 animate-spin" />
             </div>
         );
     }
-    
+
     return (
         <AppDataContext.Provider value={value}>
             {children}

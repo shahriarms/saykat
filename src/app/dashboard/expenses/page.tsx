@@ -228,7 +228,7 @@ export default function ExpensesPage() {
                     <CardDescription>{t('todays_expenses_description')}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {!summaryStats ? <div className="flex justify-center items-center min-h-[150px]"><Loader2 className="h-8 w-8 animate-spin"/></div> : (
+                    {!summaryStats ? null : (
                         <>
                             <p className="text-3xl font-bold">৳ {summaryStats.todayTotal.toFixed(2)}</p>
                             {summaryStats.todayCategoryData.length > 0 ? (
@@ -253,7 +253,7 @@ export default function ExpensesPage() {
                      {!summaryStats ? <div className="h-5"/> : <CardDescription>{t('total_label')}: <span className="font-bold">৳ {summaryStats.monthTotal.toFixed(2)}</span></CardDescription>}
                 </CardHeader>
                 <CardContent>
-                    {!monthChartData ? <div className="flex justify-center items-center min-h-[200px]"><Loader2 className="h-8 w-8 animate-spin"/></div> : (
+                    {!monthChartData ? null : (
                         <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
                             <BarChart data={monthChartData}>
                                 <CartesianGrid vertical={false} />
