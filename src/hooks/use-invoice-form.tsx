@@ -34,7 +34,7 @@ interface InvoiceFormContextType {
     setActiveDraftIndex: (index: number) => void;
     updateActiveDraft: (update: Partial<Omit<DraftInvoice, 'subtotal' | 'dueAmount' | 'changeAmount' | 'label'>>) => Promise<DraftInvoice>;
     addInvoiceItem: (product: Product) => void;
-    updateInvoiceItem: (itemId: string, update: { [key: string]: string }) => void;
+    updateInvoiceItem: (itemId: string, update: { [key: string]: any }) => void;
     removeInvoiceItem: (itemId: string) => void;
     resetActiveDraft: () => void;
     isFormLoading: boolean;
@@ -78,10 +78,16 @@ const calculateTotals = (items: (DraftInvoiceItem | { quantity: number | string,
         return acc + price * quantity;
     }, 0);
 
-    const validPaidAmount = (typeof paidAmount === 'number' && !isNaN(paidAmount)) ? paidAmount : 0;
+    let validPaidAmount = (typeof paidAmount === 'number' && !isNaN(paidAmount)) ? paidAmount : 0;
+    
+    if (validPaidAmount > subtotal) {
+        validPaidAmount = subtotal;
+    }
+
     const dueAmount = subtotal - validPaidAmount;
     const changeAmount = (cashReceived && cashReceived > subtotal) ? cashReceived - subtotal : 0;
-    return { subtotal, dueAmount, changeAmount };
+    
+    return { subtotal, dueAmount, changeAmount, paidAmount: validPaidAmount };
 };
 
 const STORAGE_KEYS = {
@@ -201,15 +207,11 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                     if (index === activeDraftIndex) {
                         const newVersion = { ...draft, ...update };
                         
-                        const { subtotal, dueAmount, changeAmount } = calculateTotals(newVersion.items, newVersion.paidAmount, newVersion.cashReceived);
-                        newVersion.subtotal = subtotal;
-
-                        if (update.hasOwnProperty('paidAmount')) {
-                           newVersion.dueAmount = dueAmount;
-                        } else {
-                           newVersion.dueAmount = subtotal - (newVersion.paidAmount || 0);
-                        }
+                        const { subtotal, dueAmount, changeAmount, paidAmount } = calculateTotals(newVersion.items, newVersion.paidAmount, newVersion.cashReceived);
                         
+                        newVersion.subtotal = subtotal;
+                        newVersion.paidAmount = paidAmount;
+                        newVersion.dueAmount = dueAmount;
                         newVersion.changeAmount = changeAmount;
 
                         if(typeof newVersion.id === 'string' || (typeof newVersion.id === 'number' && update.customerName && newVersion.label.startsWith('Memo'))) {
@@ -259,9 +261,12 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
             const newItems = draft.items.map(item => {
                 if (item.id === itemId) {
                     const updatedItem = { ...item, ...itemUpdate };
-                    // Ensure values are parsed correctly if they are strings
-                    updatedItem.quantity = parseFloat(String(updatedItem.quantity)) || item.quantity;
-                    updatedItem.price = parseFloat(String(updatedItem.price)) || item.price;
+                    const newQuantity = parseFloat(String(updatedItem.quantity));
+                    const newPrice = parseFloat(String(updatedItem.price));
+
+                    updatedItem.quantity = isNaN(newQuantity) ? item.quantity : newQuantity;
+                    updatedItem.price = isNaN(newPrice) ? item.price : newPrice;
+                    
                     return updatedItem;
                 }
                 return item;
