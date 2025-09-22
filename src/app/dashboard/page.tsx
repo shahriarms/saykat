@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/chart';
 import { useAppData } from '@/hooks/use-app-data';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { DollarSign, ShoppingCart, TrendingUp, TrendingDown, Calendar as CalendarIcon, Package, HandCoins, Receipt, Loader2, BadgeIndianRupee, Container, Wallet, RotateCw, Users, ThumbsUp, Weight } from 'lucide-react';
+import { DollarSign, ShoppingCart, TrendingUp, TrendingDown, Calendar as CalendarIcon, Package, HandCoins, Receipt, Loader2, BadgeIndianRupee, Container, Wallet, RotateCw, Users, ThumbsUp, Weight, FileText } from 'lucide-react';
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -32,6 +32,8 @@ const MonthlyExpensesDialog = dynamic(() => import('@/components/monthly-expense
 const MonthlyDueDialog = dynamic(() => import('@/components/monthly-due-report-dialog').then(mod => mod.MonthlyDueDialog), { ssr: false });
 const MonthlyUnitsSoldDialog = dynamic(() => import('@/components/monthly-units-sold-report-dialog').then(mod => mod.MonthlyUnitsSoldDialog), { ssr: false });
 const MonthlySalaryReportDialog = dynamic(() => import('@/components/monthly-salary-report-dialog').then(mod => mod.MonthlySalaryReportDialog), { ssr: false });
+const InvoicePreviewDialog = dynamic(() => import('@/components/invoice-preview-dialog').then(mod => mod.InvoicePreviewDialog), { ssr: false });
+
 
 export default function Dashboard() {
   const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, getAttendanceForDate, invoices: allInvoices } = useAppData();
@@ -57,6 +59,10 @@ export default function Dashboard() {
   const [isMonthlyDueReportOpen, setMonthlyDueReportOpen] = useState(false);
   const [isMonthlyUnitsSoldReportOpen, setMonthlyUnitsSoldReportOpen] = useState(false);
   const [isMonthlySalaryReportOpen, setMonthlySalaryReportOpen] = useState(false);
+  
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+
+  const recentMemos = useMemo(() => allInvoices.slice(0, 5), [allInvoices]);
   
   // This useEffect ensures all date-sensitive operations run only on the client, preventing hydration errors.
   useEffect(() => {
@@ -267,7 +273,7 @@ export default function Dashboard() {
                   </CardHeader>
                   <CardContent>
                       <div className="flex items-baseline gap-2">
-                        <div className="text-xl font-bold">{todayStats.materialSoldKg.toFixed(2)}</div>
+                        <div className="text-xl font-bold">{(parseFloat(String(todayStats.materialSoldKg)) || 0).toFixed(2)}</div>
                         <span className="text-xs text-muted-foreground">kg</span>
                       </div>
                       <div className="flex items-baseline gap-2">
@@ -301,102 +307,134 @@ export default function Dashboard() {
             </div>
         </div>
 
-        {/* Date Range Summary Cards */}
-        <div>
-            <h2 className="text-lg font-semibold mb-4">{t('date_range_summary_title', { range: rangeTitle })}</h2>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
-              <Card as="button" onClick={() => setMonthlySalesReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{t('monthly_sales_card_title')}</CardTitle>
-                  <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">৳ {rangeStats.totalSales.toFixed(2)}</div>
-                  <p className="text-xs text-muted-foreground">{t('invoices_in_range_footer', { count: rangeInvoices.length })}</p>
-                </CardContent>
-              </Card>
-              <Card as="button" onClick={() => setMonthlyExpensesReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{t('monthly_expenses_card_title')}</CardTitle>
-                  <TrendingDown className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">৳ {rangeStats.totalExpenses.toFixed(2)}</div>
-                   <p className="text-xs text-muted-foreground">{t('expense_entries_footer', { count: rangeExpenses.length })}</p>
-                </CardContent>
-              </Card>
-               <Card as="button" onClick={() => setMonthlySalaryReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{t('salary_paid_card_title')}</CardTitle>
-                  <Wallet className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">৳ {rangeStats.totalSalaryPaid.toFixed(2)}</div>
-                  <p className="text-xs text-muted-foreground">{t('salary_payments_footer', { count: rangeSalaries.length })}</p>
-                </CardContent>
-              </Card>
-               <Card as="button" onClick={() => setMonthlyDueReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors" disabled={rangeStats.totalDue <= 0}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{t('total_due_card_title')}</CardTitle>
-                  <BadgeIndianRupee className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-red-600">৳ {rangeStats.totalDue.toFixed(2)}</div>
-                  <p className="text-xs text-muted-foreground">{t('from_this_range_footer')}</p>
-                </CardContent>
-              </Card>
-               <Card as="button" onClick={() => setMonthlyUnitsSoldReportOpen(true)} className="text-left hover:bg-muted/so transition-colors">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{t('total_units_sold_card_title')}</CardTitle>
-                  <Container className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                     <div className="flex items-baseline gap-2">
-                        <div className="text-xl font-bold">{rangeStats.materialSoldKg.toFixed(2)}</div>
-                        <span className="text-xs text-muted-foreground">kg</span>
-                      </div>
-                      <div className="flex items-baseline gap-2">
-                        <div className="text-xl font-bold">{rangeStats.hardwareSoldPcs}</div>
-                        <span className="text-xs text-muted-foreground">pcs</span>
-                      </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{t('profit_card_title')}</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className={`text-2xl font-bold ${rangeStats.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      ৳ {rangeStats.profit.toFixed(2)}
-                  </div>
-                  <p className="text-xs text-muted-foreground">{t('profit_formula_footer')}</p>
-                </CardContent>
-              </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 grid grid-cols-1 gap-6">
+                {/* Date Range Summary Cards */}
+                <div>
+                    <h2 className="text-lg font-semibold mb-4">{t('date_range_summary_title', { range: rangeTitle })}</h2>
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <Card as="button" onClick={() => setMonthlySalesReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                          <CardTitle className="text-sm font-medium">{t('monthly_sales_card_title')}</CardTitle>
+                          <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-2xl font-bold">৳ {rangeStats.totalSales.toFixed(2)}</div>
+                          <p className="text-xs text-muted-foreground">{t('invoices_in_range_footer', { count: rangeInvoices.length })}</p>
+                        </CardContent>
+                      </Card>
+                      <Card as="button" onClick={() => setMonthlyExpensesReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                          <CardTitle className="text-sm font-medium">{t('monthly_expenses_card_title')}</CardTitle>
+                          <TrendingDown className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-2xl font-bold">৳ {rangeStats.totalExpenses.toFixed(2)}</div>
+                           <p className="text-xs text-muted-foreground">{t('expense_entries_footer', { count: rangeExpenses.length })}</p>
+                        </CardContent>
+                      </Card>
+                       <Card as="button" onClick={() => setMonthlySalaryReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                          <CardTitle className="text-sm font-medium">{t('salary_paid_card_title')}</CardTitle>
+                          <Wallet className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-2xl font-bold">৳ {rangeStats.totalSalaryPaid.toFixed(2)}</div>
+                          <p className="text-xs text-muted-foreground">{t('salary_payments_footer', { count: rangeSalaries.length })}</p>
+                        </CardContent>
+                      </Card>
+                       <Card as="button" onClick={() => setMonthlyDueReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors" disabled={rangeStats.totalDue <= 0}>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                          <CardTitle className="text-sm font-medium">{t('total_due_card_title')}</CardTitle>
+                          <BadgeIndianRupee className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-2xl font-bold text-red-600">৳ {rangeStats.totalDue.toFixed(2)}</div>
+                          <p className="text-xs text-muted-foreground">{t('from_this_range_footer')}</p>
+                        </CardContent>
+                      </Card>
+                       <Card as="button" onClick={() => setMonthlyUnitsSoldReportOpen(true)} className="text-left hover:bg-muted/so transition-colors">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                          <CardTitle className="text-sm font-medium">{t('total_units_sold_card_title')}</CardTitle>
+                          <Container className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                             <div className="flex items-baseline gap-2">
+                                <div className="text-xl font-bold">{rangeStats.materialSoldKg.toFixed(2)}</div>
+                                <span className="text-xs text-muted-foreground">kg</span>
+                              </div>
+                              <div className="flex items-baseline gap-2">
+                                <div className="text-xl font-bold">{rangeStats.hardwareSoldPcs}</div>
+                                <span className="text-xs text-muted-foreground">pcs</span>
+                              </div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                          <CardTitle className="text-sm font-medium">{t('profit_card_title')}</CardTitle>
+                          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                          <div className={`text-2xl font-bold ${rangeStats.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              ৳ {rangeStats.profit.toFixed(2)}
+                          </div>
+                          <p className="text-xs text-muted-foreground">{t('profit_formula_footer')}</p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 gap-6">
+                  <Card>
+                      <CardHeader>
+                      <CardTitle>{t('daily_sales_chart_title', { range: rangeTitle })}</CardTitle>
+                      <CardDescription>{t('daily_sales_chart_description')}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                      <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
+                          <BarChart data={salesChartData}>
+                          <CartesianGrid vertical={false} />
+                          <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
+                          <YAxis />
+                          <ChartTooltip
+                              cursor={false}
+                              content={<ChartTooltipContent indicator="dot" />}
+                          />
+                          <Bar dataKey="Sales" fill="var(--color-Sales)" radius={4} />
+                          </BarChart>
+                      </ChartContainer>
+                      </CardContent>
+                  </Card>
+                </div>
             </div>
+            
+            <Card>
+                <CardHeader>
+                    <CardTitle>Recent Memos</CardTitle>
+                    <CardDescription>Your last 5 invoices.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-4">
+                        {recentMemos.length > 0 ? (
+                            recentMemos.map(invoice => (
+                                <button key={invoice.id} onClick={() => setSelectedInvoice(invoice)} className="w-full text-left p-3 rounded-md hover:bg-muted transition-colors border">
+                                    <div className="flex justify-between items-center">
+                                        <div className="font-semibold">
+                                            Inv #{invoice.id} - {invoice.customerName}
+                                        </div>
+                                        <div className="font-mono">৳ {invoice.subtotal.toFixed(2)}</div>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground">{format(new Date(invoice.date), 'PP p')}</p>
+                                </button>
+                            ))
+                        ) : (
+                            <div className="text-center text-muted-foreground p-8">No recent invoices found.</div>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-              <CardHeader>
-              <CardTitle>{t('daily_sales_chart_title', { range: rangeTitle })}</CardTitle>
-              <CardDescription>{t('daily_sales_chart_description')}</CardDescription>
-              </CardHeader>
-              <CardContent>
-              <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
-                  <BarChart data={salesChartData}>
-                  <CartesianGrid vertical={false} />
-                  <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
-                  <YAxis />
-                  <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent indicator="dot" />}
-                  />
-                  <Bar dataKey="Sales" fill="var(--color-Sales)" radius={4} />
-                  </BarChart>
-              </ChartContainer>
-              </CardContent>
-          </Card>
           <Card>
               <CardHeader>
                   <CardTitle>{t('daily_expenses_chart_title', { range: rangeTitle })}</CardTitle>
@@ -482,6 +520,11 @@ export default function Dashboard() {
         employees={employees}
         dateRange={dateRange}
       /> }
+       { selectedInvoice && <InvoicePreviewDialog
+        invoice={selectedInvoice}
+        open={!!selectedInvoice}
+        onOpenChange={() => setSelectedInvoice(null)}
+      />}
     </>
   );
 }
