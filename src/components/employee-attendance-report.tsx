@@ -43,7 +43,7 @@ const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, EmployeeAttend
     return (
       <div ref={ref} className="hidden print-source print:block print:bg-white print:text-[9px] print:leading-tight">
         <Card className="w-full max-w-4xl mx-auto shadow-none border-0 print:shadow-none print:border-0 print:bg-white print:text-black">
-          <CardHeader className="text-center space-y-1 mb-1 print:mb-0.5 print:space-y-0.5 print:p-0">
+          <CardHeader className="text-center space-y-1 print:mb-1 print:space-y-0.5 print:p-0">
             <div className="flex justify-center items-center gap-2">
                 <svg className="w-6 h-6 print:w-5 print:h-5 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 12l3 3 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 <CardTitle className="text-lg print:text-base font-bold tracking-wider">EMPLOYEE ATTENDANCE</CardTitle>
@@ -53,7 +53,7 @@ const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, EmployeeAttend
             </CardDescription>
           </CardHeader>
           <CardContent className="print:p-0">
-            <div className="grid grid-cols-2 gap-4 my-1 print:my-0.5 border-y py-0.5 print:py-0 text-xs print:text-[9px]">
+            <div className="grid grid-cols-2 gap-4 my-1 print:my-0.5 border-y py-0.5 print:py-0 text-xs print:text-base">
                 <div>
                     <p><strong className="w-20 inline-block">Employee:</strong> {employee.name}</p>
                 </div>
@@ -65,16 +65,16 @@ const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, EmployeeAttend
             <Table className="print:text-xs">
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="print:p-1">Date</TableHead>
-                        <TableHead className="print:p-1">Day</TableHead>
+                        <TableHead className="print:p-1 text-blue-700">Date</TableHead>
+                        <TableHead className="print:p-1 text-blue-700">Day</TableHead>
                         <TableHead className="text-center print:p-1">Status</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {attendanceData.map(({ date, status }) => (
                         <TableRow key={date.toISOString()}>
-                            <TableCell className="print:p-1">{format(date, 'MMMM dd, yyyy')}</TableCell>
-                            <TableCell className="print:p-1">{format(date, 'eeee')}</TableCell>
+                            <TableCell className="print:p-1 text-blue-700">{format(date, 'MMMM dd, yyyy')}</TableCell>
+                            <TableCell className="print:p-1 text-blue-700">{format(date, 'eeee')}</TableCell>
                             <TableCell className={`text-center print:p-1 ${getStatusClass(status)}`}>{status}</TableCell>
                         </TableRow>
                     ))}
@@ -94,7 +94,7 @@ const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, EmployeeAttend
                     </TableRow>
                 </TableFooter>
             </Table>
-             <div className="flex justify-between mt-4 print:mt-2 text-xs print:text-[9px]">
+             <div className="flex justify-between mt-24 print:mt-24 text-xs print:text-[9px]">
                 <div className="border-t-2 border-gray-400 w-48 print:w-40 text-center pt-1">Employee's Signature</div>
                 <div className="border-t-2 border-gray-400 w-48 print:w-40 text-center pt-1">Manager's Signature</div>
             </div>
