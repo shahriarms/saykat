@@ -215,7 +215,7 @@ export default function EmployeesPage() {
                                                                 value={status} 
                                                                 onValueChange={(newStatus: AttendanceStatus) => handleAttendanceChange(date, newStatus)}
                                                             >
-                                                                <SelectTrigger className={cn("w-28 h-9 font-semibold", getStatusClasses(status))}>
+                                                                <SelectTrigger className={cn("w-[110px] h-9 font-semibold", getStatusClasses(status))}>
                                                                     <SelectValue />
                                                                 </SelectTrigger>
                                                                 <SelectContent>
