@@ -91,10 +91,7 @@ const calculateTotals = (items: (DraftInvoiceItem | { quantity: number | string,
     
     const changeAmount = (cashReceived && cashReceived > validPaidAmount) ? cashReceived - validPaidAmount : 0;
     
-    let dueAmount = 0;
-    if(paidAmount && paidAmount > 0) {
-        dueAmount = subtotal - validPaidAmount;
-    }
+    const dueAmount = subtotal - validPaidAmount;
 
 
     return { subtotal, changeAmount, paidAmount: validPaidAmount, dueAmount };
