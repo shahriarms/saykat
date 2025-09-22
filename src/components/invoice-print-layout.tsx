@@ -139,12 +139,12 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
         position: 'absolute',
         top: '50%',
         left: '50%',
-        transform: 'translate(-50%, -50%)',
+        transform: 'translate(-50%, -50%) rotate(-10deg)',
         opacity: 0.15,
         zIndex: 1,
         pointerEvents: 'none',
-        width: isPos ? '150px' : '250px',
-        height: isPos ? '150px' : '250px',
+        width: isPos ? '200px' : '350px',
+        height: isPos ? '100px' : '150px',
     };
 
 
@@ -161,23 +161,31 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
                 `}
             </style>
             <div style={memoStyles}>
-                 {isPaid ? (
-                    <div style={sealContainerStyles}>
-                        <svg viewBox="0 0 100 100" style={{ transform: 'rotate(-15deg)' }}>
-                            <circle cx="50" cy="50" r="45" stroke="#22c55e" strokeWidth="3" fill="none" />
-                            <circle cx="50" cy="50" r="38" stroke="#22c55e" strokeWidth="1" fill="none" strokeDasharray="3 3"/>
-                            <text x="50" y="58" fontFamily="Arial, sans-serif" fontSize="24" fontWeight="bold" fill="#22c55e" textAnchor="middle">PAID</text>
-                            <text x="50" y="32" fontFamily="Arial, sans-serif" fontSize="8" fill="#22c55e" textAnchor="middle">THANK YOU</text>
+                 <div style={sealContainerStyles}>
+                    {isPaid ? (
+                        <svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+                            <g fill="#22c55e">
+                                <path d="M10 5 C5 5, 5 10, 5 15 V85 C5 90, 5 95, 10 95 H290 C295 95, 295 90, 295 85 V15 C295 10, 295 5, 290 5 H10 Z M15 10 H285 C285 10, 290 10, 290 15 V85 C290 90, 285 90, 285 90 H15 C15 90, 10 90, 10 85 V15 C10 10, 15 10, 15 10 Z" />
+                                <text x="150" y="65" font-family="Arial, sans-serif" font-size="40" font-weight="bold" text-anchor="middle">PAID</text>
+                                <circle cx="25" cy="25" r="1.5" />
+                                <circle cx="270" cy="75" r="2" />
+                                <circle cx="150" cy="20" r="1" />
+                                <circle cx="80" cy="80" r="1.5" />
+                            </g>
                         </svg>
-                    </div>
-                 ) : (
-                    <div style={sealContainerStyles}>
-                        <svg viewBox="0 0 100 100" style={{ transform: 'rotate(-10deg)' }}>
-                            <rect x="10" y="25" width="80" height="50" stroke="#dc2626" strokeWidth="4" fill="none" />
-                            <text x="50" y="58" fontFamily="Impact, sans-serif" fontSize="32" fontWeight="bold" fill="#dc2626" textAnchor="middle">DUE</text>
+                    ) : (
+                        <svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+                            <g fill="#dc2626">
+                                <path d="M10 5 C5 5, 5 10, 5 15 V85 C5 90, 5 95, 10 95 H290 C295 95, 295 90, 295 85 V15 C295 10, 295 5, 290 5 H10 Z M15 10 H285 C285 10, 290 10, 290 15 V85 C290 90, 285 90, 285 90 H15 C15 90, 10 90, 10 85 V15 C10 10, 15 10, 15 10 Z" />
+                                <text x="150" y="65" font-family="Arial, sans-serif" font-size="40" font-weight="bold" text-anchor="middle">DUE</text>
+                                <circle cx="25" cy="25" r="1.5" />
+                                <circle cx="270" cy="75" r="2" />
+                                <circle cx="150" cy="20" r="1" />
+                                <circle cx="80" cy="80" r="1.5" />
+                            </g>
                         </svg>
-                    </div>
-                 )}
+                    )}
+                </div>
                 
                 <header style={headerStyles}>
                     <h1 style={h1Styles}>{t('memo_title')}</h1>
