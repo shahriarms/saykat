@@ -14,8 +14,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { PlusCircle, Users, UserCheck, UserX, NotebookText, Loader2, BookUser, Download, Printer, ChevronRight, Calendar as CalendarIcon, RotateCw, UserCog } from 'lucide-react';
-import { isToday, format, eachDayOfInterval, isSameDay, startOfMonth, endOfMonth } from 'date-fns';
+import { PlusCircle, Users, UserCheck, UserX, NotebookText, Loader2, BookUser, Download, Printer, ChevronRight, Calendar as CalendarIcon, RotateCw } from 'lucide-react';
+import { format, eachDayOfInterval, isSameDay, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useUser } from '@/hooks/use-user';
 import { useTranslation } from '@/hooks/use-translation';
@@ -23,7 +23,6 @@ import dynamic from 'next/dynamic';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useReactToPrint } from 'react-to-print';
 
 const EmployeeDialog = dynamic(() => import('@/components/employee-dialog'), {
     ssr: false,
@@ -35,10 +34,11 @@ const EmployeeListDialog = dynamic(() => import('@/components/employee-list-dial
     loading: () => <Loader2 className="h-5 w-5 animate-spin" />
 });
 
-const EmployeeAttendanceReport = dynamic(() => import('@/components/employee-attendance-report').then(mod => mod.EmployeeAttendanceReport), {
+const EmployeeAttendanceReport = dynamic(() => import('@/components/employee-attendance-report'), {
     ssr: false,
     loading: () => <div className="p-4">Loading report...</div>
 });
+
 
 export default function EmployeesPage() {
     const { employees, attendance, markAttendance } = useAppData();
@@ -52,9 +52,6 @@ export default function EmployeesPage() {
     const [isEmployeeListDialogOpen, setEmployeeListDialogOpen] = useState(false);
     
     const reportComponentRef = useRef<HTMLDivElement>(null);
-    const handlePrint = useReactToPrint({
-        content: () => reportComponentRef.current,
-    });
     
     useEffect(() => {
         if (employees.length > 0 && !selectedEmployee) {
@@ -62,13 +59,22 @@ export default function EmployeesPage() {
         }
     }, [employees, selectedEmployee]);
 
-    const handleAttendanceChange = (date: Date, status: AttendanceStatus) => {
+    const handleAttendanceChange = (date: Date, currentStatus: AttendanceStatus) => {
         if (!selectedEmployee) return;
-        if (user?.role !== 'admin' && !isToday(date)) {
+        if (user?.role !== 'admin' && !isSameDay(date, new Date())) {
             alert("You can only change attendance for today.");
             return;
         }
-        markAttendance(selectedEmployee.id, date, status);
+
+        let newStatus: AttendanceStatus;
+        switch (currentStatus) {
+            case 'Present': newStatus = 'Absent'; break;
+            case 'Absent': newStatus = 'Leave'; break;
+            case 'Leave': newStatus = 'Present'; break;
+            default: newStatus = 'Present';
+        }
+
+        markAttendance(selectedEmployee.id, date, newStatus);
     };
 
     const monthlyAttendanceData = useMemo(() => {
@@ -87,9 +93,11 @@ export default function EmployeesPage() {
         });
         
         const summary = report.reduce((acc, curr) => {
-            acc[curr.status]++;
+            if (curr.status in acc) {
+              acc[curr.status]++;
+            }
             return acc;
-        }, { Present: 0, Absent: 0, Leave: 0 });
+        }, { Present: 0, Absent: 0, Leave: 0 } as Record<AttendanceStatus, number>);
 
         return { report, summary };
 
@@ -97,9 +105,9 @@ export default function EmployeesPage() {
 
     const getStatusClasses = (status: AttendanceStatus) => {
         switch(status) {
-            case 'Present': return "bg-green-100 text-green-700";
-            case 'Absent': return "bg-red-100 text-red-700";
-            case 'Leave': return "bg-yellow-100 text-yellow-700";
+            case 'Present': return "bg-green-100 text-green-700 hover:bg-green-200";
+            case 'Absent': return "bg-red-100 text-red-700 hover:bg-red-200";
+            case 'Leave': return "bg-yellow-100 text-yellow-700 hover:bg-yellow-200";
             default: return "";
         }
     };
@@ -168,7 +176,7 @@ export default function EmployeesPage() {
                                             <Calendar mode="single" month={month} onMonthChange={(m) => m && setMonth(m)} captionLayout="dropdown-buttons" fromYear={2020} toYear={new Date().getFullYear() + 5}/>
                                         </PopoverContent>
                                      </Popover>
-                                     <Button onClick={handlePrint} variant="outline" disabled={!selectedEmployee}><Printer className="mr-2 h-4 w-4"/> Print Report</Button>
+                                     <Button onClick={() => window.print()} variant="outline" disabled={!selectedEmployee}><Printer className="mr-2 h-4 w-4"/> Print Report</Button>
                                 </div>
                             </div>
                         </CardHeader>
@@ -199,7 +207,7 @@ export default function EmployeesPage() {
                                                                 variant="ghost" 
                                                                 size="sm" 
                                                                 className={cn("w-24 justify-center font-semibold", getStatusClasses(status))}
-                                                                onClick={() => handleAttendanceChange(date, status === 'Present' ? 'Absent' : 'Present')}
+                                                                onClick={() => handleAttendanceChange(date, status)}
                                                             >
                                                                 {status}
                                                             </Button>
