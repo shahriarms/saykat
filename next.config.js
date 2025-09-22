@@ -12,7 +12,6 @@ const nextConfig = {
   images: {
     remotePatterns: [],
   },
-  allowedDevOrigins: ["*.cloudworkstations.dev"],
 };
 
 module.exports = nextConfig;
