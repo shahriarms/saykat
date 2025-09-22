@@ -98,8 +98,8 @@ export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePre
                         customerPhone={invoice.customerPhone}
                         invoiceItems={invoice.items}
                         subtotal={invoice.subtotal}
-                        paidAmount={invoice.paidAmount}
-                        dueAmount={invoice.dueAmount}
+                        paidAmount={invoice.paidAmount || 0}
+                        dueAmount={invoice.dueAmount || 0}
                         printFormat={settings.printFormat}
                         locale={settings.locale}
                     />
@@ -127,8 +127,8 @@ export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePre
                     customerPhone={invoiceToPrint.customerPhone}
                     invoiceItems={invoiceToPrint.items}
                     subtotal={invoiceToPrint.subtotal}
-                    paidAmount={invoiceToPrint.paidAmount}
-                    dueAmount={invoiceToPrint.dueAmount}
+                    paidAmount={invoiceToPrint.paidAmount || 0}
+                    dueAmount={invoiceToPrint.dueAmount || 0}
                     printFormat={settings.printFormat}
                     locale={settings.locale}
                 />

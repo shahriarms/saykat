@@ -102,7 +102,7 @@ function InvoicePage() {
               description: t('invoice_saved_toast_description', { invoiceId: newInvoiceId }),
             });
             
-            const finalDraft = await updateActiveDraft({ id: newInvoiceId });
+            const finalDraft = { ...updatedDraftWithId, id: newInvoiceId };
             
             const timer = setTimeout(() => {
                 setInvoiceToPrint(finalDraft);
