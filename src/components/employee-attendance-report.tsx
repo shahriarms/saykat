@@ -105,3 +105,5 @@ export const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, Employe
 );
 
 EmployeeAttendanceReport.displayName = 'EmployeeAttendanceReport';
+
+export default EmployeeAttendanceReport;
