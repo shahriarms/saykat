@@ -2,11 +2,15 @@
 'use client';
 
 import { createContext, useContext, ReactNode, useMemo, useCallback, useState, useEffect } from 'react';
-import type { InvoiceItem, Product, Buyer } from '@/lib/types';
+import type { Invoice, Product, Buyer } from '@/lib/types';
 import { useToast } from './use-toast';
 import { useAppData } from './use-app-data';
 
-export interface DraftInvoiceItem extends InvoiceItem {
+export interface DraftInvoiceItem extends Omit<Invoice, 'items' | 'id'> {
+    id: string; // product id
+    name: string;
+    quantity: number | string;
+    price: number | string;
     originalPrice: number;
 }
 
@@ -80,10 +84,17 @@ const calculateTotals = (items: (DraftInvoiceItem | { quantity: number | string,
 
     let validPaidAmount = (typeof paidAmount === 'number' && !isNaN(paidAmount)) ? paidAmount : 0;
     
-    // Change amount calculation is separate.
+    // Constraint: paidAmount cannot be more than subtotal
+    if (validPaidAmount > subtotal) {
+        validPaidAmount = subtotal;
+    }
+    
     const changeAmount = (cashReceived && cashReceived > validPaidAmount) ? cashReceived - validPaidAmount : 0;
     
-    const dueAmount = subtotal - validPaidAmount;
+    let dueAmount = 0;
+    if (validPaidAmount > 0) {
+        dueAmount = subtotal - validPaidAmount;
+    }
 
     return { subtotal, changeAmount, paidAmount: validPaidAmount, dueAmount };
 };
@@ -244,7 +255,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                     quantity: 1,
                     price: product.sellingPrice,
                     originalPrice: product.sellingPrice,
-                };
+                } as DraftInvoiceItem;
                 newItems = [...draft.items, newItem];
             }
             const { subtotal, changeAmount, paidAmount, dueAmount } = calculateTotals(newItems, draft.paidAmount, draft.cashReceived);

@@ -31,6 +31,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
 import dynamic from 'next/dynamic';
+import { cn } from '@/lib/utils';
 
 
 function InvoicePage() {
@@ -464,7 +465,7 @@ function InvoicePage() {
                                 />
                         </div>
                     </div>
-                     <div className="flex justify-between items-center font-semibold text-destructive">
+                     <div className={cn("flex justify-between items-center font-semibold", (dueAmount ?? 0) > 0 ? "text-destructive" : "text-foreground")}>
                         <Label htmlFor='dueAmount' className="shrink-0 text-sm">{t('due_label')}</Label>
                         <span className="font-medium">৳ {(dueAmount ?? 0).toFixed(2)}</span>
                     </div>
