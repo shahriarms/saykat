@@ -23,8 +23,6 @@ import dynamic from 'next/dynamic';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useReactToPrint } from 'react-to-print';
-import { EmployeeAttendanceReport } from '@/components/employee-attendance-report';
 
 
 const EmployeeDialog = dynamic(() => import('@/components/employee-dialog'), {
@@ -47,8 +45,6 @@ export default function EmployeesPage() {
     
     const [isAddEmployeeDialogOpen, setAddEmployeeDialogOpen] = useState(false);
     const [isEmployeeListDialogOpen, setEmployeeListDialogOpen] = useState(false);
-    
-    const printRef = useRef<HTMLDivElement>(null);
     
     useEffect(() => {
         if (employees.length > 0 && !selectedEmployee) {
@@ -89,10 +85,9 @@ export default function EmployeesPage() {
 
     }, [attendance, selectedEmployee, month]);
     
-     const handlePrint = useReactToPrint({
-        content: () => printRef.current,
-        documentTitle: `Attendance-Report-${selectedEmployee?.name}-${format(month, 'MMMM-yyyy')}`,
-    });
+     const handlePrint = () => {
+        window.print();
+    };
 
     const getStatusClasses = (status: AttendanceStatus) => {
         switch(status) {
@@ -107,7 +102,7 @@ export default function EmployeesPage() {
     return (
         <>
             <div className="flex flex-col gap-6 h-full">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 no-print">
                     <h1 className="text-2xl font-semibold flex items-center gap-2"><UserCog className="w-6 h-6"/>{t('attendance_page_title')}</h1>
                     <div className="flex gap-2 flex-wrap">
                         <Button onClick={() => setEmployeeListDialogOpen(true)} variant="outline">
@@ -120,7 +115,7 @@ export default function EmployeesPage() {
                 </div>
 
                 <div className="grid lg:grid-cols-3 gap-6 flex-1">
-                    <Card className="lg:col-span-1 flex flex-col">
+                    <Card className="lg:col-span-1 flex flex-col no-print">
                          <CardHeader>
                             <CardTitle>{t('employee_list_title')}</CardTitle>
                          </CardHeader>
@@ -158,7 +153,7 @@ export default function EmployeesPage() {
                                         Viewing attendance for {format(month, 'MMMM yyyy')}
                                     </CardDescription>
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 no-print">
                                      <Popover>
                                         <PopoverTrigger asChild>
                                             <Button variant="outline"><CalendarIcon className="mr-2 h-4 w-4"/> {format(month, 'MMMM yyyy')}</Button>
@@ -215,17 +210,6 @@ export default function EmployeesPage() {
                          </CardContent>
                     </Card>
                 </div>
-            </div>
-
-            <div className="print-source">
-                {selectedEmployee && (
-                    <EmployeeAttendanceReport 
-                        ref={printRef}
-                        employee={selectedEmployee}
-                        month={month}
-                        attendanceData={monthlyAttendanceData.report}
-                    />
-                )}
             </div>
 
             {isAddEmployeeDialogOpen && <EmployeeDialog
