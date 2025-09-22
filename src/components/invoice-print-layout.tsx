@@ -73,14 +73,14 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
     };
     
     const h1Styles: React.CSSProperties = {
-      fontSize: isPos ? '1.5rem' : '2.2rem',
+      fontSize: isPos ? '1.5rem' : '2.5rem',
       fontWeight: 'bold',
       color: '#000',
       margin: '0 0 0.5rem 0',
     };
 
     const h2Styles: React.CSSProperties = {
-      fontSize: isPos ? '1.2rem' : '2rem',
+      fontSize: isPos ? '1.2rem' : '2.2rem',
       fontWeight: 600,
       color: '#158a67',
       margin: 0,
@@ -171,8 +171,8 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
                         </defs>
                         <g filter="url(#grunge)" fill={isPaid ? '#22c55e' : '#dc2626'}>
                             <path d="M 50,2 L 250,2 C 265,2 290,2 298,20 L 298,80 C 298,90 270,98 250,98 L 50,98 C 35,98 10,98 2,80 L 2,20 C 2,10 20,2 50,2 Z" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="4" fill="none"/>
-                            <text x="150" y="70" fontFamily="Impact, Arial Black, sans-serif" fontSize={isPaid ? "60" : "48"} fontWeight="bold" textAnchor="middle">{isPaid ? 'PAID' : 'DUE'}</text>
-                            {isPaid && <text x="255" y="70" fontFamily="Arial, sans-serif" fontSize="56" fontWeight="bold" textAnchor="middle">৳</text>}
+                            <text x="150" y="70" fontFamily="Impact, Arial Black, sans-serif" fontSize="60" fontWeight="bold" textAnchor="middle">{isPaid ? 'PAID' : 'DUE'}</text>
+                            <text x="255" y="70" fontFamily="Arial, sans-serif" fontSize="56" fontWeight="bold" textAnchor="middle">৳</text>
                         </g>
                     </svg>
                 </div>
