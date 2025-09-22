@@ -143,8 +143,8 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
         opacity: 0.15,
         zIndex: 1,
         pointerEvents: 'none',
-        width: '350px',
-        height: '350px',
+        width: '300px',
+        height: '300px',
     };
 
 
@@ -175,7 +175,7 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
                            <text x="150" y="72" fontFamily="Impact, Arial Black, sans-serif" fontSize="60" fontWeight="bold" textAnchor="middle" lengthAdjust="spacingAndGlyphs" textLength="200" fill={isPaid ? '#22c55e' : '#dc2626'}>
                                 {isPaid ? 'PAID' : 'DUE'}
                             </text>
-                            <text x="255" y="70" fontFamily="Arial, sans-serif" fontSize="56" fontWeight="bold" textAnchor="middle" fill={isPaid ? '#22c55e' : '#dc2626'}>৳</text>
+                            <text x="265" y="70" fontFamily="Arial, sans-serif" fontSize="56" fontWeight="bold" textAnchor="middle" fill={isPaid ? '#22c55e' : '#dc2626'}>৳</text>
                         </g>
                     </svg>
                 </div>
