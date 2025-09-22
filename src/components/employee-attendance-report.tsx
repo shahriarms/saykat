@@ -19,7 +19,7 @@ interface EmployeeAttendanceReportProps {
   attendanceData: AttendanceReportItem[];
 }
 
-export const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, EmployeeAttendanceReportProps>(
+const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, EmployeeAttendanceReportProps>(
   ({ employee, month, attendanceData }, ref) => {
     const { t } = useTranslation();
 
@@ -41,16 +41,16 @@ export const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, Employe
     };
 
     return (
-      <div ref={ref} className="bg-white p-8">
+      <div ref={ref} className="bg-white p-4 print:p-2">
         <Card className="w-full max-w-4xl mx-auto shadow-none border-0">
-          <CardHeader className="text-center space-y-4 mb-4">
+          <CardHeader className="text-center space-y-2 mb-2 print:mb-1 print:space-y-1">
             <div className="flex justify-center items-center gap-2">
-                <svg className="w-10 h-10 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 12l3 3 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                <CardTitle className="text-3xl font-bold tracking-wider">EMPLOYEE ATTENDANCE</CardTitle>
+                <svg className="w-8 h-8 print:w-6 print:h-6 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 12l3 3 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <CardTitle className="text-2xl print:text-xl font-bold tracking-wider">EMPLOYEE ATTENDANCE</CardTitle>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4 my-6 border-y py-4 text-sm">
+          <CardContent className="print:p-0">
+            <div className="grid grid-cols-2 gap-4 my-4 print:my-2 border-y py-2 print:py-1 text-xs print:text-[10px]">
                 <div>
                     <p><strong className="w-24 inline-block">Employee:</strong> {employee.name}</p>
                     <p><strong className="w-24 inline-block">Role:</strong> {employee.role}</p>
@@ -61,41 +61,41 @@ export const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, Employe
                 </div>
             </div>
 
-            <Table>
+            <Table className="print:text-xs">
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Day</TableHead>
-                        <TableHead className="text-center">Status</TableHead>
+                        <TableHead className="print:p-1.5">Date</TableHead>
+                        <TableHead className="print:p-1.5">Day</TableHead>
+                        <TableHead className="text-center print:p-1.5">Status</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {attendanceData.map(({ date, status }) => (
                         <TableRow key={date.toISOString()}>
-                            <TableCell>{format(date, 'MMMM dd, yyyy')}</TableCell>
-                            <TableCell>{format(date, 'eeee')}</TableCell>
-                            <TableCell className={`text-center ${getStatusClass(status)}`}>{status}</TableCell>
+                            <TableCell className="print:p-1.5">{format(date, 'MMMM dd, yyyy')}</TableCell>
+                            <TableCell className="print:p-1.5">{format(date, 'eeee')}</TableCell>
+                            <TableCell className={`text-center print:p-1.5 ${getStatusClass(status)}`}>{status}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
                 <TableFooter>
                     <TableRow className="bg-muted">
-                        <TableCell colSpan={2} className="font-bold text-right">Total Present</TableCell>
-                        <TableCell className="font-bold text-center">{summary.Present}</TableCell>
+                        <TableCell colSpan={2} className="font-bold text-right print:p-1.5">Total Present</TableCell>
+                        <TableCell className="font-bold text-center print:p-1.5">{summary.Present}</TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell colSpan={2} className="font-bold text-right">Total Absent</TableCell>
-                        <TableCell className="font-bold text-center">{summary.Absent}</TableCell>
+                        <TableCell colSpan={2} className="font-bold text-right print:p-1.5">Total Absent</TableCell>
+                        <TableCell className="font-bold text-center print:p-1.5">{summary.Absent}</TableCell>
                     </TableRow>
                     <TableRow className="bg-muted">
-                        <TableCell colSpan={2} className="font-bold text-right">Total Leave</TableCell>
-                        <TableCell className="font-bold text-center">{summary.Leave}</TableCell>
+                        <TableCell colSpan={2} className="font-bold text-right print:p-1.5">Total Leave</TableCell>
+                        <TableCell className="font-bold text-center print:p-1.5">{summary.Leave}</TableCell>
                     </TableRow>
                 </TableFooter>
             </Table>
-             <div className="flex justify-between mt-24 text-sm">
-                <div className="border-t-2 border-gray-400 w-64 text-center pt-2">Employee's Signature</div>
-                <div className="border-t-2 border-gray-400 w-64 text-center pt-2">Manager's Signature</div>
+             <div className="flex justify-between mt-12 print:mt-8 text-xs print:text-[10px]">
+                <div className="border-t-2 border-gray-400 w-48 print:w-40 text-center pt-1">Employee's Signature</div>
+                <div className="border-t-2 border-gray-400 w-48 print:w-40 text-center pt-1">Manager's Signature</div>
             </div>
           </CardContent>
         </Card>
@@ -103,7 +103,6 @@ export const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, Employe
     );
   }
 );
-
-EmployeeAttendanceReport.displayName = 'EmployeeAttendanceReport';
+EmployeeAttendanceReport.displayName = "EmployeeAttendanceReport";
 
 export default EmployeeAttendanceReport;
