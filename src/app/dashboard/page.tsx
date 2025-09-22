@@ -61,7 +61,11 @@ export default function Dashboard() {
   
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
-  const recentMemos = useMemo(() => allInvoices.slice(0, 5), [allInvoices]);
+  const recentMemos = useMemo(() => {
+    return [...allInvoices]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 5);
+  }, [allInvoices]);
   
   // This useEffect ensures all date-sensitive operations run only on the client, preventing hydration errors.
   useEffect(() => {
