@@ -143,8 +143,8 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
         opacity: 0.15,
         zIndex: 1,
         pointerEvents: 'none',
-        width: '300px',
-        height: '100px',
+        width: '350px',
+        height: '115px',
     };
 
 
@@ -165,8 +165,8 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
                     <svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
                         <defs>
                             <filter id="grunge">
-                                <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" result="noise" />
-                                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+                                <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" result="noise" />
+                                <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G" />
                             </filter>
                         </defs>
                         <g filter="url(#grunge)" fill={isPaid ? '#22c55e' : '#dc2626'}>
