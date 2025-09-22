@@ -27,19 +27,21 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Users, FileText, ChevronRight, DollarSign, HandCoins, History, Printer, Search, Loader2, Trash2 } from 'lucide-react';
+import { Users, FileText, ChevronRight, DollarSign, HandCoins, History, Printer, Search, Loader2, Trash2, CalendarIcon, RotateCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { PaymentReceipt } from '@/components/payment-receipt';
 import { useTranslation } from '@/hooks/use-translation';
 import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
+import { format, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 import { useUser } from '@/hooks/use-user';
 import { InvoicePrintLayout } from '@/components/invoice-print-layout';
 import { useSettings } from '@/hooks/use-settings';
-
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import type { DateRange } from 'react-day-picker';
 
 export default function BuyersDuePage() {
-  const { invoices: allInvoices, buyers, getInvoicesForBuyer, addPayment, getPaymentsForInvoice, deleteInvoice, printInvoice: appPrintInvoice } = useAppData();
+  const { invoices: allInvoices, buyers, getInvoicesForBuyer, addPayment, getPaymentsForInvoice, deleteInvoice, printInvoice: appPrintInvoice, centralDateRange } = useAppData();
   const { user } = useUser();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -60,8 +62,18 @@ export default function BuyersDuePage() {
   
   const [isPrinting, setIsPrinting] = useState(false);
   const [invoiceToPrint, setInvoiceToPrint] = useState<Invoice | null>(null);
+  
+  const [localDateRange, setLocalDateRange] = useState<DateRange | undefined>(centralDateRange);
 
   const numericPaymentAmount = useMemo(() => parseFloat(paymentAmount) || 0, [paymentAmount]);
+
+  useEffect(() => {
+    setLocalDateRange(centralDateRange);
+  }, [centralDateRange]);
+
+  const handleResetDateRange = useCallback(() => {
+      setLocalDateRange(centralDateRange);
+  }, [centralDateRange]);
   
   useEffect(() => {
     if (selectedBuyer) {
@@ -160,13 +172,32 @@ export default function BuyersDuePage() {
         }
     };
 
-  const buyersWithDue = useMemo(() => buyers.filter(b => getInvoicesForBuyer(b.id).some(inv => inv.dueAmount > 0.001)), [buyers, getInvoicesForBuyer]);
+    const buyersWithDue = useMemo(() => {
+        return buyers.filter(b => {
+            let buyerInvoices = getInvoicesForBuyer(b.id);
+            if (localDateRange?.from && localDateRange?.to) {
+                const start = startOfDay(localDateRange.from);
+                const end = endOfDay(localDateRange.to);
+                buyerInvoices = buyerInvoices.filter(inv => isWithinInterval(new Date(inv.date), { start, end }));
+            }
+            return buyerInvoices.some(inv => inv.dueAmount > 0.001);
+        });
+    }, [buyers, getInvoicesForBuyer, localDateRange]);
+
   const filteredBuyersWithDue = useMemo(() => buyerSearchTerm ? buyersWithDue.filter(b => b.name.toLowerCase().includes(buyerSearchTerm.toLowerCase()) || (b.phone && b.phone.toLowerCase().includes(buyerSearchTerm.toLowerCase()))) : buyersWithDue, [buyersWithDue, buyerSearchTerm]);
   
   const dueInvoicesForSelectedBuyer = useMemo(() => {
     if (!selectedBuyer) return [];
-    return getInvoicesForBuyer(selectedBuyer.id).filter(inv => inv.dueAmount > 0.001);
-  }, [selectedBuyer, getInvoicesForBuyer]);
+    let buyerInvoices = getInvoicesForBuyer(selectedBuyer.id).filter(inv => inv.dueAmount > 0.001);
+    
+    if (localDateRange?.from && localDateRange?.to) {
+        const start = startOfDay(localDateRange.from);
+        const end = endOfDay(localDateRange.to);
+        buyerInvoices = buyerInvoices.filter(inv => isWithinInterval(new Date(inv.date), { start, end }));
+    }
+
+    return buyerInvoices;
+  }, [selectedBuyer, getInvoicesForBuyer, localDateRange]);
 
   const filteredDueInvoices = useMemo(() => {
     const searchTermLower = invoiceSearchTerm.toLowerCase();
@@ -261,10 +292,26 @@ export default function BuyersDuePage() {
   return (
     <>
       <div className="flex flex-col h-full gap-4 no-print">
-        <h1 className="text-2xl font-semibold flex items-center gap-2 no-print">
-          <HandCoins className="w-6 h-6" />
-          {t('buyers_due_page_title')}
-        </h1>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <h1 className="text-2xl font-semibold flex items-center gap-2 no-print">
+            <HandCoins className="w-6 h-6" />
+            {t('buyers_due_page_title')}
+            </h1>
+            <div className="flex items-center gap-2">
+                <Popover>
+                <PopoverTrigger asChild>
+                    <Button id="date" variant={"outline"} className="w-full sm:w-auto justify-start text-left font-normal">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {localDateRange?.from ? (localDateRange.to ? (<>{format(localDateRange.from, "LLL dd, y")} - {format(localDateRange.to, "LLL dd, y")}</>) : (format(localDateRange.from, "LLL dd, y"))) : (<span>Pick a date</span>)}
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                    <Calendar initialFocus mode="range" defaultMonth={localDateRange?.from} selected={localDateRange} onSelect={setLocalDateRange} numberOfMonths={1}/>
+                </PopoverContent>
+                </Popover>
+                <Button variant="outline" size="icon" onClick={handleResetDateRange}><RotateCw className="h-4 w-4" /></Button>
+            </div>
+        </div>
         <div className="grid md:grid-cols-5 gap-6 flex-1">
           <Card className="md:col-span-2 lg:col-span-1 flex flex-col no-print">
             <CardHeader className="flex-shrink-0">
