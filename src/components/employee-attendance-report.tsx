@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React from 'react';
@@ -49,16 +48,17 @@ const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, EmployeeAttend
                 <svg className="w-8 h-8 print:w-6 print:h-6 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 12l3 3 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 <CardTitle className="text-2xl print:text-xl font-bold tracking-wider">EMPLOYEE ATTENDANCE</CardTitle>
             </div>
+             <CardDescription className="print:text-lg">
+                Report for the month of {format(month, 'MMMM, yyyy')}
+            </CardDescription>
           </CardHeader>
           <CardContent className="print:p-0">
-            <div className="grid grid-cols-2 gap-4 my-4 print:my-2 border-y py-2 print:py-1 text-xs print:text-[10px]">
+            <div className="grid grid-cols-2 gap-4 my-2 print:my-1 border-y py-1 print:py-0.5 text-xs print:text-[10px]">
                 <div>
-                    <p><strong className="w-24 inline-block">Employee:</strong> {employee.name}</p>
-                    <p>{employee.role}</p>
+                    <p><strong className="w-20 inline-block">Employee:</strong> {employee.name}</p>
                 </div>
                  <div className="text-right">
-                    <p><strong className="w-24 inline-block text-left">Month:</strong> {format(month, 'MMMM, yyyy')}</p>
-                    <p><strong className="w-24 inline-block text-left">Joining Date:</strong> {format(new Date(employee.joiningDate), 'PP')}</p>
+                    <p>{employee.role}</p>
                 </div>
             </div>
 
