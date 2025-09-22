@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo } from 'react';
@@ -67,7 +68,7 @@ export function MonthlySalaryReportDialog({ open, onOpenChange, salaryPayments, 
             return {
                 date: format(new Date(payment.date), 'PP'),
                 employeeName: employee?.name || 'Unknown Employee',
-                amount: payment.amount,
+                amount: payment.amount || 0,
                 paidBy: payment.paidBy,
             };
         }).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -93,7 +94,7 @@ export function MonthlySalaryReportDialog({ open, onOpenChange, salaryPayments, 
             body: reportData.map(item => [
                 item.date,
                 item.employeeName,
-                '৳ '+item.amount.toFixed(2),
+                '৳ '+(item.amount || 0).toFixed(2),
                 item.paidBy,
             ]),
             startY: 22,
@@ -101,7 +102,7 @@ export function MonthlySalaryReportDialog({ open, onOpenChange, salaryPayments, 
         doc.save(`salary_payments_report.pdf`);
     };
 
-    const totalPaid = useMemo(() => reportData.reduce((sum, item) => sum + item.amount, 0), [reportData]);
+    const totalPaid = useMemo(() => reportData.reduce((sum, item) => sum + (item.amount || 0), 0), [reportData]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -135,7 +136,7 @@ export function MonthlySalaryReportDialog({ open, onOpenChange, salaryPayments, 
                     <TableCell className="font-mono text-xs">{item.date}</TableCell>
                     <TableCell className="font-medium">{item.employeeName}</TableCell>
                     <TableCell className="text-muted-foreground">{item.paidBy}</TableCell>
-                    <TableCell className="text-right font-mono font-semibold">৳ {item.amount.toFixed(2)}</TableCell>
+                    <TableCell className="text-right font-mono font-semibold">৳ {(item.amount || 0).toFixed(2)}</TableCell>
                   </TableRow>
                 ))
               ) : (
@@ -158,5 +159,3 @@ export function MonthlySalaryReportDialog({ open, onOpenChange, salaryPayments, 
     </Dialog>
   );
 }
-
-    
