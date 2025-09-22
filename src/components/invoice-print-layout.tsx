@@ -137,19 +137,20 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
     
     const paidSealStyles: React.CSSProperties = {
         position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%) rotate(-30deg)',
-        fontSize: isPos ? '2rem' : '5rem',
+        bottom: isPos ? '8rem' : '12rem', // Positioned from the bottom
+        left: '1rem',
+        transform: 'rotate(-15deg)', // Slight rotation
+        fontSize: isPos ? '2.5rem' : '4rem',
         fontWeight: 'bold',
-        color: 'rgba(0, 128, 0, 0.15)',
-        border: `5px solid rgba(0, 128, 0, 0.15)`,
-        padding: '0.5rem 2rem',
-        borderRadius: '10px',
+        color: 'rgba(0, 128, 0, 0.2)', // Slightly more visible
+        border: `5px solid rgba(0, 128, 0, 0.2)`,
+        padding: '0.25rem 1rem',
+        borderRadius: '8px',
         zIndex: 1,
         pointerEvents: 'none',
         textTransform: 'uppercase',
     };
+
 
     return (
         <div ref={ref}>
