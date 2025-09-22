@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { PlusCircle, Users, UserCheck, UserX, NotebookText, Loader2 } from 'lucide-react';
+import { PlusCircle, Users, UserCheck, UserX, NotebookText, Loader2, BookUser } from 'lucide-react';
 import { isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useUser } from '@/hooks/use-user';
@@ -29,7 +29,6 @@ import { useTranslation } from '@/hooks/use-translation';
 import dynamic from 'next/dynamic';
 import type { DateRange } from 'react-day-picker';
 import { DateRangePicker } from '@/components/date-range-picker';
-import { BookUser } from 'lucide-react';
 
 const EmployeeDialog = dynamic(() => import('@/components/employee-dialog'), {
     ssr: false,
