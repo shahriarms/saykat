@@ -73,8 +73,8 @@ const createNewDraft = (index: number, lastInvoiceId: number, isLoading: boolean
 
 const calculateTotals = (items: (DraftInvoiceItem | { quantity: number | string, price: number | string })[], paidAmount?: number, cashReceived?: number) => {
     const subtotal = items.reduce((acc, item) => {
-        const quantity = typeof item.quantity === 'number' ? item.quantity : parseFloat(item.quantity) || 0;
-        const price = typeof item.price === 'number' ? item.price : parseFloat(item.price) || 0;
+        const quantity = typeof item.quantity === 'number' ? item.quantity : parseFloat(String(item.quantity)) || 0;
+        const price = typeof item.price === 'number' ? item.price : parseFloat(String(item.price)) || 0;
         return acc + price * quantity;
     }, 0);
 
@@ -203,7 +203,13 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                         
                         const { subtotal, dueAmount, changeAmount } = calculateTotals(newVersion.items, newVersion.paidAmount, newVersion.cashReceived);
                         newVersion.subtotal = subtotal;
-                        newVersion.dueAmount = dueAmount;
+
+                        if (update.hasOwnProperty('paidAmount')) {
+                           newVersion.dueAmount = dueAmount;
+                        } else {
+                           newVersion.dueAmount = subtotal - (newVersion.paidAmount || 0);
+                        }
+                        
                         newVersion.changeAmount = changeAmount;
 
                         if(typeof newVersion.id === 'string' || (typeof newVersion.id === 'number' && update.customerName && newVersion.label.startsWith('Memo'))) {
@@ -230,7 +236,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
             const existingItem = draft.items.find(item => item.id === product.id);
             let newItems;
             if (existingItem) {
-                newItems = draft.items.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
+                newItems = draft.items.map(item => item.id === product.id ? { ...item, quantity: (parseFloat(String(item.quantity)) || 0) + 1 } : item);
             } else {
                 const newItem: DraftInvoiceItem = {
                     id: product.id,
@@ -252,17 +258,10 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
     
             const newItems = draft.items.map(item => {
                 if (item.id === itemId) {
-                    const updatedItem = { ...item };
-                    const key = Object.keys(itemUpdate)[0] as keyof DraftInvoiceItem;
-                    let value = itemUpdate[key];
-                    
-                    if (key === 'quantity' || key === 'price') {
-                         // @ts-ignore
-                        updatedItem[key] = value;
-                    } else {
-                        // @ts-ignore
-                        updatedItem[key] = value;
-                    }
+                    const updatedItem = { ...item, ...itemUpdate };
+                    // Ensure values are parsed correctly if they are strings
+                    updatedItem.quantity = parseFloat(String(updatedItem.quantity)) || item.quantity;
+                    updatedItem.price = parseFloat(String(updatedItem.price)) || item.price;
                     return updatedItem;
                 }
                 return item;
