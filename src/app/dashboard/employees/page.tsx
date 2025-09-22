@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { PlusCircle, Users, UserCheck, UserX, NotebookText, Loader2, BookUser, Download, Printer, ChevronRight, Calendar as CalendarIcon, RotateCw, UserCog } from 'lucide-react';
-import { isToday, format, eachDayOfInterval, isSameDay, isFriday, startOfMonth, endOfMonth } from 'date-fns';
+import { isToday, format, eachDayOfInterval, isSameDay, isFriday, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useUser } from '@/hooks/use-user';
 import { useTranslation } from '@/hooks/use-translation';
