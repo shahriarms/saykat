@@ -11,6 +11,7 @@ import { useSettings } from './use-settings';
 import * as productActions from '@/lib/actions/product-actions';
 import * as dataActions from '@/lib/actions/data-actions';
 import { Loader2 } from 'lucide-react';
+import type { DateRange } from 'react-day-picker';
 
 const LOCAL_STORAGE_KEYS = {
     products: 'stockpilot-products',
@@ -37,6 +38,8 @@ interface AppDataContextType {
     isAppDataLoading: boolean;
     isDbConnected: boolean;
     lastInvoiceId: number;
+    centralDateRange: DateRange | undefined;
+    setCentralDateRange: React.Dispatch<React.SetStateAction<DateRange | undefined>>;
     
     // Product Functions
     addProduct: (product: Omit<Product, 'id' | 'sellingPrice'>) => Promise<void>;
@@ -96,6 +99,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const [isAppDataLoading, setIsAppDataLoading] = useState(true);
     const [isDbConnected, setIsDbConnected] = useState(false);
     const [lastInvoiceId, setLastInvoiceId] = useState(0);
+    const [centralDateRange, setCentralDateRange] = useState<DateRange | undefined>({
+      from: startOfMonth(new Date()),
+      to: endOfMonth(new Date()),
+    });
 
     const loadDataFromLocalStorage = useCallback(() => {
         try {
@@ -658,6 +665,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     const value = useMemo(() => ({
         products, invoices, buyers, expenses, employees, attendance, salaryPayments, payments, isAppDataLoading, isDbConnected, lastInvoiceId,
+        centralDateRange, setCentralDateRange,
         addProduct, addMultipleProducts, updateProduct, deleteProduct, getProductById,
         addInvoice, deleteInvoice, printInvoice, getBuyerById, getInvoicesForBuyer, getInvoicesForDateRange, getGrossProfitForDateRange,
         addPayment, getPaymentsForInvoice,
@@ -666,6 +674,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addSalaryPayment, getPaymentsForMonth, getSalaryPaymentsForDateRange, getDueSalaryForMonth,
     }), [
         products, invoices, buyers, expenses, employees, attendance, salaryPayments, payments, isAppDataLoading, isDbConnected, lastInvoiceId,
+        centralDateRange, setCentralDateRange,
         addProduct, addMultipleProducts, updateProduct, deleteProduct, getProductById,
         addInvoice, deleteInvoice, printInvoice, getBuyerById, getInvoicesForBuyer, getInvoicesForDateRange, getGrossProfitForDateRange,
         addPayment, getPaymentsForInvoice,
@@ -677,7 +686,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (isAppDataLoading) {
         return (
             <div className="flex h-screen w-full items-center justify-center bg-background">
-                <Loader2 className="h-8 w-8 animate-spin" />
+                <Loader2 className="h-8 w-8 animate-spin mr-2" />
+                Connecting to database...
             </div>
         );
     }

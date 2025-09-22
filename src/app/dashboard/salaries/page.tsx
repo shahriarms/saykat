@@ -1,7 +1,8 @@
 
+
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useAppData } from '@/hooks/use-app-data';
 import { useUser } from '@/hooks/use-user';
 import type { Employee, SalaryPayment } from '@/lib/types';
@@ -27,15 +28,17 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { Users, ChevronRight, DollarSign, Wallet, History, AlertCircle, ShieldCheck, Loader2, Printer, FileText } from 'lucide-react';
+import { Users, ChevronRight, DollarSign, Wallet, History, AlertCircle, ShieldCheck, Loader2, Printer, FileText, CalendarIcon, RotateCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { useTranslation } from '@/hooks/use-translation';
 import { SalaryReceipt } from '@/components/salary-receipt';
-import { useEffect } from 'react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import type { DateRange } from 'react-day-picker';
 
 export default function SalariesPage() {
-  const { employees, getPaymentsForMonth, addSalaryPayment, getDueSalaryForMonth } = useAppData();
+  const { employees, getPaymentsForMonth, addSalaryPayment, getDueSalaryForMonth, centralDateRange } = useAppData();
   const { user } = useUser();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -46,29 +49,38 @@ export default function SalariesPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastSuccessfulPayment, setLastSuccessfulPayment] = useState<{payment: SalaryPayment, employee: Employee} | null>(null);
   
+  const [localDateRange, setLocalDateRange] = useState<DateRange | undefined>(centralDateRange);
+
+  useEffect(() => {
+    setLocalDateRange(centralDateRange);
+  }, [centralDateRange]);
+
+  const handleResetDateRange = useCallback(() => {
+      setLocalDateRange(centralDateRange);
+  }, [centralDateRange]);
+  
   const handleSelectEmployee = (employee: Employee) => {
     setSelectedEmployee(employee);
     setPaymentAmount('');
   };
 
   const { dueSalary, paidThisMonth, paymentsThisMonth } = useMemo(() => {
-    if (!selectedEmployee) {
+    if (!selectedEmployee || !localDateRange?.from) {
       return { dueSalary: 0, paidThisMonth: 0, paymentsThisMonth: [] };
     }
-    const currentDate = new Date();
-    const firstDay = startOfMonth(currentDate);
-    const lastDay = endOfMonth(currentDate);
+    const firstDay = startOfMonth(localDateRange.from);
+    const lastDay = endOfMonth(localDateRange.to || localDateRange.from);
     
     const payments = getPaymentsForMonth(selectedEmployee.id, firstDay, lastDay);
     const paid = payments.reduce((acc, p) => acc + (p.amount || 0), 0);
-    const due = getDueSalaryForMonth(selectedEmployee, currentDate);
+    const due = getDueSalaryForMonth(selectedEmployee, localDateRange.from);
 
     return {
       dueSalary: due,
       paidThisMonth: paid,
       paymentsThisMonth: payments,
     };
-  }, [selectedEmployee, getPaymentsForMonth, getDueSalaryForMonth]);
+  }, [selectedEmployee, getPaymentsForMonth, getDueSalaryForMonth, localDateRange]);
 
   const isOverpayment = useMemo(() => {
       if (typeof paymentAmount !== 'number' || !selectedEmployee) return false;
@@ -170,10 +182,29 @@ export default function SalariesPage() {
   return (
     <>
     <div className="flex flex-col h-full gap-4 no-print">
-      <h1 className="text-2xl font-semibold flex items-center gap-2">
-        <Wallet className="w-6 h-6" />
-        {t('salaries_page_title')}
-      </h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h1 className="text-2xl font-semibold flex items-center gap-2">
+          <Wallet className="w-6 h-6" />
+          {t('salaries_page_title')}
+        </h1>
+         <div className="flex items-center gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button id="date" variant={"outline"} className="w-full sm:w-auto justify-start text-left font-normal">
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {localDateRange?.from ? (localDateRange.to ? (<>{format(localDateRange.from, "LLL dd, y")} - {format(localDateRange.to, "LLL dd, y")}</>) : (format(localDateRange.from, "LLL dd, y"))) : (<span>Pick a date</span>)}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar initialFocus mode="range" defaultMonth={localDateRange?.from} selected={localDateRange} onSelect={setLocalDateRange} numberOfMonths={1}/>
+              </PopoverContent>
+            </Popover>
+            <Button variant="outline" size="icon" onClick={handleResetDateRange}>
+                <RotateCw className="h-4 w-4" />
+                <span className="sr-only">Reset Date</span>
+            </Button>
+        </div>
+      </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
         {/* Employee List */}
         <Card className="lg:col-span-1 flex flex-col">
@@ -357,4 +388,3 @@ export default function SalariesPage() {
     </>
   );
 }
-

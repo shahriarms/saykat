@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useAppData } from '@/hooks/use-app-data';
 import type { Expense } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -37,7 +37,9 @@ import {
   ChartConfig,
 } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
-import { PlusCircle, Download, MoreHorizontal, Search, Trash2, Pencil, PackageOpen, Loader2, Receipt } from 'lucide-react';
+import { PlusCircle, Download, MoreHorizontal, Search, Trash2, Pencil, PackageOpen, Loader2, Receipt, CalendarIcon, RotateCw } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -55,6 +57,7 @@ import 'jspdf-autotable';
 import { useTranslation } from '@/hooks/use-translation';
 import { useUser } from '@/hooks/use-user';
 import dynamic from 'next/dynamic';
+import type { DateRange } from 'react-day-picker';
 
 const ExpenseDialog = dynamic(() => import('@/components/expense-dialog').then(mod => mod.ExpenseDialog), {
     ssr: false,
@@ -72,13 +75,14 @@ interface SummaryStats {
 
 
 export default function ExpensesPage() {
-    const { expenses, deleteExpense } = useAppData();
+    const { expenses, deleteExpense, centralDateRange } = useAppData();
     const { user } = useUser();
     const { t } = useTranslation();
     const [isDialogOpen, setDialogOpen] = useState(false);
     const [expenseToEdit, setExpenseToEdit] = useState<Expense | null>(null);
     const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
 
+    const [localDateRange, setLocalDateRange] = useState<DateRange | undefined>(centralDateRange);
     const [searchTerm, setSearchTerm] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('');
     const [sortKey, setSortKey] = useState('date');
@@ -86,6 +90,14 @@ export default function ExpensesPage() {
     
     const [summaryStats, setSummaryStats] = useState<SummaryStats | null>(null);
     const [monthChartData, setMonthChartData] = useState<any[] | null>(null);
+
+    useEffect(() => {
+      setLocalDateRange(centralDateRange);
+    }, [centralDateRange]);
+
+    const handleResetDateRange = useCallback(() => {
+        setLocalDateRange(centralDateRange);
+    }, [centralDateRange]);
 
 
     const handleAddNew = () => {
@@ -204,6 +216,19 @@ export default function ExpensesPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h1 className="text-2xl font-semibold flex items-center gap-2"><Receipt className="w-6 h-6"/> {t('expenses_page_title')}</h1>
           <div className="flex gap-2 w-full sm:w-auto">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button id="date" variant={"outline"} className="w-full sm:w-auto justify-start text-left font-normal">
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {localDateRange?.from ? (localDateRange.to ? (<>{format(localDateRange.from, "LLL dd, y")} - {format(localDateRange.to, "LLL dd, y")}</>) : (format(localDateRange.from, "LLL dd, y"))) : (<span>Pick a date</span>)}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar initialFocus mode="range" defaultMonth={localDateRange?.from} selected={localDateRange} onSelect={setLocalDateRange} numberOfMonths={1}/>
+              </PopoverContent>
+            </Popover>
+            <Button variant="outline" size="icon" onClick={handleResetDateRange}><RotateCw className="h-4 w-4" /></Button>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="flex-1 sm:flex-none"><Download className="mr-2 h-4 w-4"/> {t('export_button')}</Button>

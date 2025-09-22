@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/chart';
 import { useAppData } from '@/hooks/use-app-data';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { DollarSign, ShoppingCart, TrendingUp, TrendingDown, Calendar as CalendarIcon, Package, HandCoins, Receipt, Loader2, BadgeIndianRupee, Container, Wallet, RotateCw, Users, ThumbsUp, Weight, FileText } from 'lucide-react';
+import { DollarSign, ShoppingCart, TrendingUp, TrendingDown, CalendarIcon, Package, HandCoins, Receipt, Loader2, BadgeIndianRupee, Container, Wallet, RotateCw, Users, ThumbsUp, Weight, FileText } from 'lucide-react';
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -35,10 +35,8 @@ const InvoicePreviewDialog = dynamic(() => import('@/components/invoice-preview-
 
 
 export default function Dashboard() {
-  const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, invoices: allInvoices, getAttendanceForDate } = useAppData();
+  const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, invoices: allInvoices, getAttendanceForDate, centralDateRange, setCentralDateRange } = useAppData();
   const { t } = useTranslation();
-
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   
   const [rangeInvoices, setRangeInvoices] = useState<Invoice[]>([]);
   const [rangeExpenses, setRangeExpenses] = useState<Expense[]>([]);
@@ -69,12 +67,6 @@ export default function Dashboard() {
   
   // This useEffect ensures all date-sensitive operations run only on the client, preventing hydration errors.
   useEffect(() => {
-    // Set the initial date range to the current month on the client-side
-    setDateRange({
-        from: startOfMonth(new Date()),
-        to: endOfMonth(new Date()),
-    });
-    // Set today's data on client-side
     const today = new Date();
     setTodayInvoices(getInvoicesForDateRange(today, today));
     setTodayExpenses(getExpensesForDateRange(today, today));
@@ -83,12 +75,12 @@ export default function Dashboard() {
 
   // This useEffect updates the date range data when the range changes.
   useEffect(() => {
-    if (dateRange?.from && dateRange?.to) {
-      setRangeInvoices(getInvoicesForDateRange(dateRange.from, dateRange.to));
-      setRangeExpenses(getExpensesForDateRange(dateRange.from, dateRange.to));
-      setRangeSalaries(getSalaryPaymentsForDateRange(dateRange.from, dateRange.to));
+    if (centralDateRange?.from && centralDateRange?.to) {
+      setRangeInvoices(getInvoicesForDateRange(centralDateRange.from, centralDateRange.to));
+      setRangeExpenses(getExpensesForDateRange(centralDateRange.from, centralDateRange.to));
+      setRangeSalaries(getSalaryPaymentsForDateRange(centralDateRange.from, centralDateRange.to));
     }
-  }, [dateRange, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange]);
+  }, [centralDateRange, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange]);
 
 
   const calculateUnitsSold = useCallback((invoices: Invoice[], products: Product[]) => {
@@ -135,9 +127,9 @@ export default function Dashboard() {
   }, [todayInvoices, todayExpenses, todayAttendance, getGrossProfitForDateRange, products, calculateUnitsSold]);
   
   const { salesChartData, expensesChartData } = useMemo(() => {
-    if (!dateRange?.from || !dateRange?.to) return { salesChartData: [], expensesChartData: [] };
+    if (!centralDateRange?.from || !centralDateRange?.to) return { salesChartData: [], expensesChartData: [] };
 
-    const daysInRange = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
+    const daysInRange = eachDayOfInterval({ start: centralDateRange.from, end: centralDateRange.to });
     
     const salesData = daysInRange.map(day => ({
         name: format(day, 'd'),
@@ -154,14 +146,14 @@ export default function Dashboard() {
     }));
 
     return { salesChartData: salesData, expensesChartData: expensesData };
-  }, [rangeInvoices, rangeExpenses, dateRange]);
+  }, [rangeInvoices, rangeExpenses, centralDateRange]);
 
   const handleReset = useCallback(() => {
-    setDateRange({
+    setCentralDateRange({
         from: startOfMonth(new Date()),
         to: endOfMonth(new Date()),
     });
-  }, []);
+  }, [setCentralDateRange]);
 
 
   const chartConfig: ChartConfig = {
@@ -170,18 +162,18 @@ export default function Dashboard() {
   };
 
   const rangeTitle = useMemo(() => {
-    if (!dateRange?.from) return "This Month";
-    if (dateRange.to) {
-        if (isSameDay(dateRange.from, startOfMonth(dateRange.from)) && isSameDay(dateRange.to, endOfMonth(dateRange.from))) {
-            return format(dateRange.from, 'MMMM yyyy');
+    if (!centralDateRange?.from) return "This Month";
+    if (centralDateRange.to) {
+        if (isSameDay(centralDateRange.from, startOfMonth(centralDateRange.from)) && isSameDay(centralDateRange.to, endOfMonth(centralDateRange.from))) {
+            return format(centralDateRange.from, 'MMMM yyyy');
         }
-        if (isSameDay(dateRange.from, dateRange.to)) {
-            return format(dateRange.from, 'PPP');
+        if (isSameDay(centralDateRange.from, centralDateRange.to)) {
+            return format(centralDateRange.from, 'PPP');
         }
-        return `${format(dateRange.from, 'PP')} - ${format(dateRange.to, 'PP')}`;
+        return `${format(centralDateRange.from, 'PP')} - ${format(centralDateRange.to, 'PP')}`;
     }
-    return format(dateRange.from, 'PPP');
-  }, [dateRange]);
+    return format(centralDateRange.from, 'PPP');
+  }, [centralDateRange]);
 
   return (
     <>
@@ -200,14 +192,14 @@ export default function Dashboard() {
                   className="w-full sm:w-auto justify-start text-left font-normal"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateRange?.from ? (
-                    dateRange.to ? (
+                  {centralDateRange?.from ? (
+                    centralDateRange.to ? (
                       <>
-                        {format(dateRange.from, "LLL dd, y")} -{" "}
-                        {format(dateRange.to, "LLL dd, y")}
+                        {format(centralDateRange.from, "LLL dd, y")} -{" "}
+                        {format(centralDateRange.to, "LLL dd, y")}
                       </>
                     ) : (
-                      format(dateRange.from, "LLL dd, y")
+                      format(centralDateRange.from, "LLL dd, y")
                     )
                   ) : (
                     <span>Pick a date</span>
@@ -218,9 +210,9 @@ export default function Dashboard() {
                 <Calendar
                   initialFocus
                   mode="range"
-                  defaultMonth={dateRange?.from}
-                  selected={dateRange}
-                  onSelect={setDateRange}
+                  defaultMonth={centralDateRange?.from}
+                  selected={centralDateRange}
+                  onSelect={setCentralDateRange}
                   numberOfMonths={1}
                   captionLayout="dropdown-buttons"
                   fromYear={2025}
@@ -443,33 +435,33 @@ export default function Dashboard() {
         open={isMonthlySalesReportOpen}
         onOpenChange={setMonthlySalesReportOpen}
         invoices={rangeInvoices}
-        dateRange={dateRange}
+        dateRange={centralDateRange}
       /> }
       { isMonthlyExpensesReportOpen && <MonthlyExpensesDialog
         open={isMonthlyExpensesReportOpen}
         onOpenChange={setMonthlyExpensesReportOpen}
         expenses={rangeExpenses}
-        dateRange={dateRange}
+        dateRange={centralDateRange}
       /> }
       { isMonthlyDueReportOpen && <MonthlyDueDialog
         open={isMonthlyDueReportOpen}
         onOpenChange={setMonthlyDueReportOpen}
         invoices={rangeInvoices}
-        dateRange={dateRange}
+        dateRange={centralDateRange}
       /> }
       { isMonthlyUnitsSoldReportOpen && <MonthlyUnitsSoldDialog
         open={isMonthlyUnitsSoldReportOpen}
         onOpenChange={setMonthlyUnitsSoldReportOpen}
         invoices={rangeInvoices}
         products={products}
-        dateRange={dateRange}
+        dateRange={centralDateRange}
       /> }
       { isMonthlySalaryReportOpen && <MonthlySalaryReportDialog
         open={isMonthlySalaryReportOpen}
         onOpenChange={setMonthlySalaryReportOpen}
         salaryPayments={rangeSalaries}
         employees={employees}
-        dateRange={dateRange}
+        dateRange={centralDateRange}
       /> }
        { selectedInvoice && <InvoicePreviewDialog
         invoice={selectedInvoice}
@@ -479,5 +471,3 @@ export default function Dashboard() {
     </>
   );
 }
-
-    

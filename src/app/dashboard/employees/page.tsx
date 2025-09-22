@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useAppData } from '@/hooks/use-app-data';
 import type { Employee, AttendanceStatus } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -36,7 +36,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { PlusCircle, MoreHorizontal, Pencil, Trash2, CalendarIcon, Users, UserCheck, UserX, NotebookText, Loader2 } from 'lucide-react';
+import { PlusCircle, MoreHorizontal, Pencil, Trash2, CalendarIcon, Users, UserCheck, UserX, NotebookText, Loader2, RotateCw } from 'lucide-react';
 import { format, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useUser } from '@/hooks/use-user';
@@ -52,6 +52,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useTranslation } from '@/hooks/use-translation';
 import dynamic from 'next/dynamic';
+import type { DateRange } from 'react-day-picker';
 
 const EmployeeDialog = dynamic(() => import('@/components/employee-dialog').then(mod => mod.EmployeeDialog), {
     ssr: false,
@@ -59,7 +60,7 @@ const EmployeeDialog = dynamic(() => import('@/components/employee-dialog').then
 });
 
 export default function EmployeesPage() {
-    const { employees, markAttendance, getAttendanceForDate, deleteEmployee } = useAppData();
+    const { employees, markAttendance, getAttendanceForDate, deleteEmployee, centralDateRange } = useAppData();
     const { user } = useUser();
     const { t } = useTranslation();
     
@@ -67,10 +68,19 @@ export default function EmployeesPage() {
     const [employeeToEdit, setEmployeeToEdit] = useState<Employee | null>(null);
     const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null);
     
-    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [localDate, setLocalDate] = useState<Date>(new Date());
     const [searchTerm, setSearchTerm] = useState('');
 
-    const dailyAttendance = useMemo(() => getAttendanceForDate(selectedDate), [getAttendanceForDate, selectedDate]);
+    useEffect(() => {
+        setLocalDate(centralDateRange?.from || new Date());
+    }, [centralDateRange]);
+
+    const handleResetDate = useCallback(() => {
+        setLocalDate(centralDateRange?.from || new Date());
+    }, [centralDateRange]);
+
+
+    const dailyAttendance = useMemo(() => getAttendanceForDate(localDate), [getAttendanceForDate, localDate]);
     
     const filteredEmployees = useMemo(() => {
         return employees.filter(e => 
@@ -109,12 +119,11 @@ export default function EmployeesPage() {
     };
 
     const handleAttendanceChange = (employeeId: string, status: AttendanceStatus) => {
-        // Rule: Only admins can edit past/future attendance. Employees can only edit for today.
-        if (user?.role !== 'admin' && !isToday(selectedDate)) {
+        if (user?.role !== 'admin' && !isToday(localDate)) {
             alert("You can only change attendance for the current day.");
             return;
         }
-        markAttendance(employeeId, selectedDate, status);
+        markAttendance(employeeId, localDate, status);
     };
 
     const getStatusForEmployee = (employeeId: string): AttendanceStatus => {
@@ -124,7 +133,6 @@ export default function EmployeesPage() {
     const attendanceSummary = useMemo(() => {
         const present = dailyAttendance.filter(a => a.status === 'Present').length;
         const leave = dailyAttendance.filter(a => a.status === 'Leave').length;
-        // Correctly calculate absent: total employees minus those present or on leave for that day
         const absent = employees.length - present - leave;
         return { present, absent, leave };
     }, [dailyAttendance, employees.length]);
@@ -147,6 +155,29 @@ export default function EmployeesPage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <h1 className="text-2xl font-semibold flex items-center gap-2"><Users className="w-6 h-6"/>{t('attendance_page_title')}</h1>
                 <div className="flex gap-2">
+                    <Popover>
+                        <PopoverTrigger asChild>
+                        <Button
+                            variant={"outline"}
+                            className={cn("w-full sm:w-[280px] justify-start text-left font-normal")}
+                        >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {localDate ? format(localDate, "PPP") : <span>{t('pick_a_date')}</span>}
+                        </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                        <Calendar
+                            mode="single"
+                            selected={localDate}
+                            onSelect={(date) => setLocalDate(date || new Date())}
+                            initialFocus
+                        />
+                        </PopoverContent>
+                    </Popover>
+                    <Button variant="outline" size="icon" onClick={handleResetDate}>
+                        <RotateCw className="h-4 w-4" />
+                        <span className="sr-only">Reset Date</span>
+                    </Button>
                     <Button onClick={handleAddNew} disabled={user?.role !== 'admin'} className="w-full sm:w-auto">
                         <PlusCircle className="mr-2 h-4 w-4" /> {t('add_employee_button')}
                     </Button>
@@ -161,30 +192,6 @@ export default function EmployeesPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                      <div className="flex flex-col md:flex-row gap-4 items-center">
-                        <div>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                    "w-full sm:w-[280px] justify-start text-left font-normal",
-                                    !selectedDate && "text-muted-foreground"
-                                    )}
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {selectedDate ? format(selectedDate, "PPP") : <span>{t('pick_a_date')}</span>}
-                                </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                <Calendar
-                                    mode="single"
-                                    selected={selectedDate}
-                                    onSelect={(date) => setSelectedDate(date || new Date())}
-                                    initialFocus
-                                />
-                                </PopoverContent>
-                            </Popover>
-                        </div>
                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 text-sm w-full">
                             <div className="flex items-center gap-2 p-2 rounded-md bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300"><UserCheck className="w-5 h-5"/> {t('present_label')}: <span className="font-bold">{attendanceSummary.present}</span></div>
                             <div className="flex items-center gap-2 p-2 rounded-md bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300"><UserX className="w-5 h-5"/> {t('absent_label')}: <span className="font-bold">{attendanceSummary.absent}</span></div>
