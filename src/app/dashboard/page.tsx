@@ -35,7 +35,7 @@ const InvoicePreviewDialog = dynamic(() => import('@/components/invoice-preview-
 
 
 export default function Dashboard() {
-  const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, getAttendanceForDate, invoices: allInvoices } = useAppData();
+  const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, invoices: allInvoices } = useAppData();
   const { t } = useTranslation();
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
@@ -272,7 +272,7 @@ export default function Dashboard() {
                   </CardHeader>
                   <CardContent>
                       <div className="flex items-baseline gap-2">
-                        <div className="text-xl font-bold">{(parseFloat(String(todayStats.materialSoldKg)) || 0).toFixed(2)}</div>
+                        <div className="text-xl font-bold">{(todayStats.materialSoldKg).toFixed(2)}</div>
                         <span className="text-xs text-muted-foreground">kg</span>
                       </div>
                       <div className="flex items-baseline gap-2">
@@ -306,34 +306,31 @@ export default function Dashboard() {
             </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="lg:col-span-1">
-                <CardHeader>
-                    <CardTitle>Recent Memos</CardTitle>
-                    <CardDescription>Your last 5 invoices.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        {recentMemos.length > 0 ? (
-                            recentMemos.map(invoice => (
-                                <button key={invoice.id} onClick={() => setSelectedInvoice(invoice)} className="w-full text-left p-3 rounded-md hover:bg-muted transition-colors border">
-                                    <div className="flex justify-between items-center">
-                                        <div className="font-semibold">
-                                            Inv #{invoice.id} - {invoice.customerName}
-                                        </div>
-                                        <div className="font-mono">৳ {invoice.subtotal.toFixed(2)}</div>
-                                    </div>
-                                    <p className="text-sm text-muted-foreground">{format(new Date(invoice.date), 'PP p')}</p>
-                                </button>
-                            ))
-                        ) : (
-                            <div className="text-center text-muted-foreground p-8">No recent invoices found.</div>
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
+        <div>
+            <h2 className="text-lg font-semibold mb-4">Recent Memos</h2>
+            {recentMemos.length > 0 ? (
+                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    {recentMemos.map(invoice => (
+                        <Card as="button" key={invoice.id} onClick={() => setSelectedInvoice(invoice)} className="text-left hover:bg-muted/50 transition-colors flex flex-col">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-base">Inv #{invoice.id}</CardTitle>
+                                <CardDescription className="truncate">{invoice.customerName}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex-1 flex flex-col justify-end">
+                                <div className="text-lg font-bold font-mono">৳ {invoice.subtotal.toFixed(2)}</div>
+                                <p className="text-xs text-muted-foreground">{format(new Date(invoice.date), 'PP p')}</p>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            ) : (
+                <div className="text-center text-muted-foreground p-8 border rounded-lg">No recent invoices found.</div>
+            )}
+        </div>
 
-            <div className="lg:col-span-2 grid grid-cols-1 gap-6">
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-3 grid grid-cols-1 gap-6">
                 {/* Date Range Summary Cards */}
                 <div>
                     <h2 className="text-lg font-semibold mb-4">{t('date_range_summary_title', { range: rangeTitle })}</h2>
