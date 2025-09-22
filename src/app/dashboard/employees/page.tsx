@@ -1,9 +1,9 @@
 
 'use client';
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useAppData } from '@/hooks/use-app-data';
-import type { Employee, AttendanceStatus } from '@/lib/types';
+import type { Employee, Attendance, AttendanceStatus } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
@@ -21,14 +21,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { PlusCircle, Users, UserCheck, UserX, NotebookText, Loader2, BookUser } from 'lucide-react';
-import { isToday } from 'date-fns';
+import { PlusCircle, Users, UserCheck, UserX, NotebookText, Loader2, BookUser, Download, Printer } from 'lucide-react';
+import { isToday, format, eachDayOfInterval, isSameDay, isFriday } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useUser } from '@/hooks/use-user';
 import { useTranslation } from '@/hooks/use-translation';
 import dynamic from 'next/dynamic';
 import type { DateRange } from 'react-day-picker';
 import { DateRangePicker } from '@/components/date-range-picker';
+import { useReactToPrint } from 'react-to-print';
+import * as XLSX from 'xlsx';
 
 const EmployeeDialog = dynamic(() => import('@/components/employee-dialog'), {
     ssr: false,
@@ -40,19 +42,14 @@ const EmployeeListDialog = dynamic(() => import('@/components/employee-list-dial
     loading: () => <Loader2 className="h-5 w-5 animate-spin" />
 });
 
-const AttendanceRegisterDialog = dynamic(() => import('@/components/attendance-register-dialog'), {
-    ssr: false,
-    loading: () => <Loader2 className="h-5 w-5 animate-spin" />
-});
-
 export default function EmployeesPage() {
-    const { employees, markAttendance, getAttendanceForDate, centralDateRange } = useAppData();
+    const { employees, attendance: allAttendance, markAttendance, getAttendanceForDate, centralDateRange } = useAppData();
     const { user } = useUser();
     const { t } = useTranslation();
+    const printRef = useRef<HTMLDivElement>(null);
     
     const [isAddEmployeeDialogOpen, setAddEmployeeDialogOpen] = useState(false);
     const [isEmployeeListDialogOpen, setEmployeeListDialogOpen] = useState(false);
-    const [isRegisterOpen, setRegisterOpen] = useState(false);
     
     const [localDateRange, setLocalDateRange] = useState<DateRange | undefined>(centralDateRange);
 
@@ -63,7 +60,7 @@ export default function EmployeesPage() {
     }, [centralDateRange]);
 
     const dailyAttendance = useMemo(() => getAttendanceForDate(singleDateForDailyView), [getAttendanceForDate, singleDateForDailyView]);
-    
+
     const handleAttendanceChange = (employeeId: string, status: AttendanceStatus) => {
         if (user?.role !== 'admin' && !isToday(singleDateForDailyView)) {
             alert("You can only change attendance for the current day.");
@@ -95,6 +92,74 @@ export default function EmployeesPage() {
                 return '';
         }
     };
+    
+    // Logic from former AttendanceRegisterDialog
+    const handlePrint = useReactToPrint({
+        content: () => printRef.current,
+        documentTitle: `Attendance-Register-${localDateRange ? format(localDateRange.from!, 'MMMM-yyyy') : ''}`,
+    });
+
+    const { days, rangeTitle, attendanceData } = useMemo(() => {
+        const from = localDateRange?.from;
+        const to = localDateRange?.to;
+
+        if (!from || !to) {
+            return { days: [], rangeTitle: 'No date range selected', attendanceData: [] };
+        }
+
+        const daysInInterval = eachDayOfInterval({ start: from, end: to });
+        
+        const title = `${format(from, 'MMMM yyyy')}`;
+
+        const data = employees.map(employee => {
+            const employeeAttendance = allAttendance.filter(a => a.employeeId === employee.id);
+            const attendanceByDay = new Map<string, Attendance['status']>();
+            
+            daysInInterval.forEach(day => {
+                const attendanceRecord = employeeAttendance.find(a => isSameDay(new Date(a.date), day));
+                attendanceByDay.set(format(day, 'yyyy-MM-dd'), attendanceRecord?.status || 'Absent');
+            });
+            
+            const summary = {
+                P: Array.from(attendanceByDay.values()).filter(s => s === 'Present').length,
+                A: Array.from(attendanceByDay.values()).filter(s => s === 'Absent').length,
+                L: Array.from(attendanceByDay.values()).filter(s => s === 'Leave').length,
+            };
+
+            return { employee, attendanceByDay, summary };
+        });
+
+        return { days: daysInInterval, rangeTitle: title, attendanceData: data };
+
+    }, [localDateRange, employees, allAttendance]);
+
+    const handleExport = () => {
+        const header = ["Employee Name", ...days.map(d => format(d, "dd")), "P", "A", "L"];
+        const body = attendanceData.map(({ employee, attendanceByDay, summary }) => {
+            const row: (string | number)[] = [employee.name];
+            days.forEach(day => {
+                const status = attendanceByDay.get(format(day, 'yyyy-MM-dd')) || 'A';
+                row.push(status.charAt(0));
+            });
+            row.push(summary.P, summary.A, summary.L);
+            return row;
+        });
+
+        const worksheet = XLSX.utils.aoa_to_sheet([header, ...body]);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance");
+        XLSX.writeFile(workbook, `Attendance_Register_${rangeTitle}.xlsx`);
+    };
+
+    const getStatusClass = (status: Attendance['status']) => {
+        switch (status) {
+            case 'Present': return 'text-green-600 font-bold';
+            case 'Absent': return 'text-red-600 font-bold';
+            case 'Leave': return 'text-yellow-600 font-bold';
+            default: return '';
+        }
+    };
+
 
     return (
         <>
@@ -107,9 +172,6 @@ export default function EmployeesPage() {
                         onDateChange={setLocalDateRange}
                         centralDateRange={centralDateRange}
                     />
-                    <Button onClick={() => setRegisterOpen(true)} variant="outline">
-                        <BookUser className="mr-2 h-4 w-4"/> View Attendance Register
-                    </Button>
                     <Button onClick={() => setEmployeeListDialogOpen(true)} variant="outline">
                         <Users className="mr-2 h-4 w-4" /> Employee List
                     </Button>
@@ -118,7 +180,8 @@ export default function EmployeesPage() {
                     </Button>
                 </div>
             </div>
-            <div className="grid grid-cols-1 gap-6">
+
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <Card>
                     <CardHeader>
                         <CardTitle>{t('daily_attendance_title')}</CardTitle>
@@ -135,7 +198,7 @@ export default function EmployeesPage() {
                             </div>
                         </div>
 
-                        <div className="rounded-md border overflow-auto max-h-96">
+                        <div className="rounded-md border overflow-auto max-h-[30rem]">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -177,6 +240,67 @@ export default function EmployeesPage() {
                         </div>
                     </CardContent>
                 </Card>
+
+                 <Card className="flex flex-col">
+                    <CardHeader>
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <CardTitle>Monthly Attendance Register</CardTitle>
+                                <CardDescription>Showing attendance for {rangeTitle}.</CardDescription>
+                            </div>
+                            <div className="flex gap-2">
+                                <Button variant="outline" size="sm" onClick={handlePrint}><Printer className="mr-2 h-4 w-4" /> Print</Button>
+                                <Button variant="outline" size="sm" onClick={handleExport}><Download className="mr-2 h-4 w-4" /> Export</Button>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="flex-1 overflow-auto p-0">
+                       <div className="overflow-auto h-[40rem] rounded-b-lg border-t" ref={printRef}>
+                            <div className="p-4 print:p-2">
+                                <div className="text-center mb-4 hidden print:block">
+                                    <h2 className="text-xl font-bold">Mahmud Engineering Shop</h2>
+                                    <h3 className="text-lg">Attendance Register - {rangeTitle}</h3>
+                                </div>
+                                <div className="relative overflow-auto">
+                                    <table className="w-full border-collapse text-xs whitespace-nowrap">
+                                        <thead>
+                                            <tr className="bg-muted">
+                                                <th className="sticky left-0 bg-muted border p-2 z-10 min-w-[150px]">Employee</th>
+                                                {days.map(day => (
+                                                    <th key={day.toString()} className={cn("border p-1 text-center", isFriday(day) && 'bg-muted-foreground/20')}>
+                                                        <div>{format(day, 'dd')}</div>
+                                                        <div className="font-normal text-muted-foreground">{format(day, 'E')}</div>
+                                                    </th>
+                                                ))}
+                                                <th className="border p-1 text-center bg-primary/20">P</th>
+                                                <th className="border p-1 text-center bg-primary/20">A</th>
+                                                <th className="border p-1 text-center bg-primary/20">L</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {attendanceData.map(({ employee, attendanceByDay, summary }) => (
+                                                <tr key={employee.id}>
+                                                    <td className="sticky left-0 bg-background border p-2 font-medium z-10">{employee.name}</td>
+                                                    {days.map(day => {
+                                                        const status = attendanceByDay.get(format(day, 'yyyy-MM-dd')) || 'Absent';
+                                                        return (
+                                                            <td key={day.toString()} className={cn("border p-1 text-center", isFriday(day) && 'bg-muted-foreground/10')}>
+                                                                <span className={getStatusClass(status)}>{status.charAt(0)}</span>
+                                                            </td>
+                                                        );
+                                                    })}
+                                                    <td className="border p-1 text-center font-bold bg-primary/10">{summary.P}</td>
+                                                    <td className="border p-1 text-center font-bold bg-primary/10">{summary.A}</td>
+                                                    <td className="border p-1 text-center font-bold bg-primary/10">{summary.L}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
 
@@ -189,12 +313,6 @@ export default function EmployeesPage() {
         {isEmployeeListDialogOpen && <EmployeeListDialog
             open={isEmployeeListDialogOpen}
             onOpenChange={setEmployeeListDialogOpen}
-        />}
-
-        {isRegisterOpen && <AttendanceRegisterDialog
-            open={isRegisterOpen}
-            onOpenChange={setRegisterOpen}
-            dateRange={localDateRange}
         />}
         </>
     );
