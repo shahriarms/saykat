@@ -214,6 +214,7 @@ export default function EmployeesPage() {
                                                             <Select 
                                                                 value={status} 
                                                                 onValueChange={(newStatus: AttendanceStatus) => handleAttendanceChange(date, newStatus)}
+                                                                disabled={user?.role !== 'admin' && !isSameDay(date, new Date())}
                                                             >
                                                                 <SelectTrigger className={cn("w-[110px] h-9 font-semibold", getStatusClasses(status))}>
                                                                     <SelectValue />
