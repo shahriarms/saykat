@@ -139,7 +139,7 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
         position: 'absolute',
         top: '50%',
         left: '50%',
-        transform: 'translate(-50%, -50%) rotate(-10deg)',
+        transform: 'translate(-50%, -50%)',
         opacity: 0.1,
         zIndex: 1,
         pointerEvents: 'none',
