@@ -75,21 +75,14 @@ const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, EmployeeAttend
                         </TableRow>
                     ))}
                 </TableBody>
-                 <TableFooter>
-                    <TableRow className="bg-muted print:bg-gray-100">
-                        <TableCell colSpan={2} className="font-bold text-right print:p-1">Total Present</TableCell>
-                        <TableCell className="font-bold text-center print:p-1">{summary.Present}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell colSpan={2} className="font-bold text-right print:p-1">Total Absent</TableCell>
-                        <TableCell className="font-bold text-center print:p-1">{summary.Absent}</TableCell>
-                    </TableRow>
-                    <TableRow className="bg-muted print:bg-gray-100">
-                        <TableCell colSpan={2} className="font-bold text-right print:p-1">Total Leave</TableCell>
-                        <TableCell className="font-bold text-center print:p-1">{summary.Leave}</TableCell>
-                    </TableRow>
-                </TableFooter>
             </Table>
+            
+            <div className="mt-2 text-right space-y-0.5 text-xs font-semibold">
+                <p>Total Present: {summary.Present}</p>
+                <p>Total Absent: {summary.Absent}</p>
+                <p>Total Leave: {summary.Leave}</p>
+            </div>
+
              <div className="flex justify-between mt-24 print:mt-24 text-xs print:text-[9px]">
                 <div className="border-t-2 border-gray-400 w-48 print:w-40 text-center pt-1">Employee's Signature</div>
                 <div className="border-t-2 border-gray-400 w-48 print:w-40 text-center pt-1">Manager's Signature</div>
