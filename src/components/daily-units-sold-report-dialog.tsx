@@ -28,6 +28,7 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { useTranslation } from '@/hooks/use-translation';
+import { DraftInvoiceItem } from '@/hooks/use-invoice-form';
 
 interface DailyUnitsSoldReportDialogProps {
   open: boolean;
@@ -52,11 +53,12 @@ export function DailyUnitsSoldReportDialog({ open, onOpenChange, invoices, produ
         const productMap = new Map(products.map(p => [p.id, p]));
 
         invoices.forEach(invoice => {
-            invoice.items.forEach(item => {
+            invoice.items.forEach((item: DraftInvoiceItem) => {
                 const product = productMap.get(item.id);
                 if (product) {
                     const existing = soldItemsMap.get(item.id) || { totalQuantity: 0, mainCategory: product.mainCategory };
-                    existing.totalQuantity += item.quantity;
+                    const quantity = parseFloat(String(item.quantity)) || 0;
+                    existing.totalQuantity += quantity;
                     soldItemsMap.set(item.id, existing);
                 }
             });
@@ -115,7 +117,7 @@ export function DailyUnitsSoldReportDialog({ open, onOpenChange, invoices, produ
             startY += 6;
             (doc as any).autoTable({
                 head: [['Item Name', 'Total Quantity Sold (kg)']],
-                body: materialItems.map(item => [item.name, item.totalQuantity.toFixed(2)]),
+                body: materialItems.map(item => [item.name, (parseFloat(String(item.totalQuantity)) || 0).toFixed(2)]),
                 startY,
             });
         }
@@ -165,14 +167,14 @@ export function DailyUnitsSoldReportDialog({ open, onOpenChange, invoices, produ
                 <TableBody>
                 {materialItems.length > 0 ? (
                     materialItems.map(item => (
-                        <TableRow key={item.id}><TableCell className="font-medium">{item.name}</TableCell><TableCell className="text-right font-semibold">{item.totalQuantity.toFixed(2)}</TableCell></TableRow>
+                        <TableRow key={item.id}><TableCell className="font-medium">{item.name}</TableCell><TableCell className="text-right font-semibold">{(parseFloat(String(item.totalQuantity)) || 0).toFixed(2)}</TableCell></TableRow>
                     ))
                 ) : (<TableRow><TableCell colSpan={2} className="h-24 text-center">No material items sold.</TableCell></TableRow>)}
                 </TableBody>
                 <UiTableFooter>
                     <TableRow>
                         <TableCell className="font-bold">Total Material</TableCell>
-                        <TableCell className="text-right font-bold">{totalMaterialKg.toFixed(2)} kg</TableCell>
+                        <TableCell className="text-right font-bold">{(parseFloat(String(totalMaterialKg)) || 0).toFixed(2)} kg</TableCell>
                     </TableRow>
                 </UiTableFooter>
             </Table>
