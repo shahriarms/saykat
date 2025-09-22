@@ -137,14 +137,14 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
     
     const sealContainerStyles: React.CSSProperties = {
         position: 'absolute',
-        top: '50%',
+        top: '55%',
         left: '50%',
-        transform: 'translate(-50%, -50%)',
-        opacity: 0.1,
+        transform: 'translate(-50%, -50%) rotate(-15deg)',
+        opacity: 0.15,
         zIndex: 1,
         pointerEvents: 'none',
-        width: isPos ? '150px' : '300px',
-        height: isPos ? '150px' : '300px',
+        width: '350px',
+        height: '350px',
     };
 
 
@@ -170,22 +170,12 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
                             </filter>
                         </defs>
                         <g filter="url(#grunge)" fill={isPaid ? '#22c55e' : '#dc2626'}>
-                            <rect x="2" y="2" width="296" height="96" rx="10" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="4" fill="none"/>
-                             <rect x="8" y="8" width="284" height="84" rx="6" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="2" fill="none"/>
-                            <line x1="220" y1="2" x2="220" y2="98" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="4" />
-                            <text
-                                x="110"
-                                y="68"
-                                fontFamily="Impact, Arial Black, sans-serif"
-                                fontSize="60"
-                                fontWeight="bold"
-                                textAnchor="middle"
-                                lengthAdjust="spacingAndGlyphs"
-                                textLength="200"
-                            >
+                           <path d="M 10 2 H 290 L 298 10 V 90 L 290 98 H 10 L 2 90 V 10 Z" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="4" fill="none" />
+                           <path d="M 18 10 H 282 L 290 18 V 82 L 282 90 H 18 L 10 82 V 18 Z" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="2" fill="none" />
+                           <text x="110" y="72" fontFamily="Impact, Arial Black, sans-serif" fontSize="60" fontWeight="bold" textAnchor="middle" lengthAdjust="spacingAndGlyphs" textLength="200" fill={isPaid ? '#22c55e' : '#dc2626'}>
                                 {isPaid ? 'PAID' : 'DUE'}
                             </text>
-                            <text x="255" y="70" fontFamily="Arial, sans-serif" fontSize="56" fontWeight="bold" textAnchor="middle">৳</text>
+                            <text x="255" y="70" fontFamily="Arial, sans-serif" fontSize="56" fontWeight="bold" textAnchor="middle" fill={isPaid ? '#22c55e' : '#dc2626'}>৳</text>
                         </g>
                     </svg>
                 </div>
