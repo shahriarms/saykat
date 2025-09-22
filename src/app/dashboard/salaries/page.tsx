@@ -311,7 +311,7 @@ export default function SalariesPage() {
 
                          <div className="flex-1 min-h-0 mt-4">
                             <h3 className="font-semibold text-lg flex items-center gap-2 mb-2"><History className="w-5 h-5"/> {t('monthly_payment_history_title')}</h3>
-                            <ScrollArea className="h-32 rounded-md border">
+                            <ScrollArea className="h-48 rounded-md border">
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
