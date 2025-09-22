@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo } from 'react';
@@ -45,15 +46,19 @@ export function DailySalesDialog({ open, onOpenChange, invoices }: DailySalesDia
 
     const handleExportExcel = () => {
         const flattenedData = sortedInvoices.flatMap(invoice => 
-            invoice.items.map(item => ({
-                "Invoice No": String(invoice.id),
-                "Time": format(new Date(invoice.date), 'p'),
-                "Customer Name": invoice.customerName,
-                "Item Name": item.name,
-                "Quantity": item.quantity,
-                "Rate": item.price,
-                "Total": item.price * item.quantity,
-            }))
+            invoice.items.map(item => {
+                const price = parseFloat(String(item.price)) || 0;
+                const quantity = parseFloat(String(item.quantity)) || 0;
+                return {
+                    "Invoice No": String(invoice.id),
+                    "Time": format(new Date(invoice.date), 'p'),
+                    "Customer Name": invoice.customerName,
+                    "Item Name": item.name,
+                    "Quantity": quantity,
+                    "Rate": price,
+                    "Total": price * quantity,
+                }
+            })
         );
 
         const worksheet = XLSX.utils.json_to_sheet(flattenedData);
@@ -77,12 +82,16 @@ export function DailySalesDialog({ open, onOpenChange, invoices }: DailySalesDia
             finalY += 5;
             (doc as any).autoTable({
                 head: [['Item Name', 'Qty', 'Rate', 'Total']],
-                body: invoice.items.map(item => [
-                    item.name,
-                    item.quantity,
-                    '৳ '+item.price.toFixed(2),
-                    '৳ '+(item.price * item.quantity).toFixed(2),
-                ]),
+                body: invoice.items.map(item => {
+                    const price = parseFloat(String(item.price)) || 0;
+                    const quantity = parseFloat(String(item.quantity)) || 0;
+                    return [
+                        item.name,
+                        quantity,
+                        '৳ '+price.toFixed(2),
+                        '৳ '+(price * quantity).toFixed(2),
+                    ]
+                }),
                 startY: finalY,
                 theme: 'grid',
                 styles: { fontSize: 8 },
@@ -132,14 +141,18 @@ export function DailySalesDialog({ open, onOpenChange, invoices }: DailySalesDia
                                 </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {invoice.items.map(item => (
-                                        <TableRow key={item.id}>
-                                            <TableCell className="font-medium">{item.name}</TableCell>
-                                            <TableCell className="text-right">{item.quantity}</TableCell>
-                                            <TableCell className="text-right font-mono">৳{item.price.toFixed(2)}</TableCell>
-                                            <TableCell className="text-right font-mono font-semibold">৳{(item.price * item.quantity).toFixed(2)}</TableCell>
-                                        </TableRow>
-                                    ))}
+                                    {invoice.items.map(item => {
+                                        const price = parseFloat(String(item.price)) || 0;
+                                        const quantity = parseFloat(String(item.quantity)) || 0;
+                                        return (
+                                            <TableRow key={item.id}>
+                                                <TableCell className="font-medium">{item.name}</TableCell>
+                                                <TableCell className="text-right">{quantity}</TableCell>
+                                                <TableCell className="text-right font-mono">৳{price.toFixed(2)}</TableCell>
+                                                <TableCell className="text-right font-mono font-semibold">৳{(price * quantity).toFixed(2)}</TableCell>
+                                            </TableRow>
+                                        )
+                                    })}
                                 </TableBody>
                                 <UiTableFooter>
                                     <TableRow>
