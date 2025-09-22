@@ -65,16 +65,16 @@ const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, EmployeeAttend
             <Table className="print:text-xs">
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="print:p-1 text-blue-700">Date</TableHead>
-                        <TableHead className="print:p-1 text-blue-700">Day</TableHead>
+                        <TableHead className="print:p-1">Date</TableHead>
+                        <TableHead className="print:p-1">Day</TableHead>
                         <TableHead className="text-center print:p-1">Status</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {attendanceData.map(({ date, status }) => (
                         <TableRow key={date.toISOString()}>
-                            <TableCell className="print:p-1 text-blue-700">{format(date, 'MMMM dd, yyyy')}</TableCell>
-                            <TableCell className="print:p-1 text-blue-700">{format(date, 'eeee')}</TableCell>
+                            <TableCell className="print:p-1">{format(date, 'MMMM dd, yyyy')}</TableCell>
+                            <TableCell className="print:p-1">{format(date, 'eeee')}</TableCell>
                             <TableCell className={`text-center print:p-1 ${getStatusClass(status)}`}>{status}</TableCell>
                         </TableRow>
                     ))}
