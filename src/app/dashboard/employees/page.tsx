@@ -7,12 +7,13 @@ import type { Employee, Attendance, AttendanceStatus } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { PlusCircle, Users, UserCheck, UserX, NotebookText, Loader2, BookUser, Download, Printer, ChevronRight, Calendar as CalendarIcon, RotateCw, UserCog } from 'lucide-react';
 import { isToday, format, eachDayOfInterval, isSameDay, isFriday, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -64,77 +65,44 @@ export default function EmployeesPage() {
         markAttendance(selectedEmployee.id, date, status);
     };
 
-    const employeeAttendanceForMonth = useMemo(() => {
-        if (!selectedEmployee) return [];
+    const monthlyAttendanceData = useMemo(() => {
+        if (!selectedEmployee) return { report: [], summary: { Present: 0, Absent: 0, Leave: 0 } };
+
         const start = startOfMonth(month);
         const end = endOfMonth(month);
-        return attendance.filter(a => a.employeeId === selectedEmployee.id && isWithinInterval(new Date(a.date), { start, end }));
-    }, [attendance, selectedEmployee, month]);
-
-    const attendanceSummary = useMemo(() => {
-        const summary = { Present: 0, Absent: 0, Leave: 0 };
-        const start = startOfMonth(month);
-        const end = endOfMonth(month);
-        const daysInMonth = eachDayOfInterval({start, end});
-
-        daysInMonth.forEach(day => {
-            const record = employeeAttendanceForMonth.find(a => isSameDay(new Date(a.date), day));
-            if (record) {
-                summary[record.status]++;
-            } else {
-                summary['Absent']++;
-            }
+        const daysInMonth = eachDayOfInterval({ start, end });
+        
+        const report = daysInMonth.map(day => {
+            const record = attendance.find(a => a.employeeId === selectedEmployee.id && isSameDay(new Date(a.date), day));
+            return {
+                date: day,
+                status: record?.status || 'Absent',
+            };
         });
-        return summary;
-    }, [employeeAttendanceForMonth, month]);
+        
+        const summary = report.reduce((acc, curr) => {
+            acc[curr.status]++;
+            return acc;
+        }, { Present: 0, Absent: 0, Leave: 0 });
+
+        return { report, summary };
+
+    }, [attendance, selectedEmployee, month]);
     
      const handlePrint = useReactToPrint({
         content: () => printRef.current,
         documentTitle: `Attendance-Report-${selectedEmployee?.name}-${format(month, 'MMMM-yyyy')}`,
     });
 
-    const DayCell = ({ date, displayMonth }: { date: Date, displayMonth: Date }) => {
-        if (date.getMonth() !== displayMonth.getMonth()) {
-            return <div className="h-20"></div>;
+    const getStatusClasses = (status: AttendanceStatus) => {
+        switch(status) {
+            case 'Present': return "bg-green-100 text-green-700";
+            case 'Absent': return "bg-red-100 text-red-700";
+            case 'Leave': return "bg-yellow-100 text-yellow-700";
+            default: return "";
         }
-        
-        const record = employeeAttendanceForMonth.find(a => isSameDay(new Date(a.date), date));
-        const status = record?.status || 'Absent';
-        
-        const statusConfig = {
-            Present: {
-                bg: 'bg-green-100 dark:bg-green-900/50',
-                text: 'text-green-800 dark:text-green-300',
-                icon: <UserCheck className="w-4 h-4" />
-            },
-            Absent: {
-                bg: 'bg-red-100 dark:bg-red-900/50',
-                text: 'text-red-800 dark:text-red-300',
-                icon: <UserX className="w-4 h-4" />
-            },
-            Leave: {
-                bg: 'bg-yellow-100 dark:bg-yellow-900/50',
-                text: 'text-yellow-800 dark:text-yellow-300',
-                icon: <NotebookText className="w-4 h-4" />
-            }
-        };
-
-        return (
-             <div className={cn("h-20 rounded-md p-2 flex flex-col justify-between transition-colors", statusConfig[status].bg)}>
-                <div className="font-semibold text-sm">{format(date, 'd')}</div>
-                <Select value={status} onValueChange={(newStatus) => handleAttendanceChange(date, newStatus as AttendanceStatus)}>
-                    <SelectTrigger className={cn("h-7 text-xs w-full", statusConfig[status].text, statusConfig[status].bg, "focus:ring-0 border-0")}>
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="Present">Present</SelectItem>
-                        <SelectItem value="Absent">Absent</SelectItem>
-                        <SelectItem value="Leave">Leave</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-        );
     };
+
 
     return (
         <>
@@ -196,7 +164,7 @@ export default function EmployeesPage() {
                                             <Button variant="outline"><CalendarIcon className="mr-2 h-4 w-4"/> {format(month, 'MMMM yyyy')}</Button>
                                         </PopoverTrigger>
                                         <PopoverContent>
-                                            <Calendar mode="single" month={month} onMonthChange={setMonth} captionLayout="dropdown-buttons" fromYear={2020} toYear={new Date().getFullYear() + 5}/>
+                                            <Calendar mode="single" month={month} onMonthChange={(m) => m && setMonth(m)} captionLayout="dropdown-buttons" fromYear={2020} toYear={new Date().getFullYear() + 5}/>
                                         </PopoverContent>
                                      </Popover>
                                      <Button onClick={handlePrint} variant="outline" disabled={!selectedEmployee}><Printer className="mr-2 h-4 w-4"/> Print Report</Button>
@@ -207,19 +175,39 @@ export default function EmployeesPage() {
                              {selectedEmployee ? (
                                 <>
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 text-sm w-full">
-                                        <div className="flex items-center gap-2 p-2 rounded-md bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300"><UserCheck className="w-5 h-5"/> {t('present_label')}: <span className="font-bold">{attendanceSummary.Present}</span></div>
-                                        <div className="flex items-center gap-2 p-2 rounded-md bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300"><UserX className="w-5 h-5"/> {t('absent_label')}: <span className="font-bold">{attendanceSummary.Absent}</span></div>
-                                        <div className="flex items-center gap-2 p-2 rounded-md bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300"><NotebookText className="w-5 h-5"/> {t('on_leave_label')}: <span className="font-bold">{attendanceSummary.Leave}</span></div>
+                                        <div className="flex items-center gap-2 p-2 rounded-md bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300"><UserCheck className="w-5 h-5"/> {t('present_label')}: <span className="font-bold">{monthlyAttendanceData.summary.Present}</span></div>
+                                        <div className="flex items-center gap-2 p-2 rounded-md bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300"><UserX className="w-5 h-5"/> {t('absent_label')}: <span className="font-bold">{monthlyAttendanceData.summary.Absent}</span></div>
+                                        <div className="flex items-center gap-2 p-2 rounded-md bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300"><NotebookText className="w-5 h-5"/> {t('on_leave_label')}: <span className="font-bold">{monthlyAttendanceData.summary.Leave}</span></div>
                                     </div>
-                                    <div className="flex-1 overflow-auto rounded-lg border p-4">
-                                        <Calendar 
-                                            mode="default"
-                                            month={month}
-                                            onMonthChange={setMonth}
-                                            components={{ Day: DayCell }}
-                                            className="w-full"
-                                        />
-                                    </div>
+                                    <ScrollArea className="flex-1 h-96 rounded-md border">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Date</TableHead>
+                                                    <TableHead>Day</TableHead>
+                                                    <TableHead>Status</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {monthlyAttendanceData.report.map(({date, status}) => (
+                                                    <TableRow key={date.toISOString()}>
+                                                        <TableCell>{format(date, 'MMM dd, yyyy')}</TableCell>
+                                                        <TableCell>{format(date, 'eee')}</TableCell>
+                                                        <TableCell>
+                                                            <Button 
+                                                                variant="ghost" 
+                                                                size="sm" 
+                                                                className={cn("w-24 justify-center font-semibold", getStatusClasses(status))}
+                                                                onClick={() => handleAttendanceChange(date, status === 'Present' ? 'Absent' : 'Present')}
+                                                            >
+                                                                {status}
+                                                            </Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </ScrollArea>
                                 </>
                              ) : (
                                 <div className="flex-1 flex items-center justify-center text-muted-foreground">Select an employee to view their attendance.</div>
@@ -235,7 +223,7 @@ export default function EmployeesPage() {
                         ref={printRef}
                         employee={selectedEmployee}
                         month={month}
-                        attendanceData={employeeAttendanceForMonth}
+                        attendanceData={monthlyAttendanceData.report}
                     />
                 )}
             </div>

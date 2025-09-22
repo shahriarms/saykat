@@ -9,33 +9,26 @@ import { StockPilotLogo } from './stock-pilot-logo';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from './ui/table';
 
+interface AttendanceReportItem {
+  date: Date;
+  status: Attendance['status'];
+}
+
 interface EmployeeAttendanceReportProps {
   employee: Employee;
   month: Date;
-  attendanceData: Attendance[];
+  attendanceData: AttendanceReportItem[];
 }
 
 export const EmployeeAttendanceReport = React.memo(React.forwardRef<HTMLDivElement, EmployeeAttendanceReportProps>(
   ({ employee, month, attendanceData }, ref) => {
     const { t } = useTranslation();
 
-    const monthStart = startOfMonth(month);
-    const monthEnd = endOfMonth(month);
-    const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
+    const summary = attendanceData.reduce((acc, curr) => {
+        acc[curr.status]++;
+        return acc;
+    }, { Present: 0, Absent: 0, Leave: 0 });
 
-    const reportData = daysInMonth.map(day => {
-        const record = attendanceData.find(a => isSameDay(new Date(a.date), day));
-        return {
-            date: day,
-            status: record?.status || 'Absent',
-        };
-    });
-    
-    const summary = {
-        Present: reportData.filter(r => r.status === 'Present').length,
-        Absent: reportData.filter(r => r.status === 'Absent').length,
-        Leave: reportData.filter(r => r.status === 'Leave').length,
-    };
 
     const getStatusClass = (status: Attendance['status']) => {
         switch (status) {
@@ -77,7 +70,7 @@ export const EmployeeAttendanceReport = React.memo(React.forwardRef<HTMLDivEleme
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {reportData.map(({ date, status }) => (
+                    {attendanceData.map(({ date, status }) => (
                         <TableRow key={date.toISOString()}>
                             <TableCell>{format(date, 'MMMM dd, yyyy')}</TableCell>
                             <TableCell>{format(date, 'eeee')}</TableCell>
