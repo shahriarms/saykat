@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React from 'react';
@@ -42,7 +43,7 @@ const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, EmployeeAttend
 
     return (
       <div ref={ref} className="bg-white p-4 print:p-2">
-        <Card className="w-full max-w-4xl mx-auto shadow-none border-0 print:shadow-none print:border-0">
+        <Card className="w-full max-w-4xl mx-auto shadow-none border-0 print:shadow-none print:border-0 print:bg-white print:text-black">
           <CardHeader className="text-center space-y-2 mb-2 print:mb-1 print:space-y-1">
             <div className="flex justify-center items-center gap-2">
                 <svg className="w-8 h-8 print:w-6 print:h-6 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 12l3 3 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -78,8 +79,8 @@ const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, EmployeeAttend
                         </TableRow>
                     ))}
                 </TableBody>
-                <TableFooter>
-                    <TableRow className="bg-muted">
+                 <TableFooter>
+                    <TableRow className="bg-muted print:bg-gray-100">
                         <TableCell colSpan={2} className="font-bold text-right print:p-1.5">Total Present</TableCell>
                         <TableCell className="font-bold text-center print:p-1.5">{summary.Present}</TableCell>
                     </TableRow>
@@ -87,13 +88,13 @@ const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, EmployeeAttend
                         <TableCell colSpan={2} className="font-bold text-right print:p-1.5">Total Absent</TableCell>
                         <TableCell className="font-bold text-center print:p-1.5">{summary.Absent}</TableCell>
                     </TableRow>
-                    <TableRow className="bg-muted">
+                    <TableRow className="bg-muted print:bg-gray-100">
                         <TableCell colSpan={2} className="font-bold text-right print:p-1.5">Total Leave</TableCell>
                         <TableCell className="font-bold text-center print:p-1.5">{summary.Leave}</TableCell>
                     </TableRow>
                 </TableFooter>
             </Table>
-             <div className="flex justify-between mt-12 print:mt-8 text-xs print:text-[10px]">
+             <div className="flex justify-between mt-8 print:mt-4 text-xs print:text-[10px]">
                 <div className="border-t-2 border-gray-400 w-48 print:w-40 text-center pt-1">Employee's Signature</div>
                 <div className="border-t-2 border-gray-400 w-48 print:w-40 text-center pt-1">Manager's Signature</div>
             </div>

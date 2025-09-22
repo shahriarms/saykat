@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
@@ -111,6 +112,21 @@ export default function EmployeesPage() {
             default: return "";
         }
     };
+    
+    const handlePrint = () => {
+        if (!selectedEmployee) return;
+        
+        const originalTitle = document.title;
+        document.title = `Attendance Report - ${selectedEmployee.name} - ${format(month, 'MMMM yyyy')}`;
+        
+        const handleAfterPrint = () => {
+            document.title = originalTitle;
+            window.removeEventListener('afterprint', handleAfterPrint);
+        };
+        window.addEventListener('afterprint', handleAfterPrint);
+        
+        window.print();
+    };
 
 
     return (
@@ -176,7 +192,7 @@ export default function EmployeesPage() {
                                             <Calendar mode="single" month={month} onMonthChange={(m) => m && setMonth(m)} captionLayout="dropdown-buttons" fromYear={2020} toYear={new Date().getFullYear() + 5}/>
                                         </PopoverContent>
                                      </Popover>
-                                     <Button onClick={() => window.print()} variant="outline" disabled={!selectedEmployee}><Printer className="mr-2 h-4 w-4"/> Print Report</Button>
+                                     <Button onClick={handlePrint} variant="outline" disabled={!selectedEmployee}><Printer className="mr-2 h-4 w-4"/> Print Report</Button>
                                 </div>
                             </div>
                         </CardHeader>
