@@ -71,8 +71,13 @@ const createNewDraft = (index: number, lastInvoiceId: number, isLoading: boolean
     }
 };
 
-const calculateTotals = (items: DraftInvoiceItem[], paidAmount?: number, cashReceived?: number) => {
-    const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+const calculateTotals = (items: (DraftInvoiceItem | { quantity: number | string, price: number | string })[], paidAmount?: number, cashReceived?: number) => {
+    const subtotal = items.reduce((acc, item) => {
+        const quantity = typeof item.quantity === 'number' ? item.quantity : parseFloat(item.quantity) || 0;
+        const price = typeof item.price === 'number' ? item.price : parseFloat(item.price) || 0;
+        return acc + price * quantity;
+    }, 0);
+
     const validPaidAmount = (typeof paidAmount === 'number' && !isNaN(paidAmount)) ? paidAmount : 0;
     const dueAmount = subtotal - validPaidAmount;
     const changeAmount = (cashReceived && cashReceived > subtotal) ? cashReceived - subtotal : 0;
@@ -252,15 +257,8 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                     let value = itemUpdate[key];
                     
                     if (key === 'quantity' || key === 'price') {
-                        // Allow empty string for temporary user input, but parse to a number
-                        if (value === '' || value === null) {
-                            // @ts-ignore
-                            updatedItem[key] = ''; // Keep it as an empty string for the input field
-                        } else {
-                            const parsedValue = parseFloat(value);
-                            // @ts-ignore
-                            updatedItem[key] = isNaN(parsedValue) ? item[key] : parsedValue;
-                        }
+                         // @ts-ignore
+                        updatedItem[key] = value;
                     } else {
                         // @ts-ignore
                         updatedItem[key] = value;
@@ -270,14 +268,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                 return item;
             });
     
-            // Ensure values used for calculation are numbers
-            const itemsForCalc = newItems.map(item => ({
-                ...item,
-                quantity: typeof item.quantity === 'number' ? item.quantity : 0,
-                price: typeof item.price === 'number' ? item.price : 0,
-            }));
-
-            const { subtotal, dueAmount, changeAmount } = calculateTotals(itemsForCalc, draft.paidAmount, draft.cashReceived);
+            const { subtotal, dueAmount, changeAmount } = calculateTotals(newItems, draft.paidAmount, draft.cashReceived);
             return { ...draft, items: newItems, subtotal, dueAmount, changeAmount };
         }));
     }, [activeDraftIndex]);
@@ -334,5 +325,3 @@ export function useInvoiceForm() {
     }
     return context;
 }
-
-    

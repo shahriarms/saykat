@@ -408,7 +408,7 @@ function InvoicePage() {
                                 <TableRow>
                                     <TableHead>Item</TableHead>
                                     <TableHead className="w-24">Qty</TableHead>
-                                    <TableHead className="w-32 hidden sm:table-cell">Price</TableHead>
+                                    <TableHead className="w-32">Price</TableHead>
                                     <TableHead className="text-right w-32">Total</TableHead>
                                     <TableHead className="w-12"></TableHead>
                                 </TableRow>
@@ -423,7 +423,7 @@ function InvoicePage() {
                                         <TableCell>
                                             <Input type="text" inputMode="decimal" value={item.quantity} onChange={e => updateInvoiceItem(item.id, { quantity: e.target.value })} className="h-9" />
                                         </TableCell>
-                                        <TableCell className="hidden sm:table-cell">
+                                        <TableCell>
                                             <div className="relative flex items-center">
                                                 <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-sm">৳</span>
                                                 <Input type="text" inputMode="decimal" value={item.price} onChange={e => updateInvoiceItem(item.id, { price: e.target.value })} className="pl-5 text-right font-medium h-9" />
@@ -558,5 +558,3 @@ export default function InvoicePageWrapper() {
     </InvoiceFormProvider>
   );
 }
-
-    
