@@ -135,20 +135,16 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
         color: '#666',
     };
     
-    const paidSealStyles: React.CSSProperties = {
+    const paidSealContainerStyles: React.CSSProperties = {
         position: 'absolute',
-        bottom: isPos ? '8rem' : '12rem', // Positioned from the bottom
-        left: '1rem',
-        transform: 'rotate(-15deg)', // Slight rotation
-        fontSize: isPos ? '2.5rem' : '4rem',
-        fontWeight: 'bold',
-        color: 'rgba(0, 128, 0, 0.2)', // Slightly more visible
-        border: `5px solid rgba(0, 128, 0, 0.2)`,
-        padding: '0.25rem 1rem',
-        borderRadius: '8px',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%) rotate(-15deg)',
+        opacity: 0.15,
         zIndex: 1,
         pointerEvents: 'none',
-        textTransform: 'uppercase',
+        width: isPos ? '150px' : '250px',
+        height: isPos ? '150px' : '250px',
     };
 
 
@@ -165,7 +161,41 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
                 `}
             </style>
             <div style={memoStyles}>
-                {isPaid && <div style={paidSealStyles}>Paid</div>}
+                 {isPaid && (
+                  <div style={paidSealContainerStyles}>
+                      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
+                          <defs>
+                              <path id="circlePath" d="M 15, 50 a 35,35 0 1,1 70,0 35,35 0 1,1 -70,0" />
+                              <filter id="grunge">
+                                <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="5" result="noise"/>
+                                <feDiffuseLighting in="noise" lightingColor="#FFF" surfaceScale="2" result="light">
+                                  <feDistantLight azimuth="45" elevation="60" />
+                                </feDiffuseLighting>
+                                <feComposite in="light" in2="SourceAlpha" operator="in" result="grunge"/>
+                                <feComposite in="SourceGraphic" in2="grunge" operator="atop"/>
+                              </filter>
+                          </defs>
+                          <g filter="url(#grunge)" fill="#22c55e">
+                              {/* Outer jagged circle */}
+                              <path d="M50,2.5 C23.8,2.5 2.5,23.8 2.5,50 C2.5,76.2 23.8,97.5 50,97.5 C76.2,97.5 97.5,76.2 97.5,50 C97.5,23.8 76.2,2.5 50,2.5 Z M50,0 C77.6,0 100,22.4 100,50 C100,77.6 77.6,100 50,100 C22.4,100 0,77.6 0,50 C0,22.4 22.4,0 50,0 Z" transform="scale(0.98) translate(1,1)" />
+                              <circle cx="50" cy="50" r="45"/>
+                              <path d="M 10 35 L 90 35 L 90 65 L 10 65 Z" />
+                          </g>
+                          <g fill="#000">
+                             <circle cx="50" cy="50" r="35" fill="none" strokeWidth="3" stroke="#000" />
+                          </g>
+                          <g fill="#fff" fontFamily="Impact, sans-serif" fontSize="24" textAnchor="middle" letterSpacing="2">
+                              <text x="50" y="58">PAID</text>
+                          </g>
+                          <g fill="#000" fontFamily="Arial, sans-serif" fontSize="8" textAnchor="middle" fontWeight="bold">
+                              <text>
+                                <textPath href="#circlePath" startOffset="18%">THANK YOU</textPath>
+                                <textPath href="#circlePath" startOffset="68%">THANK YOU</textPath>
+                              </text>
+                          </g>
+                      </svg>
+                  </div>
+                )}
                 
                 <header style={headerStyles}>
                     <h1 style={h1Styles}>{t('memo_title')}</h1>
