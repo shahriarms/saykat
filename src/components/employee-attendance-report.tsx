@@ -42,7 +42,7 @@ const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, EmployeeAttend
 
     return (
       <div ref={ref} className="hidden print-source print:block print:bg-white print:text-[9px] print:leading-tight">
-        <Card className="w-full mx-auto shadow-none border-0 print:max-w-none print:shadow-none print:border-0 print:bg-white print:text-black">
+        <Card className="w-full mx-auto shadow-none border-0 print:shadow-none print:border-0 print:bg-white print:text-black print:mx-4">
           <CardHeader className="text-center space-y-1 print:mb-1 print:space-y-0.5 print:p-0">
             <div className="flex justify-center items-center gap-2">
                 <svg className="w-6 h-6 print:w-5 print:h-5 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 12l3 3 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -53,7 +53,7 @@ const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, EmployeeAttend
             </CardDescription>
           </CardHeader>
           <CardContent className="print:p-0">
-            <div className="flex justify-between items-center my-1 print:my-0.5 border-y py-0.5 print:py-0 text-base">
+            <div className="flex justify-between items-center my-1 print:my-0.5 border-y py-0.5 print:py-0 print:text-base">
                 <p><strong className="w-20 inline-block">Employee:</strong> {employee.name}</p>
                 <p>{employee.role}</p>
             </div>
