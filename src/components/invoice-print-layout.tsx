@@ -54,7 +54,7 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
     const isPaid = dueAmount <= 0.001;
 
     const memoStyles: React.CSSProperties = {
-        position: 'relative', // Needed for the paid seal positioning
+        position: 'relative',
         background: '#fff',
         color: '#000',
         fontFamily: isBn ? "'SolaimanLipi', 'Times New Roman', sans-serif" : "'Times New Roman', sans-serif",
@@ -135,11 +135,11 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
         color: '#666',
     };
     
-    const paidSealContainerStyles: React.CSSProperties = {
+    const sealContainerStyles: React.CSSProperties = {
         position: 'absolute',
         top: '50%',
         left: '50%',
-        transform: 'translate(-50%, -50%) rotate(-15deg)',
+        transform: 'translate(-50%, -50%)',
         opacity: 0.15,
         zIndex: 1,
         pointerEvents: 'none',
@@ -161,41 +161,23 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
                 `}
             </style>
             <div style={memoStyles}>
-                 {isPaid && (
-                  <div style={paidSealContainerStyles}>
-                      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
-                          <defs>
-                              <path id="circlePath" d="M 15, 50 a 35,35 0 1,1 70,0 35,35 0 1,1 -70,0" />
-                              <filter id="grunge">
-                                <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="5" result="noise"/>
-                                <feDiffuseLighting in="noise" lightingColor="#FFF" surfaceScale="2" result="light">
-                                  <feDistantLight azimuth="45" elevation="60" />
-                                </feDiffuseLighting>
-                                <feComposite in="light" in2="SourceAlpha" operator="in" result="grunge"/>
-                                <feComposite in="SourceGraphic" in2="grunge" operator="atop"/>
-                              </filter>
-                          </defs>
-                          <g filter="url(#grunge)" fill="#22c55e">
-                              {/* Outer jagged circle */}
-                              <path d="M50,2.5 C23.8,2.5 2.5,23.8 2.5,50 C2.5,76.2 23.8,97.5 50,97.5 C76.2,97.5 97.5,76.2 97.5,50 C97.5,23.8 76.2,2.5 50,2.5 Z M50,0 C77.6,0 100,22.4 100,50 C100,77.6 77.6,100 50,100 C22.4,100 0,77.6 0,50 C0,22.4 22.4,0 50,0 Z" transform="scale(0.98) translate(1,1)" />
-                              <circle cx="50" cy="50" r="45"/>
-                              <path d="M 10 35 L 90 35 L 90 65 L 10 65 Z" />
-                          </g>
-                          <g fill="#000">
-                             <circle cx="50" cy="50" r="35" fill="none" strokeWidth="3" stroke="#000" />
-                          </g>
-                          <g fill="#fff" fontFamily="Impact, sans-serif" fontSize="24" textAnchor="middle" letterSpacing="2">
-                              <text x="50" y="58">PAID</text>
-                          </g>
-                          <g fill="#000" fontFamily="Arial, sans-serif" fontSize="8" textAnchor="middle" fontWeight="bold">
-                              <text>
-                                <textPath href="#circlePath" startOffset="18%">THANK YOU</textPath>
-                                <textPath href="#circlePath" startOffset="68%">THANK YOU</textPath>
-                              </text>
-                          </g>
-                      </svg>
-                  </div>
-                )}
+                 {isPaid ? (
+                    <div style={sealContainerStyles}>
+                        <svg viewBox="0 0 100 100" style={{ transform: 'rotate(-15deg)' }}>
+                            <circle cx="50" cy="50" r="45" stroke="#22c55e" strokeWidth="3" fill="none" />
+                            <circle cx="50" cy="50" r="38" stroke="#22c55e" strokeWidth="1" fill="none" strokeDasharray="3 3"/>
+                            <text x="50" y="58" fontFamily="Arial, sans-serif" fontSize="24" fontWeight="bold" fill="#22c55e" textAnchor="middle">PAID</text>
+                            <text x="50" y="32" fontFamily="Arial, sans-serif" fontSize="8" fill="#22c55e" textAnchor="middle">THANK YOU</text>
+                        </svg>
+                    </div>
+                 ) : (
+                    <div style={sealContainerStyles}>
+                        <svg viewBox="0 0 100 100" style={{ transform: 'rotate(-10deg)' }}>
+                            <rect x="10" y="25" width="80" height="50" stroke="#dc2626" strokeWidth="4" fill="none" />
+                            <text x="50" y="58" fontFamily="Impact, sans-serif" fontSize="32" fontWeight="bold" fill="#dc2626" textAnchor="middle">DUE</text>
+                        </svg>
+                    </div>
+                 )}
                 
                 <header style={headerStyles}>
                     <h1 style={h1Styles}>{t('memo_title')}</h1>
