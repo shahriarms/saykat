@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -308,6 +307,32 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Card className="lg:col-span-1">
+                <CardHeader>
+                    <CardTitle>Recent Memos</CardTitle>
+                    <CardDescription>Your last 5 invoices.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-4">
+                        {recentMemos.length > 0 ? (
+                            recentMemos.map(invoice => (
+                                <button key={invoice.id} onClick={() => setSelectedInvoice(invoice)} className="w-full text-left p-3 rounded-md hover:bg-muted transition-colors border">
+                                    <div className="flex justify-between items-center">
+                                        <div className="font-semibold">
+                                            Inv #{invoice.id} - {invoice.customerName}
+                                        </div>
+                                        <div className="font-mono">৳ {invoice.subtotal.toFixed(2)}</div>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground">{format(new Date(invoice.date), 'PP p')}</p>
+                                </button>
+                            ))
+                        ) : (
+                            <div className="text-center text-muted-foreground p-8">No recent invoices found.</div>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
+
             <div className="lg:col-span-2 grid grid-cols-1 gap-6">
                 {/* Date Range Summary Cards */}
                 <div>
@@ -383,58 +408,30 @@ export default function Dashboard() {
                       </Card>
                     </div>
                 </div>
-                <div className="grid grid-cols-1 gap-6">
-                  <Card>
-                      <CardHeader>
-                      <CardTitle>{t('daily_sales_chart_title', { range: rangeTitle })}</CardTitle>
-                      <CardDescription>{t('daily_sales_chart_description')}</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                      <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
-                          <BarChart data={salesChartData}>
-                          <CartesianGrid vertical={false} />
-                          <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
-                          <YAxis />
-                          <ChartTooltip
-                              cursor={false}
-                              content={<ChartTooltipContent indicator="dot" />}
-                          />
-                          <Bar dataKey="Sales" fill="var(--color-Sales)" radius={4} />
-                          </BarChart>
-                      </ChartContainer>
-                      </CardContent>
-                  </Card>
-                </div>
             </div>
-            
-            <Card>
-                <CardHeader>
-                    <CardTitle>Recent Memos</CardTitle>
-                    <CardDescription>Your last 5 invoices.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        {recentMemos.length > 0 ? (
-                            recentMemos.map(invoice => (
-                                <button key={invoice.id} onClick={() => setSelectedInvoice(invoice)} className="w-full text-left p-3 rounded-md hover:bg-muted transition-colors border">
-                                    <div className="flex justify-between items-center">
-                                        <div className="font-semibold">
-                                            Inv #{invoice.id} - {invoice.customerName}
-                                        </div>
-                                        <div className="font-mono">৳ {invoice.subtotal.toFixed(2)}</div>
-                                    </div>
-                                    <p className="text-sm text-muted-foreground">{format(new Date(invoice.date), 'PP p')}</p>
-                                </button>
-                            ))
-                        ) : (
-                            <div className="text-center text-muted-foreground p-8">No recent invoices found.</div>
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+              <CardHeader>
+              <CardTitle>{t('daily_sales_chart_title', { range: rangeTitle })}</CardTitle>
+              <CardDescription>{t('daily_sales_chart_description')}</CardDescription>
+              </CardHeader>
+              <CardContent>
+              <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
+                  <BarChart data={salesChartData}>
+                  <CartesianGrid vertical={false} />
+                  <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
+                  <YAxis />
+                  <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent indicator="dot" />}
+                  />
+                  <Bar dataKey="Sales" fill="var(--color-Sales)" radius={4} />
+                  </BarChart>
+              </ChartContainer>
+              </CardContent>
+          </Card>
           <Card>
               <CardHeader>
                   <CardTitle>{t('daily_expenses_chart_title', { range: rangeTitle })}</CardTitle>
