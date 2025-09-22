@@ -73,14 +73,14 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
     };
     
     const h1Styles: React.CSSProperties = {
-      fontSize: isPos ? '1.5rem' : '2rem',
+      fontSize: isPos ? '1.5rem' : '2.2rem',
       fontWeight: 'bold',
       color: '#000',
       margin: '0 0 0.5rem 0',
     };
 
     const h2Styles: React.CSSProperties = {
-      fontSize: isPos ? '1.2rem' : '1.5rem',
+      fontSize: isPos ? '1.2rem' : '2rem',
       fontWeight: 600,
       color: '#158a67',
       margin: 0,
@@ -140,11 +140,11 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%) rotate(-10deg)',
-        opacity: 0.15,
+        opacity: 0.1,
         zIndex: 1,
         pointerEvents: 'none',
         width: isPos ? '150px' : '300px',
-        height: isPos ? '75px' : '100px',
+        height: isPos ? '150px' : '300px',
     };
 
 
@@ -170,18 +170,9 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
                             </filter>
                         </defs>
                         <g filter="url(#grunge)" fill={isPaid ? '#22c55e' : '#dc2626'}>
-                            <rect x="2" y="2" width="296" height="96" rx="10" ry="10" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="4" fill="none"/>
-                            <rect x="2" y="2" width="296" height="96" rx="10" ry="10" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="8" fill="none" strokeDasharray="3 3"/>
-                            
-                            {isPaid ? (
-                                <>
-                                    <line x1="210" y1="2" x2="210" y2="98" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="4" />
-                                    <text x="105" y="68" fontFamily="Arial, sans-serif" fontSize="60" fontWeight="bold" textAnchor="middle">PAID</text>
-                                    <text x="255" y="70" fontFamily="Arial, sans-serif" fontSize="56" fontWeight="bold" textAnchor="middle">৳</text>
-                                </>
-                            ) : (
-                                <text x="150" y="68" fontFamily="Arial, sans-serif" fontSize="60" fontWeight="bold" textAnchor="middle">DUE</text>
-                            )}
+                            <path d="M 50,2 L 250,2 C 265,2 290,2 298,20 L 298,80 C 298,90 270,98 250,98 L 50,98 C 35,98 10,98 2,80 L 2,20 C 2,10 20,2 50,2 Z" stroke={isPaid ? '#22c55e' : '#dc2626'} strokeWidth="4" fill="none"/>
+                            <text x="150" y="70" fontFamily="Impact, Arial Black, sans-serif" fontSize={isPaid ? "60" : "48"} fontWeight="bold" textAnchor="middle">{isPaid ? 'PAID' : 'DUE'}</text>
+                            {isPaid && <text x="255" y="70" fontFamily="Arial, sans-serif" fontSize="56" fontWeight="bold" textAnchor="middle">৳</text>}
                         </g>
                     </svg>
                 </div>
