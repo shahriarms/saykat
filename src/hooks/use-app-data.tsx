@@ -52,7 +52,7 @@ interface AppDataContextType {
     getBuyerById: (buyerId: string) => Buyer | undefined;
     getInvoicesForBuyer: (buyerId: string) => Invoice[];
     getInvoicesForDateRange: (startDate: Date, endDate: Date) => Invoice[];
-    getGrossProfitForDateRange: (invoices: Invoice[]) => { grossProfit: number; cogs: number };
+    getGrossProfitForDateRange: (invoices: Invoice[]) => { grossProfit: number, cogs: number };
 
 
     // Payment Functions
@@ -429,23 +429,32 @@ export function DataProvider({ children }: { children: ReactNode }) {
         });
     }, [invoices]);
     
-    const getGrossProfitForDateRange = useCallback((invoicesInRange: Invoice[]): { grossProfit: number, cogs: number } => {
-        let totalProfit = 0;
+    const getGrossProfitForDateRange = useCallback((invoicesInRange: Invoice[]): { grossProfit: number; cogs: number } => {
+        let totalGrossProfit = 0;
         let totalCOGS = 0;
         const productMap = new Map(products.map(p => [p.id, p]));
 
         for (const invoice of invoicesInRange) {
-            for (const item of invoice.items) {
-                const product = productMap.get(item.id);
-                if (product) {
-                    const cogsForItem = product.buyingPrice * item.quantity;
-                    const profitPerUnit = item.price - product.buyingPrice;
-                    totalProfit += profitPerUnit * item.quantity;
-                    totalCOGS += cogsForItem;
+            // If totalProfit is stored on the invoice, use it for accuracy
+            if (typeof invoice.totalProfit === 'number') {
+                totalGrossProfit += invoice.totalProfit;
+                // Estimate COGS if not stored
+                const cogsForInvoice = invoice.subtotal - invoice.totalProfit;
+                totalCOGS += cogsForInvoice;
+            } else {
+                // Fallback for older invoices without stored profit
+                for (const item of invoice.items) {
+                    const product = productMap.get(item.id);
+                    if (product) {
+                        const cogsForItem = product.buyingPrice * item.quantity;
+                        const profitPerUnit = item.price - product.buyingPrice;
+                        totalGrossProfit += profitPerUnit * item.quantity;
+                        totalCOGS += cogsForItem;
+                    }
                 }
             }
         }
-        return { grossProfit: totalProfit, cogs: totalCOGS };
+        return { grossProfit: totalGrossProfit, cogs: totalCOGS };
     }, [products]);
 
 

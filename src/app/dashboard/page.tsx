@@ -129,10 +129,7 @@ export default function Dashboard() {
       const { materialSoldKg, hardwareSoldPcs } = calculateUnitsSold(todayInvoices, products);
       const presentToday = todayAttendance.filter(a => a.status === 'Present').length;
       
-      const profitMarginOnSale = totalSales > 0 ? (grossProfit / totalSales) * 100 : 0;
-      const profitMarginOnCost = cogs > 0 ? (grossProfit / cogs) * 100 : 0;
-
-      return { totalSales, totalExpenses, profit, totalDue, materialSoldKg, hardwareSoldPcs, presentToday, grossProfit, cogs, profitMarginOnSale, profitMarginOnCost };
+      return { totalSales, totalExpenses, profit, totalDue, materialSoldKg, hardwareSoldPcs, presentToday, grossProfit, cogs };
   }, [todayInvoices, todayExpenses, todayAttendance, getGrossProfitForDateRange, products, calculateUnitsSold]);
   
   const { salesChartData, expensesChartData } = useMemo(() => {
@@ -172,7 +169,7 @@ export default function Dashboard() {
         if (isSameDay(date.from, date.to)) {
             return format(date.from, 'PPP');
         }
-        return `${format(date.from, 'PP')} - ${format(date.to, 'PP')}`;
+        return `${format(date.from, 'LLL dd, y')} - ${format(date.to, 'LLL dd, y')}`;
     }
     return format(date.from, 'PPP');
   }, [date]);
@@ -261,32 +258,44 @@ export default function Dashboard() {
                                 <TrendingUp className={`h-6 w-6 ${todayStats.profit >= 0 ? 'text-green-600' : 'text-red-600'}`} />
                             </div>
                             <div>
-                                <p className="text-sm text-muted-foreground">{t('todays_profit_card_title')}</p>
+                                <p className="text-sm text-muted-foreground">Net Profit</p>
                                 <p className={`text-xl font-bold ${todayStats.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>৳ {todayStats.profit.toFixed(2)}</p>
                             </div>
                         </Card>
                     </TooltipTrigger>
                     <TooltipContent>
-                        <p className="text-sm">Profit = Gross Profit - Expenses</p>
+                        <p className="text-sm">Net Profit = Gross Profit - Expenses</p>
                         <p className="text-sm">৳{todayStats.profit.toFixed(2)} = ৳{todayStats.grossProfit.toFixed(2)} - ৳{todayStats.totalExpenses.toFixed(2)}</p>
                     </TooltipContent>
                 </Tooltip>
-                 <Card className="text-left flex items-center p-4 gap-4">
-                    <div className="bg-teal-100 p-3 rounded-full"><ThumbsUp className="h-6 w-6 text-teal-600" /></div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Profit % (on Sale)</p>
-                        <p className="text-xl font-bold"> {todayStats.profitMarginOnSale.toFixed(2)}%</p>
-                        <p className="text-xs text-muted-foreground">(Profit/Sales)</p>
-                    </div>
-                 </Card>
-                  <Card className="text-left flex items-center p-4 gap-4">
-                    <div className="bg-cyan-100 p-3 rounded-full"><Weight className="h-6 w-6 text-cyan-600" /></div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Profit % (on Cost)</p>
-                        <p className="text-xl font-bold"> {todayStats.profitMarginOnCost.toFixed(2)}%</p>
-                        <p className="text-xs text-muted-foreground">(Profit/COGS)</p>
-                    </div>
-                  </Card>
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Card className="text-left flex items-center p-4 gap-4">
+                            <div className="bg-teal-100 p-3 rounded-full"><ThumbsUp className="h-6 w-6 text-teal-600" /></div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Gross Profit</p>
+                                <p className="text-xl font-bold">৳ {todayStats.grossProfit.toFixed(2)}</p>
+                            </div>
+                        </Card>
+                    </TooltipTrigger>
+                     <TooltipContent>
+                        <p className="text-sm">Gross Profit = Selling Price - Cost of Goods</p>
+                    </TooltipContent>
+                </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Card className="text-left flex items-center p-4 gap-4">
+                            <div className="bg-cyan-100 p-3 rounded-full"><Weight className="h-6 w-6 text-cyan-600" /></div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">COGS</p>
+                                <p className="text-xl font-bold">৳ {todayStats.cogs.toFixed(2)}</p>
+                            </div>
+                        </Card>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p className="text-sm">Cost of Goods Sold (Total Purchase Price of Sold Items)</p>
+                    </TooltipContent>
+                 </Tooltip>
             </div>
         </div>
 
