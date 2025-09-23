@@ -459,11 +459,12 @@ function InvoicePage() {
                             <Button
                                 type="button"
                                 size="sm"
+                                variant={isFullyPaid ? "default" : "default"}
                                 className={cn(
                                     "h-8 px-2 text-xs",
                                     isFullyPaid
-                                    ? "bg-green-600 hover:bg-green-700 text-white"
-                                    : "bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                                    ? "bg-green-600 hover:bg-green-700"
+                                    : ""
                                 )}
                                 onClick={() => updateActiveDraft({ paidAmount: subtotal })}
                             >
