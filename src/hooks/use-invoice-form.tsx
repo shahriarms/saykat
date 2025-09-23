@@ -84,8 +84,11 @@ const calculateTotals = (items: (DraftInvoiceItem | { quantity: number | string,
 
     const validPaidAmount = (typeof paidAmount === 'number' && !isNaN(paidAmount)) ? Math.max(0, Math.min(paidAmount, subtotal)) : 0;
     
-    const changeAmount = (cashReceived && cashReceived > subtotal) ? cashReceived - subtotal : 0;
+    const validCashReceived = (typeof cashReceived === 'number' && !isNaN(cashReceived)) ? cashReceived : 0;
+
     const dueAmount = subtotal - validPaidAmount;
+    
+    const changeAmount = (validCashReceived > subtotal) ? validCashReceived - subtotal : 0;
 
     return { subtotal, changeAmount, paidAmount: validPaidAmount, dueAmount };
 };
