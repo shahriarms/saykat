@@ -418,6 +418,8 @@ function InvoicePage() {
                                                 {showProfit && (
                                                     <>
                                                         <Separator orientation="vertical" className="h-3" />
+                                                        <span>Buy: ৳{item.buyingPrice.toFixed(2)}</span>
+                                                        <Separator orientation="vertical" className="h-3" />
                                                         <span className={cn(item.profitMargin < 0 ? 'text-red-500' : 'text-green-600')}>
                                                             Profit: {item.profitMargin.toFixed(1)}% (৳{item.profitAmount.toFixed(2)})
                                                         </span>
