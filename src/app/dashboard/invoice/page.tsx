@@ -61,33 +61,41 @@ function InvoicePage() {
   const [isPrintConfirmOpen, setPrintConfirmOpen] = useState(false);
   const [invoiceToPrint, setInvoiceToPrint] = useState<DraftInvoice | null>(null);
 
-  const handlePrint = useCallback(() => {
+  useEffect(() => {
     if (invoiceToPrint) {
-        setTimeout(() => {
-            window.print();
-        }, 100);
-    }
-  }, [invoiceToPrint]);
+        setIsProcessing(true); // Visually indicate printing
+        const originalTitle = document.title;
+        document.title = `invoice-${invoiceToPrint.id}`;
+        
+        const handleAfterPrint = () => {
+            document.title = originalTitle;
+            setInvoiceToPrint(null);
+            setIsProcessing(false); // End processing state
+            resetActiveDraft();
+             toast({
+                title: "Memo Ready",
+                description: "A new, empty memo is ready for you.",
+            });
+            window.removeEventListener('afterprint', handleAfterPrint);
+        };
 
- useEffect(() => {
-    if (invoiceToPrint) {
-        handlePrint();
+        window.addEventListener('afterprint', handleAfterPrint);
+        
+        // Use timeout to ensure the state update has rendered before printing
+        const timer = setTimeout(() => {
+            window.print();
+        }, 100); 
+        
+        return () => {
+            clearTimeout(timer);
+            window.removeEventListener('afterprint', handleAfterPrint);
+            // Defensive cleanup
+            if (document.title !== originalTitle) {
+              document.title = originalTitle;
+            }
+        };
     }
-    const handleAfterPrint = () => {
-      if (invoiceToPrint) {
-        setInvoiceToPrint(null);
-        resetActiveDraft();
-        toast({
-          title: "Memo Ready",
-          description: "A new, empty memo is ready for you.",
-        });
-      }
-    };
-    window.addEventListener('afterprint', handleAfterPrint);
-    return () => {
-      window.removeEventListener('afterprint', handleAfterPrint);
-    };
-  }, [invoiceToPrint, resetActiveDraft, toast, handlePrint]);
+  }, [invoiceToPrint, resetActiveDraft, toast]);
   
   const { id: draftId, customerName, customerAddress, customerPhone, paidAmount, subtotal, items, cashReceived, changeAmount, dueAmount } = activeDraft || {};
 
@@ -132,6 +140,9 @@ function InvoicePage() {
             
             const finalDraft = await updateActiveDraft({ id: newInvoiceId });
             setInvoiceToPrint(finalDraft);
+        } else {
+            // If addInvoice fails, reset processing state
+            setIsProcessing(false);
         }
     } catch (error: any) {
         console.error("Failed to save invoice:", error);
@@ -140,7 +151,6 @@ function InvoicePage() {
             title: 'Error',
             description: error.message || 'Failed to save the invoice.',
         });
-    } finally {
         setIsProcessing(false);
     }
   };
