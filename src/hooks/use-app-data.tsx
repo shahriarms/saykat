@@ -52,7 +52,7 @@ interface AppDataContextType {
     getBuyerById: (buyerId: string) => Buyer | undefined;
     getInvoicesForBuyer: (buyerId: string) => Invoice[];
     getInvoicesForDateRange: (startDate: Date, endDate: Date) => Invoice[];
-    getGrossProfitForDateRange: (invoices: Invoice[]) => number;
+    getGrossProfitForDateRange: (invoices: Invoice[]) => { grossProfit: number; cogs: number };
 
 
     // Payment Functions
@@ -428,20 +428,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
         });
     }, [invoices]);
     
-    const getGrossProfitForDateRange = useCallback((invoicesInRange: Invoice[]) => {
+    const getGrossProfitForDateRange = useCallback((invoicesInRange: Invoice[]): { grossProfit: number, cogs: number } => {
         let totalProfit = 0;
+        let totalCOGS = 0;
         const productMap = new Map(products.map(p => [p.id, p]));
 
         for (const invoice of invoicesInRange) {
             for (const item of invoice.items) {
                 const product = productMap.get(item.id);
                 if (product) {
+                    const cogsForItem = product.buyingPrice * item.quantity;
                     const profitPerUnit = item.price - product.buyingPrice;
                     totalProfit += profitPerUnit * item.quantity;
+                    totalCOGS += cogsForItem;
                 }
             }
         }
-        return totalProfit;
+        return { grossProfit: totalProfit, cogs: totalCOGS };
     }, [products]);
 
 

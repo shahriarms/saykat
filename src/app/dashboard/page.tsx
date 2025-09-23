@@ -113,22 +113,26 @@ export default function Dashboard() {
     const totalSales = rangeInvoices.reduce((sum, inv) => sum + inv.subtotal, 0);
     const totalExpenses = rangeExpenses.reduce((sum, exp) => sum + exp.amount, 0);
     const totalSalaryPaid = rangeSalaries.reduce((sum, sal) => sum + sal.amount, 0);
-    const grossProfit = getGrossProfitForDateRange(rangeInvoices);
+    const { grossProfit, cogs } = getGrossProfitForDateRange(rangeInvoices);
     const profit = grossProfit - totalExpenses - totalSalaryPaid;
     const totalDue = rangeInvoices.reduce((sum, inv) => sum + inv.dueAmount, 0);
     const { materialSoldKg, hardwareSoldPcs } = calculateUnitsSold(rangeInvoices, products);
-    return { totalSales, totalExpenses, totalSalaryPaid, profit, totalDue, materialSoldKg, hardwareSoldPcs, grossProfit };
+    return { totalSales, totalExpenses, totalSalaryPaid, profit, totalDue, materialSoldKg, hardwareSoldPcs, grossProfit, cogs };
   }, [rangeInvoices, rangeExpenses, rangeSalaries, getGrossProfitForDateRange, products, calculateUnitsSold]);
   
   const todayStats = useMemo(() => {
       const totalSales = todayInvoices.reduce((sum, inv) => sum + inv.subtotal, 0);
       const totalExpenses = todayExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-      const grossProfit = getGrossProfitForDateRange(todayInvoices);
+      const { grossProfit, cogs } = getGrossProfitForDateRange(todayInvoices);
       const profit = grossProfit - totalExpenses;
       const totalDue = todayInvoices.reduce((sum, inv) => sum + inv.dueAmount, 0);
       const { materialSoldKg, hardwareSoldPcs } = calculateUnitsSold(todayInvoices, products);
       const presentToday = todayAttendance.filter(a => a.status === 'Present').length;
-      return { totalSales, totalExpenses, profit, totalDue, materialSoldKg, hardwareSoldPcs, presentToday, grossProfit };
+      
+      const profitMarginOnSale = totalSales > 0 ? (grossProfit / totalSales) * 100 : 0;
+      const profitMarginOnCost = cogs > 0 ? (grossProfit / cogs) * 100 : 0;
+
+      return { totalSales, totalExpenses, profit, totalDue, materialSoldKg, hardwareSoldPcs, presentToday, grossProfit, cogs, profitMarginOnSale, profitMarginOnCost };
   }, [todayInvoices, todayExpenses, todayAttendance, getGrossProfitForDateRange, products, calculateUnitsSold]);
   
   const { salesChartData, expensesChartData } = useMemo(() => {
@@ -214,7 +218,7 @@ export default function Dashboard() {
 
         <div>
             <h2 className="text-lg font-semibold mb-4">{t('todays_summary_title')}</h2>
-             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
                 <Card as="button" onClick={() => setDailySalesReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
                   <div className="bg-blue-100 p-3 rounded-full"><DollarSign className="h-6 w-6 text-blue-600" /></div>
                   <div>
@@ -267,6 +271,22 @@ export default function Dashboard() {
                         <p className="text-sm">৳{todayStats.profit.toFixed(2)} = ৳{todayStats.grossProfit.toFixed(2)} - ৳{todayStats.totalExpenses.toFixed(2)}</p>
                     </TooltipContent>
                 </Tooltip>
+                 <Card className="text-left flex items-center p-4 gap-4">
+                    <div className="bg-teal-100 p-3 rounded-full"><ThumbsUp className="h-6 w-6 text-teal-600" /></div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Profit % (on Sale)</p>
+                        <p className="text-xl font-bold"> {todayStats.profitMarginOnSale.toFixed(2)}%</p>
+                        <p className="text-xs text-muted-foreground">(Profit/Sales)</p>
+                    </div>
+                 </Card>
+                  <Card className="text-left flex items-center p-4 gap-4">
+                    <div className="bg-cyan-100 p-3 rounded-full"><Weight className="h-6 w-6 text-cyan-600" /></div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Profit % (on Cost)</p>
+                        <p className="text-xl font-bold"> {todayStats.profitMarginOnCost.toFixed(2)}%</p>
+                        <p className="text-xs text-muted-foreground">(Profit/COGS)</p>
+                    </div>
+                  </Card>
             </div>
         </div>
 
