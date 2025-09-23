@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
@@ -430,12 +431,15 @@ export default function BuyersDuePage() {
                                 <h3 className="text-lg font-semibold">{t('live_receipt_preview_title')}</h3>
                             </div>
                             <ScrollArea className="flex-1 rounded-lg bg-background p-2 mt-2">
-                                <PaymentReceipt
-                                    buyer={selectedBuyer}
-                                    invoice={selectedInvoice}
-                                    paymentHistory={getPaymentsForInvoice(selectedInvoice.id)}
-                                    newPaymentAmount={numericPaymentAmount}
-                                />
+                                <div className="w-full h-full overflow-x-auto">
+                                    <PaymentReceipt
+                                        buyer={selectedBuyer}
+                                        invoice={selectedInvoice}
+                                        paymentHistory={getPaymentsForInvoice(selectedInvoice.id)}
+                                        newPaymentAmount={numericPaymentAmount}
+                                        previewMode={true}
+                                    />
+                                </div>
                             </ScrollArea>
                           </div>
                       </div>

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React from 'react';
@@ -19,6 +20,7 @@ interface InvoicePrintLayoutProps {
     dueAmount: number;
     printFormat?: PrintFormat;
     locale?: Locale;
+    previewMode?: boolean; // New prop for scaling in preview
 }
 
 export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, InvoicePrintLayoutProps>(
@@ -35,6 +37,7 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
         dueAmount,
         printFormat = 'normal',
         locale = 'en',
+        previewMode = false, // Default to false
     } = props;
 
     const t = (key: keyof (typeof translations)['en'], options?: any) => {
@@ -52,6 +55,8 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
 
     const amountInWords = isBn ? numberToWordsBn(subtotal) : numberToWords(subtotal);
     const isPaid = dueAmount <= 0.001;
+    
+    const scaleFactor = previewMode ? 'scale(0.9)' : 'scale(1)';
 
     const memoStyles: React.CSSProperties = {
         position: 'relative',
@@ -65,6 +70,8 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
         padding: isPos ? '0.25rem' : '2rem',
         border: isPos ? 'none' : '2px dashed #ccc',
         boxSizing: 'border-box',
+        transform: scaleFactor,
+        transformOrigin: 'top',
     };
 
     const headerStyles: React.CSSProperties = {
@@ -102,13 +109,22 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
         marginBottom: isPos ? '1rem' : '2rem',
         fontSize: isPos ? '12px' : '14px',
     };
-
+    
     const thStyles: React.CSSProperties = {
         borderBottom: '2px solid #ccc',
         padding: isPos ? '0.25rem' : '0.75rem',
         textAlign: 'left',
         fontWeight: 600,
+        width: isPos ? undefined : 'auto', // for A4
     };
+    
+    const posThStyles = {
+        item: { ...thStyles, width: '50%' },
+        qty: { ...thStyles, textAlign: 'center', width: '15%' },
+        rate: { ...thStyles, textAlign: 'right', width: '20%' },
+        amount: { ...thStyles, textAlign: 'right', width: '15%' },
+    };
+
 
     const tdStyles: React.CSSProperties = {
         borderBottom: '1px solid #eee',
@@ -200,12 +216,12 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
                 </div>
 
                 <table style={tableStyles}>
-                    <thead>
+                     <thead>
                         <tr>
-                            <th style={thStyles}>{t('item_header')}</th>
-                            <th style={{...thStyles, textAlign: 'center'}}>{t('quantity_header')}</th>
-                            <th style={{...thStyles, textAlign: 'right'}}>{t('rate_header')}</th>
-                            <th style={{...thStyles, textAlign: 'right'}}>{t('amount_header')}</th>
+                            <th style={isPos ? posThStyles.item : thStyles}>{t('item_header')}</th>
+                            <th style={isPos ? posThStyles.qty : {...thStyles, textAlign: 'center'}}>{t('quantity_header')}</th>
+                            <th style={isPos ? posThStyles.rate : {...thStyles, textAlign: 'right'}}>{t('rate_header')}</th>
+                            <th style={isPos ? posThStyles.amount : {...thStyles, textAlign: 'right'}}>{t('amount_header')}</th>
                         </tr>
                     </thead>
                     <tbody>
