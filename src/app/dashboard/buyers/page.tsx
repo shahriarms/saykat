@@ -102,6 +102,7 @@ export default function BuyersPage() {
       }
     } else {
       setInvoiceToPrint(selectedInvoice);
+      setTimeout(() => window.print(), 100);
     }
   };
   
@@ -120,35 +121,6 @@ export default function BuyersPage() {
       setIsDeleting(false);
     }
   };
-  
-    useEffect(() => {
-        if (invoiceToPrint) {
-            setIsPrinting(true);
-            const originalTitle = document.title;
-            document.title = `invoice-${invoiceToPrint.id}`;
-            
-            const handleAfterPrint = () => {
-                document.title = originalTitle;
-                setInvoiceToPrint(null);
-                setIsPrinting(false);
-                window.removeEventListener('afterprint', handleAfterPrint);
-            };
-
-            window.addEventListener('afterprint', handleAfterPrint);
-            
-            const timer = setTimeout(() => {
-                window.print();
-            }, 100); 
-            
-            return () => {
-                clearTimeout(timer);
-                window.removeEventListener('afterprint', handleAfterPrint);
-                if (document.title !== originalTitle) {
-                  document.title = originalTitle;
-                }
-            };
-        }
-    }, [invoiceToPrint]);
   
   const filteredInvoices = useMemo(() => {
     if (!selectedBuyer) return [];
@@ -344,21 +316,6 @@ export default function BuyersPage() {
                                     locale={settings.locale}
                                 />
                             </div>
-                        </div>
-                         <div className="hidden print:block">
-                            <InvoicePrintLayout 
-                                  invoiceId={selectedInvoice.id}
-                                  currentDate={new Date(selectedInvoice.date).toLocaleDateString()}
-                                  customerName={selectedInvoice.customerName}
-                                  customerAddress={selectedInvoice.customerAddress}
-                                  customerPhone={selectedInvoice.customerPhone}
-                                  invoiceItems={selectedInvoice.items}
-                                  subtotal={selectedInvoice.subtotal}
-                                  paidAmount={selectedInvoice.paidAmount}
-                                  dueAmount={selectedInvoice.dueAmount}
-                                  printFormat={settings.printFormat}
-                                  locale={settings.locale}
-                              />
                         </div>
                     </div>
                   ) : (
