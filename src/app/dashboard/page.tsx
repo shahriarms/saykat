@@ -120,8 +120,9 @@ export default function Dashboard() {
     const { grossProfit, cogs } = getGrossProfitForDateRange(rangeInvoices);
     const profit = grossProfit - totalExpenses - totalSalaryPaid;
     const totalDue = rangeInvoices.reduce((sum, inv) => sum + inv.dueAmount, 0);
+    const cashInHand = profit - totalDue;
     const { materialSoldKg, hardwareSoldPcs } = calculateUnitsSold(rangeInvoices, products);
-    return { totalSales, totalExpenses, totalSalaryPaid, profit, totalDue, materialSoldKg, hardwareSoldPcs, grossProfit, cogs };
+    return { totalSales, totalExpenses, totalSalaryPaid, profit, totalDue, materialSoldKg, hardwareSoldPcs, grossProfit, cogs, cashInHand };
   }, [rangeInvoices, rangeExpenses, rangeSalaries, products, calculateUnitsSold, getGrossProfitForDateRange]);
   
   const todayStats = useMemo(() => {
@@ -274,7 +275,7 @@ export default function Dashboard() {
                 </Tooltip>
                  <Tooltip>
                     <TooltipTrigger asChild>
-                        <Card as="button" onClick={() => setGrossProfitReportOpen(true)} className="text-left flex items-center p-4 gap-4">
+                        <Card as="button" onClick={() => setGrossProfitReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
                             <div className="bg-teal-100 p-3 rounded-full"><ThumbsUp className="h-6 w-6 text-teal-600" /></div>
                             <div>
                                 <p className="text-sm text-muted-foreground">Today's Gross Profit</p>
