@@ -300,7 +300,7 @@ export default function BuyersDuePage() {
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <Card className="lg:col-span-1 flex flex-col">
-            <CardHeader className="flex-shrink-0">
+            <CardHeader>
               <CardTitle>{t('buyers_with_due_title')}</CardTitle>
               <div className="relative pt-2">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -329,7 +329,7 @@ export default function BuyersDuePage() {
           </Card>
 
           <Card className="lg:col-span-1 flex flex-col">
-            <CardHeader className="flex-shrink-0">
+            <CardHeader>
               <CardTitle className="truncate">{selectedBuyer ? t('due_invoices_title') : t('select_buyer_title')}</CardTitle>
               <CardDescription>{selectedBuyer ? t('for_buyer_subtitle', { name: selectedBuyer.name }) : t('outstanding_balances_subtitle')}</CardDescription>
               <div className="relative pt-2">
@@ -506,3 +506,5 @@ export default function BuyersDuePage() {
     </>
   );
 }
+
+    
