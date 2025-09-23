@@ -114,6 +114,14 @@ function InvoicePage() {
       toast({ variant: 'destructive', title: t('validation_error_title'), description: t('invoice_items_required_error') });
       return false;
     }
+    if ((dueAmount || 0) > 0 && (!customerPhone || customerPhone.length < 11)) {
+        toast({
+            variant: 'destructive',
+            title: 'Phone Number Required for Due',
+            description: 'Please enter a valid 11-digit phone number for invoices with a due balance.',
+        });
+        return false;
+    }
     return true;
   };
   
@@ -536,5 +544,3 @@ export default function InvoicePageWrapper() {
     </InvoiceFormProvider>
   );
 }
-
-    
