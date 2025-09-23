@@ -478,20 +478,37 @@ function InvoicePage() {
                   </CardHeader>
                   <CardContent>
                       <ScrollArea className="h-96">
-                          <div className="p-4 bg-muted/50 rounded-lg transform origin-top scale-[var(--tw-scale-x)] md:scale-100 [--tw-scale-x:0.4] sm:[--tw-scale-x:0.6]">
-                              <InvoicePrintLayout 
-                                  invoiceId={draftId}
-                                  currentDate={new Date().toLocaleDateString()}
-                                  customerName={customerName}
-                                  customerAddress={customerAddress}
-                                  customerPhone={customerPhone}
-                                  invoiceItems={items}
-                                  subtotal={subtotal}
-                                  paidAmount={paidAmount || 0}
-                                  dueAmount={dueAmount || 0}
-                                  printFormat={settings.printFormat}
-                                  locale={settings.locale}
-                              />
+                          <div className="p-4 bg-muted/50 rounded-lg">
+                              <div className="print:hidden transform origin-top scale-[var(--tw-scale-x)] md:scale-100 [--tw-scale-x:0.4] sm:[--tw-scale-x:0.6]">
+                                <InvoicePrintLayout 
+                                    invoiceId={draftId}
+                                    currentDate={new Date().toLocaleDateString()}
+                                    customerName={customerName}
+                                    customerAddress={customerAddress}
+                                    customerPhone={customerPhone}
+                                    invoiceItems={items}
+                                    subtotal={subtotal}
+                                    paidAmount={paidAmount || 0}
+                                    dueAmount={dueAmount || 0}
+                                    printFormat={settings.printFormat}
+                                    locale={settings.locale}
+                                />
+                              </div>
+                              <div className="hidden print:block">
+                                <InvoicePrintLayout 
+                                    invoiceId={draftId}
+                                    currentDate={new Date().toLocaleDateString()}
+                                    customerName={customerName}
+                                    customerAddress={customerAddress}
+                                    customerPhone={customerPhone}
+                                    invoiceItems={items}
+                                    subtotal={subtotal}
+                                    paidAmount={paidAmount || 0}
+                                    dueAmount={dueAmount || 0}
+                                    printFormat={settings.printFormat}
+                                    locale={settings.locale}
+                                />
+                              </div>
                           </div>
                       </ScrollArea>
                   </CardContent>
