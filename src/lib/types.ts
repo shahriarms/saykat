@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string;
   name: string;
@@ -16,6 +17,8 @@ export interface InvoiceItem {
   name: string;
   quantity: number;
   price: number; // This will be the sellingPrice at the time of sale
+  buyingPrice: number;
+  profitAmount: number;
 }
 
 export interface Payment {

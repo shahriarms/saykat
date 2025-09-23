@@ -80,7 +80,7 @@ const createNewDraft = (index: number, lastInvoiceId: number, isLoading: boolean
     }
 };
 
-const calculateTotals = (items: (DraftInvoiceItem | { quantity: number | string, price: number | string, profitAmount?: number })[], paidAmount?: number, cashReceived?: number) => {
+const calculateTotals = (items: (DraftInvoiceItem | InvoiceItem)[], paidAmount?: number, cashReceived?: number) => {
     const subtotal = items.reduce((acc, item) => {
         const quantity = parseFloat(String(item.quantity)) || 0;
         const price = parseFloat(String(item.price)) || 0;
@@ -88,7 +88,7 @@ const calculateTotals = (items: (DraftInvoiceItem | { quantity: number | string,
     }, 0);
 
     const totalProfit = items.reduce((acc, item) => {
-        const profit = item.profitAmount || 0;
+        const profit = (item as DraftInvoiceItem).profitAmount || 0;
         return acc + profit;
     }, 0);
 
@@ -101,6 +101,7 @@ const calculateTotals = (items: (DraftInvoiceItem | { quantity: number | string,
     
     return { subtotal, dueAmount, paidAmount: validPaidAmount, changeAmount, totalProfit };
 };
+
 
 const STORAGE_KEYS = {
     invoiceDrafts: 'stockpilot-invoice-drafts',

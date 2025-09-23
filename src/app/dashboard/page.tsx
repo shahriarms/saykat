@@ -26,6 +26,8 @@ const DailyExpensesReportDialog = dynamic(() => import('@/components/daily-expen
 const DailyDueReportDialog = dynamic(() => import('@/components/daily-due-report-dialog').then(mod => mod.DailyDueReportDialog), { ssr: false });
 const DailyUnitsSoldReportDialog = dynamic(() => import('@/components/daily-units-sold-report-dialog').then(mod => mod.DailyUnitsSoldReportDialog), { ssr: false });
 const DailyAttendanceReportDialog = dynamic(() => import('@/components/daily-attendance-report-dialog').then(mod => mod.DailyAttendanceReportDialog), { ssr: false });
+const GrossProfitReportDialog = dynamic(() => import('@/components/gross-profit-report-dialog').then(mod => mod.GrossProfitReportDialog), { ssr: false });
+
 const MonthlySalesDialog = dynamic(() => import('@/components/monthly-sales-report-dialog').then(mod => mod.MonthlySalesDialog), { ssr: false });
 const MonthlyExpensesDialog = dynamic(() => import('@/components/monthly-expenses-report-dialog').then(mod => mod.MonthlyExpensesDialog), { ssr: false });
 const MonthlyDueDialog = dynamic(() => import('@/components/monthly-due-report-dialog').then(mod => mod.MonthlyDueDialog), { ssr: false });
@@ -55,6 +57,7 @@ export default function Dashboard() {
   const [isDailyDueReportOpen, setDailyDueReportOpen] = useState(false);
   const [isDailyUnitsSoldReportOpen, setDailyUnitsSoldReportOpen] = useState(false);
   const [isDailyAttendanceReportOpen, setDailyAttendanceReportOpen] = useState(false);
+  const [isGrossProfitReportOpen, setGrossProfitReportOpen] = useState(false);
   
   const [isMonthlySalesReportOpen, setMonthlySalesReportOpen] = useState(false);
   const [isMonthlyExpensesReportOpen, setMonthlyExpensesReportOpen] = useState(false);
@@ -253,7 +256,7 @@ export default function Dashboard() {
                 </Card>
                  <Tooltip>
                     <TooltipTrigger asChild>
-                        <Card className="text-left flex items-center p-4 gap-4">
+                        <Card as="button" className="text-left flex items-center p-4 gap-4">
                             <div className={`p-3 rounded-full ${todayStats.profit >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
                                 <TrendingUp className={`h-6 w-6 ${todayStats.profit >= 0 ? 'text-green-600' : 'text-red-600'}`} />
                             </div>
@@ -270,7 +273,7 @@ export default function Dashboard() {
                 </Tooltip>
                  <Tooltip>
                     <TooltipTrigger asChild>
-                        <Card className="text-left flex items-center p-4 gap-4">
+                        <Card as="button" onClick={() => setGrossProfitReportOpen(true)} className="text-left flex items-center p-4 gap-4">
                             <div className="bg-teal-100 p-3 rounded-full"><ThumbsUp className="h-6 w-6 text-teal-600" /></div>
                             <div>
                                 <p className="text-sm text-muted-foreground">Gross Profit</p>
@@ -431,6 +434,11 @@ export default function Dashboard() {
         onOpenChange={setDailyAttendanceReportOpen}
         attendance={todayAttendance}
         employees={employees}
+      /> }
+      { isGrossProfitReportOpen && <GrossProfitReportDialog
+        open={isGrossProfitReportOpen}
+        onOpenChange={setGrossProfitReportOpen}
+        invoices={todayInvoices}
       /> }
 
       {/* Monthly/Date Range Report Dialogs */}

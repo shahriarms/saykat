@@ -4,6 +4,7 @@
 import { Pool } from 'pg';
 import type { Product, Invoice, Buyer, Expense, Employee, SalaryPayment, Payment, Attendance, AttendanceStatus, InvoiceItem } from '@/lib/types';
 import PostgresProductService from './product-service.postgres';
+import { DraftInvoiceItem } from '@/hooks/use-invoice-form';
 
 // This is a Server Action file. It will only run on the server.
 
@@ -77,29 +78,25 @@ class PostgresDataService {
         return PostgresProductService.getAllProducts();
     }
     
-    static async addInvoice(invoiceData: Omit<Invoice, 'id'>, items: any[]): Promise<Invoice> {
+    static async addInvoice(invoiceData: Omit<Invoice, 'id'>, items: DraftInvoiceItem[]): Promise<Invoice> {
         const db = getPool();
         const client = await db.connect();
         try {
             await client.query('BEGIN');
             
-            // Get the last invoice ID and increment it
             const lastIdResult = await client.query('SELECT id FROM invoices ORDER BY id DESC LIMIT 1');
             const newId = lastIdResult.rows.length > 0 ? lastIdResult.rows[0].id + 1 : 1;
             
             let finalInvoiceData = { ...invoiceData, id: newId };
 
-            // Upsert buyer and get their ID
             let buyerId = invoiceData.buyerId;
             if (invoiceData.customerName) {
                  if (buyerId) {
-                    // Existing buyer was selected, just add the new invoice ID to their list
                     await client.query(
                         'UPDATE buyers SET invoice_ids = invoice_ids || $1::jsonb WHERE id = $2',
                         [JSON.stringify(newId), buyerId]
                     );
                 } else {
-                    // Check if buyer exists by name, otherwise create new.
                     let buyerResult = await client.query('SELECT id FROM buyers WHERE name = $1', [invoiceData.customerName]);
                     if (buyerResult.rows.length > 0) {
                         buyerId = buyerResult.rows[0].id;
@@ -118,14 +115,21 @@ class PostgresDataService {
                 finalInvoiceData.buyerId = buyerId;
             }
 
-            // Insert invoice
+            const finalItems: InvoiceItem[] = items.map(item => ({
+                id: item.id,
+                name: item.name,
+                quantity: parseFloat(String(item.quantity)) || 0,
+                price: parseFloat(String(item.price)) || 0,
+                buyingPrice: item.buyingPrice,
+                profitAmount: item.profitAmount,
+            }));
+
             await client.query(
                 'INSERT INTO invoices (id, buyer_id, customer_name, customer_address, customer_phone, items, subtotal, paid_amount, due_amount, date, total_profit) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)',
-                [finalInvoiceData.id, finalInvoiceData.buyerId, finalInvoiceData.customerName, finalInvoiceData.customerAddress, finalInvoiceData.customerPhone, JSON.stringify(items), finalInvoiceData.subtotal, finalInvoiceData.paidAmount, finalInvoiceData.dueAmount, finalInvoiceData.date, finalInvoiceData.totalProfit]
+                [finalInvoiceData.id, finalInvoiceData.buyerId, finalInvoiceData.customerName, finalInvoiceData.customerAddress, finalInvoiceData.customerPhone, JSON.stringify(finalItems), finalInvoiceData.subtotal, finalInvoiceData.paidAmount, finalInvoiceData.dueAmount, finalInvoiceData.date, finalInvoiceData.totalProfit]
             );
 
-            // Update product stock
-            const stockUpdates = items.map(item => ({
+            const stockUpdates = finalItems.map(item => ({
                 id: item.id,
                 stockChange: -item.quantity,
             }));
