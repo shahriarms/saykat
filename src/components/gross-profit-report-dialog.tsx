@@ -23,19 +23,22 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FileDown, FileText } from 'lucide-react';
 import type { Invoice } from '@/lib/types';
-import { format } from 'date-fns';
+import { format, isSameDay, startOfMonth, endOfMonth } from 'date-fns';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { Separator } from './ui/separator';
+import type { DateRange } from 'react-day-picker';
 
 interface GrossProfitReportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   invoices: Invoice[];
+  isRangeReport?: boolean;
+  dateRange?: DateRange;
 }
 
-export function GrossProfitReportDialog({ open, onOpenChange, invoices }: GrossProfitReportDialogProps) {
+export function GrossProfitReportDialog({ open, onOpenChange, invoices, isRangeReport = false, dateRange }: GrossProfitReportDialogProps) {
 
     const sortedInvoices = useMemo(() => {
         if (!invoices) return [];
@@ -43,6 +46,23 @@ export function GrossProfitReportDialog({ open, onOpenChange, invoices }: GrossP
     }, [invoices]);
 
     const grandTotalProfit = useMemo(() => sortedInvoices.reduce((sum, inv) => sum + (inv.totalProfit || 0), 0), [sortedInvoices]);
+
+    const rangeTitle = useMemo(() => {
+        if (!isRangeReport) return "Today's Gross Profit Report";
+        if (!dateRange?.from) return "Gross Profit Report";
+        
+        const from = dateRange.from;
+        const to = dateRange.to || from;
+
+        if (isSameDay(from, startOfMonth(from)) && isSameDay(to, endOfMonth(from))) {
+            return `Gross Profit Report (${format(from, 'MMMM yyyy')})`;
+        }
+        if (isSameDay(from, to)) {
+            return `Gross Profit Report (${format(from, 'PPP')})`;
+        }
+        return `Gross Profit Report (${format(from, 'PP')} - ${format(to, 'PP')})`;
+    }, [isRangeReport, dateRange]);
+
 
     const handleExportExcel = () => {
         const flattenedData = sortedInvoices.flatMap(invoice => 
@@ -60,13 +80,13 @@ export function GrossProfitReportDialog({ open, onOpenChange, invoices }: GrossP
 
         const worksheet = XLSX.utils.json_to_sheet(flattenedData);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Today's Gross Profit");
-        XLSX.writeFile(workbook, `todays_gross_profit_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Gross Profit Report");
+        XLSX.writeFile(workbook, `gross_profit_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
     };
 
     const handleExportPdf = () => {
         const doc = new jsPDF();
-        doc.text(`Today's Gross Profit Report - ${format(new Date(), 'PPP')}`, 14, 16);
+        doc.text(rangeTitle, 14, 16);
         
         let finalY = 22;
         sortedInvoices.forEach(invoice => {
@@ -93,16 +113,16 @@ export function GrossProfitReportDialog({ open, onOpenChange, invoices }: GrossP
             finalY = (doc as any).lastAutoTable.finalY + 10;
         });
 
-        doc.save(`todays_gross_profit_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+        doc.save(`gross_profit_report.pdf`);
     };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
-          <DialogTitle>Today's Gross Profit Report</DialogTitle>
+          <DialogTitle>{rangeTitle}</DialogTitle>
           <DialogDescription>
-            A detailed profit breakdown for all invoices from today. Grand Total Profit: <strong>৳ {grandTotalProfit.toFixed(2)}</strong>
+            A detailed profit breakdown for all invoices. Grand Total Profit: <strong>৳ {grandTotalProfit.toFixed(2)}</strong>
           </DialogDescription>
         </DialogHeader>
         
@@ -163,7 +183,7 @@ export function GrossProfitReportDialog({ open, onOpenChange, invoices }: GrossP
                 <div className="flex justify-center items-center h-full text-center text-muted-foreground">
                     <div>
                         <FileText className="mx-auto h-12 w-12" />
-                        <p className="mt-4">No profitable sales recorded for today.</p>
+                        <p className="mt-4">No profitable sales recorded for this period.</p>
                     </div>
                 </div>
             )}
@@ -178,4 +198,3 @@ export function GrossProfitReportDialog({ open, onOpenChange, invoices }: GrossP
     </Dialog>
   );
 }
-

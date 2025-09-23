@@ -64,6 +64,7 @@ export default function Dashboard() {
   const [isMonthlyDueReportOpen, setMonthlyDueReportOpen] = useState(false);
   const [isMonthlyUnitsSoldReportOpen, setMonthlyUnitsSoldReportOpen] = useState(false);
   const [isMonthlySalaryReportOpen, setMonthlySalaryReportOpen] = useState(false);
+  const [isRangeGrossProfitReportOpen, setRangeGrossProfitReportOpen] = useState(false);
   
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
@@ -361,7 +362,7 @@ export default function Dashboard() {
                       </Tooltip>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                           <Card className="text-left flex items-center p-4 gap-4">
+                           <Card as="button" onClick={() => setRangeGrossProfitReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
                               <div className="bg-emerald-100 p-3 rounded-full"><ThumbsUp className="h-6 w-6 text-emerald-600" /></div>
                               <div>
                                 <p className="text-sm text-muted-foreground">Total Gross Profit</p>
@@ -501,6 +502,13 @@ export default function Dashboard() {
         onOpenChange={setMonthlySalaryReportOpen}
         salaryPayments={rangeSalaries}
         employees={employees}
+        dateRange={date}
+      /> }
+       { isRangeGrossProfitReportOpen && <GrossProfitReportDialog
+        open={isRangeGrossProfitReportOpen}
+        onOpenChange={setRangeGrossProfitReportOpen}
+        invoices={rangeInvoices}
+        isRangeReport={true}
         dateRange={date}
       /> }
        { selectedInvoice && <InvoicePreviewDialog
