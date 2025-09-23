@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
@@ -442,30 +441,27 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const getGrossProfitForDateRange = useCallback((invoicesInRange: Invoice[]): { grossProfit: number; cogs: number } => {
         let totalGrossProfit = 0;
         let totalCOGS = 0;
-        const productMap = new Map(products.map(p => [p.id, p]));
-
+        
         for (const invoice of invoicesInRange) {
-            // If totalProfit is stored on the invoice, use it for accuracy
-            if (typeof invoice.totalProfit === 'number') {
+            // Use the stored totalProfit if available and it's a valid number
+            if (typeof invoice.totalProfit === 'number' && isFinite(invoice.totalProfit)) {
                 totalGrossProfit += invoice.totalProfit;
-                // Estimate COGS if not stored
-                const cogsForInvoice = invoice.subtotal - invoice.totalProfit;
-                totalCOGS += cogsForInvoice;
+                // Estimate COGS from subtotal and profit
+                const subtotal = parseFloat(String(invoice.subtotal)) || 0;
+                totalCOGS += (subtotal - invoice.totalProfit);
             } else {
-                // Fallback for older invoices without stored profit
+                // Fallback calculation for older data or if totalProfit is missing
+                const subtotal = parseFloat(String(invoice.subtotal)) || 0;
+                let cogsForInvoice = 0;
                 for (const item of invoice.items) {
-                    const product = productMap.get(item.id);
-                    if (product) {
-                        const cogsForItem = product.buyingPrice * item.quantity;
-                        const profitPerUnit = item.price - product.buyingPrice;
-                        totalGrossProfit += profitPerUnit * item.quantity;
-                        totalCOGS += cogsForItem;
-                    }
+                    cogsForInvoice += (parseFloat(String(item.buyingPrice)) || 0) * (parseFloat(String(item.quantity)) || 0);
                 }
+                totalCOGS += cogsForInvoice;
+                totalGrossProfit += (subtotal - cogsForInvoice);
             }
         }
         return { grossProfit: totalGrossProfit, cogs: totalCOGS };
-    }, [products]);
+    }, []);
 
 
     const addPayment = useCallback(async (paymentData: Omit<Payment, 'id' | 'date'>): Promise<{ payment: Payment; updatedInvoice: Invoice } | null> => {
