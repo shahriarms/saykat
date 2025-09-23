@@ -141,13 +141,25 @@ export default function BuyersDuePage() {
             const originalTitle = document.title;
             document.title = `payment-receipt-for-invoice-${lastSuccessfulPayment.invoice.id}`;
             
-            const timer = setTimeout(() => {
-                window.print();
+            const handleAfterPrint = () => {
                 document.title = originalTitle;
                 setLastSuccessfulPayment(null);
+                 window.removeEventListener('afterprint', handleAfterPrint);
+            };
+
+            window.addEventListener('afterprint', handleAfterPrint);
+
+            const timer = setTimeout(() => {
+                window.print();
             }, 100);
 
-            return () => clearTimeout(timer);
+            return () => {
+                clearTimeout(timer);
+                window.removeEventListener('afterprint', handleAfterPrint);
+                 if (document.title !== originalTitle) {
+                    document.title = originalTitle;
+                 }
+            };
         }
     }, [lastSuccessfulPayment]);
 
@@ -506,5 +518,3 @@ export default function BuyersDuePage() {
     </>
   );
 }
-
-    

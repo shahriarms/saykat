@@ -63,7 +63,7 @@ function InvoicePage() {
   useEffect(() => {
     const handleAfterPrint = async () => {
       if (!invoiceToPrint) return;
-
+      document.title = 'StockPilot'; // Reset title after print
       setIsProcessing(true);
       try {
         const newInvoiceId = await addInvoice(invoiceToPrint);
@@ -127,14 +127,17 @@ function InvoicePage() {
   
   const handlePrintConfirm = () => {
      if (!validateInvoice() || isProcessing || !activeDraft) return;
+     
+     const originalTitle = document.title;
+     document.title = `invoice-${activeDraft.id}`;
 
      // Prepare the data for printing.
      setInvoiceToPrint(activeDraft);
 
      // Use a timeout to ensure the state update has rendered before printing.
-     // This is crucial for environments like iframes (Firebase Studio).
      setTimeout(() => {
         window.print();
+        document.title = originalTitle; // Restore title in case 'afterprint' doesn't fire (e.g., user cancels print)
      }, 100);
   };
 

@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
@@ -105,8 +104,11 @@ export default function BuyersPage() {
       setInvoiceToPrint(selectedInvoice);
       // Use a timeout to allow the state to update before printing
       setTimeout(() => {
+        const originalTitle = document.title;
+        document.title = `invoice-${selectedInvoice.id}`;
         window.print();
-      }, 0);
+        document.title = originalTitle;
+      }, 100);
     }
   };
   

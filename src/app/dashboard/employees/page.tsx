@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
@@ -78,7 +77,9 @@ export default function EmployeesPage() {
         return () => {
           clearTimeout(timer);
           window.removeEventListener('afterprint', handleAfterPrint);
-          document.title = originalTitle;
+          if (document.title !== originalTitle) {
+            document.title = originalTitle;
+          }
         };
       }
     }, [reportToPrint, selectedEmployee]);
