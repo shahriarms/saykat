@@ -178,3 +178,4 @@ export function GrossProfitReportDialog({ open, onOpenChange, invoices }: GrossP
     </Dialog>
   );
 }
+
