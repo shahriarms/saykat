@@ -58,44 +58,44 @@ function InvoicePage() {
   
   const [draftToDelete, setDraftToDelete] = useState<DraftInvoice | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isPrintConfirmOpen, setPrintConfirmOpen] = useState(false);
   const [invoiceToPrint, setInvoiceToPrint] = useState<DraftInvoice | null>(null);
 
   useEffect(() => {
-    if (invoiceToPrint) {
-        setIsProcessing(true); // Visually indicate printing
-        const originalTitle = document.title;
-        document.title = `invoice-${invoiceToPrint.id}`;
-        
-        const handleAfterPrint = () => {
-            document.title = originalTitle;
-            setInvoiceToPrint(null);
-            setIsProcessing(false); // End processing state
-            resetActiveDraft();
-             toast({
-                title: "Memo Ready",
-                description: "A new, empty memo is ready for you.",
-            });
-            window.removeEventListener('afterprint', handleAfterPrint);
-        };
+    const handleAfterPrint = async () => {
+      if (!invoiceToPrint) return;
 
-        window.addEventListener('afterprint', handleAfterPrint);
-        
-        // Use timeout to ensure the state update has rendered before printing
-        const timer = setTimeout(() => {
-            window.print();
-        }, 100); 
-        
-        return () => {
-            clearTimeout(timer);
-            window.removeEventListener('afterprint', handleAfterPrint);
-            // Defensive cleanup in case component unmounts before afterprint
-            if (document.title !== originalTitle) {
-              document.title = originalTitle;
-            }
-        };
-    }
-  }, [invoiceToPrint, resetActiveDraft, toast]);
+      setIsProcessing(true);
+      try {
+        const newInvoiceId = await addInvoice(invoiceToPrint);
+        if (newInvoiceId) {
+          toast({
+            title: t('invoice_saved_toast_title'),
+            description: t('invoice_saved_toast_description', { invoiceId: newInvoiceId }),
+          });
+        }
+      } catch (error: any) {
+        console.error("Failed to save invoice after printing:", error);
+        toast({
+          variant: 'destructive',
+          title: 'Error Saving Invoice',
+          description: error.message || 'The invoice was printed, but failed to save.',
+        });
+      } finally {
+        setInvoiceToPrint(null);
+        resetActiveDraft();
+        setIsProcessing(false);
+        toast({
+          title: "Memo Ready",
+          description: "A new, empty memo is ready for you.",
+        });
+      }
+    };
+
+    window.addEventListener('afterprint', handleAfterPrint);
+    return () => {
+      window.removeEventListener('afterprint', handleAfterPrint);
+    };
+  }, [invoiceToPrint, addInvoice, resetActiveDraft, toast, t]);
   
   const { id: draftId, customerName, customerAddress, customerPhone, paidAmount, subtotal, items, cashReceived, changeAmount, dueAmount } = activeDraft || {};
 
@@ -118,41 +118,16 @@ function InvoicePage() {
   };
   
   const handlePrintConfirm = () => {
-     if (!validateInvoice() || isProcessing) return;
-     setPrintConfirmOpen(true);
-  };
-  
-  const handleSaveAndPrint = async () => {
-    if (!validateInvoice() || !activeDraft || isProcessing) return;
+     if (!validateInvoice() || isProcessing || !activeDraft) return;
 
-    setPrintConfirmOpen(false);
-    setIsProcessing(true);
+     // Prepare the data for printing.
+     setInvoiceToPrint(activeDraft);
 
-    try {
-        const updatedDraftWithId = await updateActiveDraft({ id: activeDraft.id });
-        const newInvoiceId = await addInvoice(updatedDraftWithId);
-        
-        if (newInvoiceId) {
-            toast({
-              title: t('invoice_saved_toast_title'),
-              description: t('invoice_saved_toast_description', { invoiceId: newInvoiceId }),
-            });
-            
-            const finalDraft = await updateActiveDraft({ id: newInvoiceId });
-            setInvoiceToPrint(finalDraft);
-        } else {
-            // If addInvoice fails, reset processing state
-            setIsProcessing(false);
-        }
-    } catch (error: any) {
-        console.error("Failed to save invoice:", error);
-        toast({
-            variant: 'destructive',
-            title: 'Error',
-            description: error.message || 'Failed to save the invoice.',
-        });
-        setIsProcessing(false);
-    }
+     // Use a timeout to ensure the state update has rendered before printing.
+     // This is crucial for environments like iframes (Firebase Studio).
+     setTimeout(() => {
+        window.print();
+     }, 100);
   };
 
   const [mainCategoryFilter, setMainCategoryFilter] = useState<'Material' | 'Hardware'>('Material');
@@ -401,7 +376,7 @@ function InvoicePage() {
                     <div className="flex gap-2">
                         <Button onClick={handlePrintConfirm} disabled={!items || items.length === 0 || isProcessing}>
                             {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>} 
-                            {isProcessing ? 'Processing...' : t('save_and_print_button')}
+                            {isProcessing ? 'Processing...' : 'Print & Save'}
                         </Button>
                     </div>
                 </CardHeader>
@@ -550,22 +525,6 @@ function InvoicePage() {
           </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={isPrintConfirmOpen} onOpenChange={setPrintConfirmOpen}>
-          <AlertDialogContent>
-              <AlertDialogHeader>
-                  <AlertDialogTitle>Confirm Print</AlertDialogTitle>
-                  <AlertDialogDescription>
-                     Are you sure you want to save and print this invoice? This will finalize the invoice.
-                  </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleSaveAndPrint}>
-                     Yes, Print
-                  </AlertDialogAction>
-              </AlertDialogFooter>
-          </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }
@@ -577,3 +536,5 @@ export default function InvoicePageWrapper() {
     </InvoiceFormProvider>
   );
 }
+
+    
