@@ -89,12 +89,11 @@ const calculateTotals = (items: (DraftInvoiceItem | { quantity: number | string,
         validPaidAmount = subtotal;
     }
     
-    const changeAmount = (cashReceived && cashReceived > validPaidAmount) ? cashReceived - validPaidAmount : 0;
+    // Change is the cash received minus the total bill, if cash received is greater.
+    const changeAmount = (cashReceived && cashReceived > subtotal) ? cashReceived - subtotal : 0;
     
-    let dueAmount = 0;
-    if(paidAmount && paidAmount > 0) {
-        dueAmount = subtotal - validPaidAmount;
-    }
+    // Due is the subtotal minus what's been paid.
+    const dueAmount = subtotal - validPaidAmount;
 
 
     return { subtotal, changeAmount, paidAmount: validPaidAmount, dueAmount };
