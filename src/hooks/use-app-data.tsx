@@ -10,6 +10,7 @@ import { useSettings } from './use-settings';
 import * as productActions from '@/lib/actions/product-actions';
 import * as dataActions from '@/lib/actions/data-actions';
 import { Loader2 } from 'lucide-react';
+import { DateRange } from 'react-day-picker';
 
 const LOCAL_STORAGE_KEYS = {
     products: 'stockpilot-products',
@@ -36,6 +37,8 @@ interface AppDataContextType {
     isAppDataLoading: boolean;
     isDbConnected: boolean;
     lastInvoiceId: number;
+    centralDateRange: DateRange | undefined;
+    setCentralDateRange: (dateRange: DateRange | undefined) => void;
     
     // Product Functions
     addProduct: (product: Omit<Product, 'id' | 'sellingPrice'>) => Promise<void>;
@@ -96,6 +99,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const [isAppDataLoading, setIsAppDataLoading] = useState(true);
     const [isDbConnected, setIsDbConnected] = useState(false);
     const [lastInvoiceId, setLastInvoiceId] = useState(0);
+    const [centralDateRange, setCentralDateRange] = useState<DateRange | undefined>({
+      from: startOfMonth(new Date()),
+      to: endOfMonth(new Date()),
+    });
 
     const loadDataFromLocalStorage = useCallback(() => {
         try {
@@ -443,15 +450,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
         let totalCOGS = 0;
         
         for (const invoice of invoicesInRange) {
-            // Use the stored totalProfit if available and it's a valid number
-            if (typeof invoice.totalProfit === 'number' && isFinite(invoice.totalProfit)) {
-                totalGrossProfit += invoice.totalProfit;
-                // Estimate COGS from subtotal and profit
-                const subtotal = parseFloat(String(invoice.subtotal)) || 0;
-                totalCOGS += (subtotal - invoice.totalProfit);
+            const subtotal = parseFloat(String(invoice.subtotal)) || 0;
+            const invoiceProfit = parseFloat(String(invoice.totalProfit)) || 0;
+
+            if (typeof invoice.totalProfit === 'number' && isFinite(invoiceProfit)) {
+                totalGrossProfit += invoiceProfit;
+                totalCOGS += (subtotal - invoiceProfit);
             } else {
-                // Fallback calculation for older data or if totalProfit is missing
-                const subtotal = parseFloat(String(invoice.subtotal)) || 0;
                 let cogsForInvoice = 0;
                 for (const item of invoice.items) {
                     cogsForInvoice += (parseFloat(String(item.buyingPrice)) || 0) * (parseFloat(String(item.quantity)) || 0);
@@ -693,7 +698,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }, [getPaymentsForMonth]);
 
     const value = useMemo(() => ({
-        products, invoices, buyers, expenses, employees, attendance, salaryPayments, payments, isAppDataLoading, isDbConnected, lastInvoiceId,
+        products, invoices, buyers, expenses, employees, attendance, salaryPayments, payments, isAppDataLoading, isDbConnected, lastInvoiceId, centralDateRange, setCentralDateRange,
         addProduct, addMultipleProducts, updateProduct, deleteProduct, getProductById,
         addInvoice, deleteInvoice, printInvoice, getBuyerById, getInvoicesForBuyer, getInvoicesForDateRange, getGrossProfitForDateRange,
         addPayment, getPaymentsForInvoice,
@@ -701,7 +706,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addEmployee, updateEmployee, deleteEmployee, markAttendance, getAttendanceForDate,
         addSalaryPayment, deleteSalaryPayment, getPaymentsForMonth, getSalaryPaymentsForDateRange, getDueSalaryForMonth,
     }), [
-        products, invoices, buyers, expenses, employees, attendance, salaryPayments, payments, isAppDataLoading, isDbConnected, lastInvoiceId,
+        products, invoices, buyers, expenses, employees, attendance, salaryPayments, payments, isAppDataLoading, isDbConnected, lastInvoiceId, centralDateRange, setCentralDateRange,
         addProduct, addMultipleProducts, updateProduct, deleteProduct, getProductById,
         addInvoice, deleteInvoice, printInvoice, getBuyerById, getInvoicesForBuyer, getInvoicesForDateRange, getGrossProfitForDateRange,
         addPayment, getPaymentsForInvoice,

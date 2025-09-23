@@ -37,7 +37,7 @@ import { DateRangePicker } from '@/components/date-range-picker';
 import { cn } from '@/lib/utils';
 
 export default function SalariesPage() {
-  const { employees, getPaymentsForMonth, addSalaryPayment, deleteSalaryPayment, getDueSalaryForMonth } = useAppData();
+  const { employees, getPaymentsForMonth, addSalaryPayment, deleteSalaryPayment, getDueSalaryForMonth, centralDateRange } = useAppData();
   const { user } = useUser();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -48,12 +48,13 @@ export default function SalariesPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentToPrint, setPaymentToPrint] = useState<{payment: SalaryPayment, employee: Employee} | null>(null);
   
-  const [localDateRange, setLocalDateRange] = useState<DateRange | undefined>({
-      from: startOfMonth(new Date()),
-      to: endOfMonth(new Date()),
-  });
+  const [localDateRange, setLocalDateRange] = useState<DateRange | undefined>(centralDateRange);
 
   const [paymentToDelete, setPaymentToDelete] = useState<SalaryPayment | null>(null);
+  
+  useEffect(() => {
+    setLocalDateRange(centralDateRange);
+  }, [centralDateRange]);
 
   useEffect(() => {
       if (paymentToPrint) {
@@ -197,7 +198,11 @@ export default function SalariesPage() {
           <Wallet className="w-6 h-6" />
           {t('salaries_page_title')}
         </h1>
-        <DateRangePicker initialDateRange={localDateRange} onDateChange={setLocalDateRange} />
+        <DateRangePicker 
+            initialDateRange={localDateRange} 
+            onDateChange={setLocalDateRange}
+            centralDateRange={centralDateRange}
+        />
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
         {/* Employee List */}

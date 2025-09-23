@@ -37,13 +37,8 @@ const InvoicePreviewDialog = dynamic(() => import('@/components/invoice-preview-
 
 
 export default function Dashboard() {
-  const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, invoices: allInvoices, getAttendanceForDate } = useAppData();
+  const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, invoices: allInvoices, getAttendanceForDate, centralDateRange, setCentralDateRange } = useAppData();
   const { t } = useTranslation();
-  
-  const [date, setDate] = useState<DateRange | undefined>({
-      from: startOfMonth(new Date()),
-      to: endOfMonth(new Date()),
-  });
   
   const [rangeInvoices, setRangeInvoices] = useState<Invoice[]>([]);
   const [rangeExpenses, setRangeExpenses] = useState<Expense[]>([]);
@@ -84,12 +79,12 @@ export default function Dashboard() {
 
   // This useEffect updates the date range data when the range changes.
   useEffect(() => {
-    if (date?.from && date?.to) {
-      setRangeInvoices(getInvoicesForDateRange(date.from, date.to));
-      setRangeExpenses(getExpensesForDateRange(date.from, date.to));
-      setRangeSalaries(getSalaryPaymentsForDateRange(date.from, date.to));
+    if (centralDateRange?.from && centralDateRange?.to) {
+      setRangeInvoices(getInvoicesForDateRange(centralDateRange.from, centralDateRange.to));
+      setRangeExpenses(getExpensesForDateRange(centralDateRange.from, centralDateRange.to));
+      setRangeSalaries(getSalaryPaymentsForDateRange(centralDateRange.from, centralDateRange.to));
     }
-  }, [date, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange]);
+  }, [centralDateRange, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange]);
 
 
   const calculateUnitsSold = useCallback((invoices: Invoice[], products: Product[]) => {
@@ -139,9 +134,9 @@ export default function Dashboard() {
   }, [todayInvoices, todayExpenses, todayAttendance, products, calculateUnitsSold, getGrossProfitForDateRange]);
   
   const { salesChartData, expensesChartData } = useMemo(() => {
-    if (!date?.from || !date?.to) return { salesChartData: [], expensesChartData: [] };
+    if (!centralDateRange?.from || !centralDateRange?.to) return { salesChartData: [], expensesChartData: [] };
 
-    const daysInRange = eachDayOfInterval({ start: date.from, end: date.to });
+    const daysInRange = eachDayOfInterval({ start: centralDateRange.from, end: centralDateRange.to });
     
     const salesData = daysInRange.map(day => ({
         name: format(day, 'd'),
@@ -158,7 +153,7 @@ export default function Dashboard() {
     }));
 
     return { salesChartData: salesData, expensesChartData: expensesData };
-  }, [rangeInvoices, rangeExpenses, date]);
+  }, [rangeInvoices, rangeExpenses, centralDateRange]);
 
 
   const chartConfig: ChartConfig = {
@@ -167,18 +162,18 @@ export default function Dashboard() {
   };
 
   const rangeTitle = useMemo(() => {
-    if (!date?.from) return "This Month";
-    if (date.to) {
-        if (isSameDay(date.from, startOfMonth(date.from)) && isSameDay(date.to, endOfMonth(date.from))) {
-            return format(date.from, 'MMMM yyyy');
+    if (!centralDateRange?.from) return "This Month";
+    if (centralDateRange.to) {
+        if (isSameDay(centralDateRange.from, startOfMonth(centralDateRange.from)) && isSameDay(centralDateRange.to, endOfMonth(centralDateRange.from))) {
+            return format(centralDateRange.from, 'MMMM yyyy');
         }
-        if (isSameDay(date.from, date.to)) {
-            return format(date.from, 'PPP');
+        if (isSameDay(centralDateRange.from, centralDateRange.to)) {
+            return format(centralDateRange.from, 'PPP');
         }
-        return `${format(date.from, 'LLL dd, y')} - ${format(date.to, 'LLL dd, y')}`;
+        return `${format(centralDateRange.from, 'LLL dd, y')} - ${format(centralDateRange.to, 'LLL dd, y')}`;
     }
-    return format(date.from, 'PPP');
-  }, [date]);
+    return format(centralDateRange.from, 'PPP');
+  }, [centralDateRange]);
 
   return (
     <>
@@ -188,7 +183,7 @@ export default function Dashboard() {
               <h1 className="text-2xl font-bold">{t('dashboard_sidebar')}</h1>
               <p className="text-muted-foreground">{t('welcome_back_header')}</p>
           </div>
-          <DateRangePicker initialDateRange={date} onDateChange={setDate} />
+          <DateRangePicker initialDateRange={centralDateRange} onDateChange={setCentralDateRange} />
         </div>
         
         <div>
@@ -512,40 +507,40 @@ export default function Dashboard() {
         open={isMonthlySalesReportOpen}
         onOpenChange={setMonthlySalesReportOpen}
         invoices={rangeInvoices}
-        dateRange={date}
+        dateRange={centralDateRange}
       /> }
       { isMonthlyExpensesReportOpen && <MonthlyExpensesDialog
         open={isMonthlyExpensesReportOpen}
         onOpenChange={setMonthlyExpensesReportOpen}
         expenses={rangeExpenses}
-        dateRange={date}
+        dateRange={centralDateRange}
       /> }
       { isMonthlyDueReportOpen && <MonthlyDueDialog
         open={isMonthlyDueReportOpen}
         onOpenChange={setMonthlyDueReportOpen}
         invoices={rangeInvoices}
-        dateRange={date}
+        dateRange={centralDateRange}
       /> }
       { isMonthlyUnitsSoldReportOpen && <MonthlyUnitsSoldDialog
         open={isMonthlyUnitsSoldReportOpen}
         onOpenChange={setMonthlyUnitsSoldReportOpen}
         invoices={rangeInvoices}
         products={products}
-        dateRange={date}
+        dateRange={centralDateRange}
       /> }
       { isMonthlySalaryReportOpen && <MonthlySalaryReportDialog
         open={isMonthlySalaryReportOpen}
         onOpenChange={setMonthlySalaryReportOpen}
         salaryPayments={rangeSalaries}
         employees={employees}
-        dateRange={date}
+        dateRange={centralDateRange}
       /> }
        { isRangeGrossProfitReportOpen && <GrossProfitReportDialog
         open={isRangeGrossProfitReportOpen}
         onOpenChange={setRangeGrossProfitReportOpen}
         invoices={rangeInvoices}
         isRangeReport={true}
-        dateRange={date}
+        dateRange={centralDateRange}
       /> }
        { selectedInvoice && <InvoicePreviewDialog
         invoice={selectedInvoice}
