@@ -477,40 +477,43 @@ function InvoicePage() {
                       <CardTitle>{t('live_print_preview_title')}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                      <ScrollArea className="h-96">
-                          <div className="p-4 bg-muted/50 rounded-lg min-w-[820px]">
-                              <div className="print:hidden">
-                                <InvoicePrintLayout 
-                                    invoiceId={draftId}
-                                    currentDate={new Date().toLocaleDateString()}
-                                    customerName={customerName}
-                                    customerAddress={customerAddress}
-                                    customerPhone={customerPhone}
-                                    invoiceItems={items}
-                                    subtotal={subtotal}
-                                    paidAmount={paidAmount || 0}
-                                    dueAmount={dueAmount || 0}
-                                    printFormat={settings.printFormat}
-                                    locale={settings.locale}
-                                />
-                              </div>
-                              <div className="hidden print:block">
-                                <InvoicePrintLayout 
-                                    invoiceId={draftId}
-                                    currentDate={new Date().toLocaleDateString()}
-                                    customerName={customerName}
-                                    customerAddress={customerAddress}
-                                    customerPhone={customerPhone}
-                                    invoiceItems={items}
-                                    subtotal={subtotal}
-                                    paidAmount={paidAmount || 0}
-                                    dueAmount={dueAmount || 0}
-                                    printFormat={settings.printFormat}
-                                    locale={settings.locale}
-                                />
-                              </div>
-                          </div>
-                      </ScrollArea>
+                        {/* Screen-only scalable preview */}
+                        <div className="w-full bg-muted/50 rounded-lg overflow-hidden relative print:hidden" style={{ aspectRatio: '1 / 1.414' }}>
+                           <div className="absolute inset-0 p-4">
+                                <div className="origin-top-left" style={{ transform: 'scale(calc(100% / 800px))' }}>
+                                    <InvoicePrintLayout 
+                                        invoiceId={draftId}
+                                        currentDate={new Date().toLocaleDateString()}
+                                        customerName={customerName}
+                                        customerAddress={customerAddress}
+                                        customerPhone={customerPhone}
+                                        invoiceItems={items}
+                                        subtotal={subtotal}
+                                        paidAmount={paidAmount || 0}
+                                        dueAmount={dueAmount || 0}
+                                        printFormat={settings.printFormat}
+                                        locale={settings.locale}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Hidden, full-size layout for printing */}
+                        <div className="hidden print:block">
+                            <InvoicePrintLayout 
+                                invoiceId={draftId}
+                                currentDate={new Date().toLocaleDateString()}
+                                customerName={customerName}
+                                customerAddress={customerAddress}
+                                customerPhone={customerPhone}
+                                invoiceItems={items}
+                                subtotal={subtotal}
+                                paidAmount={paidAmount || 0}
+                                dueAmount={dueAmount || 0}
+                                printFormat={settings.printFormat}
+                                locale={settings.locale}
+                            />
+                        </div>
                   </CardContent>
               </Card>
           </div>
