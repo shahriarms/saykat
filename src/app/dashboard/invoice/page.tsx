@@ -61,7 +61,18 @@ function InvoicePage() {
   const [isPrintConfirmOpen, setPrintConfirmOpen] = useState(false);
   const [invoiceToPrint, setInvoiceToPrint] = useState<DraftInvoice | null>(null);
 
+  const handlePrint = useCallback(() => {
+    if (invoiceToPrint) {
+        setTimeout(() => {
+            window.print();
+        }, 100);
+    }
+  }, [invoiceToPrint]);
+
  useEffect(() => {
+    if (invoiceToPrint) {
+        handlePrint();
+    }
     const handleAfterPrint = () => {
       if (invoiceToPrint) {
         setInvoiceToPrint(null);
@@ -76,7 +87,7 @@ function InvoicePage() {
     return () => {
       window.removeEventListener('afterprint', handleAfterPrint);
     };
-  }, [invoiceToPrint, resetActiveDraft, toast]);
+  }, [invoiceToPrint, resetActiveDraft, toast, handlePrint]);
   
   const { id: draftId, customerName, customerAddress, customerPhone, paidAmount, subtotal, items, cashReceived, changeAmount, dueAmount } = activeDraft || {};
 
@@ -121,10 +132,6 @@ function InvoicePage() {
             
             const finalDraft = await updateActiveDraft({ id: newInvoiceId });
             setInvoiceToPrint(finalDraft);
-            
-            setTimeout(() => {
-              window.print();
-            }, 100);
         }
     } catch (error: any) {
         console.error("Failed to save invoice:", error);
@@ -217,6 +224,8 @@ function InvoicePage() {
         </div>
     );
   }
+
+  const isFullyPaid = subtotal > 0 && Math.abs(subtotal - (paidAmount || 0)) < 0.001;
 
   return (
     <>
@@ -406,7 +415,7 @@ function InvoicePage() {
                                             <p className='text-xs text-muted-foreground'>Suggested: ৳ {item.originalPrice.toFixed(2)}</p>
                                         </TableCell>
                                         <TableCell>
-                                            <Input type="text" inputMode="decimal" value={item.quantity} onChange={e => updateInvoiceItem(item.id, { quantity: e.target.value })} className="h-9" />
+                                            <Input type="text" inputMode="decimal" value={item.quantity} onChange={e => updateInvoiceItem(item.id, { quantity: e.target.value })} className="h-9" placeholder="0" />
                                         </TableCell>
                                         <TableCell>
                                             <div className="relative flex items-center">
@@ -449,9 +458,13 @@ function InvoicePage() {
                             />
                             <Button
                                 type="button"
-                                variant="outline"
                                 size="sm"
-                                className="h-8 px-2 text-xs"
+                                className={cn(
+                                    "h-8 px-2 text-xs",
+                                    isFullyPaid
+                                    ? "bg-green-600 hover:bg-green-700 text-white"
+                                    : "bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                                )}
                                 onClick={() => updateActiveDraft({ paidAmount: subtotal })}
                             >
                                 Full
