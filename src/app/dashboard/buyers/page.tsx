@@ -187,119 +187,120 @@ export default function BuyersPage() {
             centralDateRange={centralDateRange}
           />
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Buyers List & Invoice List */}
-          <div className="col-span-2 lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t('all_buyers_title')}</CardTitle>
-                  <div className="relative pt-2">
-                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                          type="search" 
-                          placeholder={t('search_by_name_or_phone_placeholder')}
-                          className="pl-8" 
-                          value={buyerSearchTerm}
-                          onChange={e => setBuyerSearchTerm(e.target.value)}
-                      />
-                  </div>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="divide-y border-t">
-                    {filteredBuyers.map((buyer) => (
-                      <button
-                        key={buyer.id}
-                        onClick={() => handleSelectBuyer(buyer)}
-                        className={`w-full text-left p-4 hover:bg-muted transition-colors ${
-                          selectedBuyer?.id === buyer.id ? 'bg-muted' : ''
-                        }`}
-                      >
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-semibold">{buyer.name}</p>
-                            <p className="text-sm text-muted-foreground">{buyer.address}</p>
-                          </div>
-                          <ChevronRight className="w-5 h-5 text-muted-foreground" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="flex flex-col">
+            <CardHeader>
+              <CardTitle>{t('all_buyers_title')}</CardTitle>
+              <div className="relative pt-2">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                      type="search" 
+                      placeholder={t('search_by_name_or_phone_placeholder')}
+                      className="pl-8" 
+                      value={buyerSearchTerm}
+                      onChange={e => setBuyerSearchTerm(e.target.value)}
+                  />
+              </div>
+            </CardHeader>
+            <CardContent className="p-0 flex-1">
+              <ScrollArea className="h-full max-h-[calc(100vh-350px)]">
+                <div className="divide-y border-t">
+                  {filteredBuyers.map((buyer) => (
+                    <button
+                      key={buyer.id}
+                      onClick={() => handleSelectBuyer(buyer)}
+                      className={`w-full text-left p-4 hover:bg-muted transition-colors ${
+                        selectedBuyer?.id === buyer.id ? 'bg-muted' : ''
+                      }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="font-semibold">{buyer.name}</p>
+                          <p className="text-sm text-muted-foreground">{buyer.address}</p>
                         </div>
-                      </button>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                        <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="truncate">{selectedBuyer ? t('buyers_invoices_title', { name: selectedBuyer.name }) : t('invoice_log_title')}</CardTitle>
-                  <div className="relative pt-2">
-                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                          type="search" 
-                          placeholder={t('search_by_invoice_no_or_date_placeholder')}
-                          className="pl-8" 
-                          value={invoiceSearchTerm}
-                          onChange={e => setInvoiceSearchTerm(e.target.value)}
-                          disabled={!selectedBuyer}
-                      />
-                  </div>
-                </CardHeader>
-                <CardContent className="p-0">
-                    <div className="divide-y border-t">
-                    {selectedBuyer ? (
-                      filteredInvoices.length > 0 ? (
-                        filteredInvoices.map((invoice) => {
-                          const { color, status } = getInvoiceStatus(invoice);
-                          const isPaid = status === 'paid';
-                          const paymentsForInvoice = isPaid ? getPaymentsForInvoice(invoice.id) : [];
-                          const lastPaymentDate = isPaid && paymentsForInvoice.length > 0 ? format(new Date(paymentsForInvoice[0].date), 'PP') : null;
+          <Card className="flex flex-col">
+            <CardHeader>
+              <CardTitle className="truncate">{selectedBuyer ? t('buyers_invoices_title', { name: selectedBuyer.name }) : t('invoice_log_title')}</CardTitle>
+              <div className="relative pt-2">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                      type="search" 
+                      placeholder={t('search_by_invoice_no_or_date_placeholder')}
+                      className="pl-8" 
+                      value={invoiceSearchTerm}
+                      onChange={e => setInvoiceSearchTerm(e.target.value)}
+                      disabled={!selectedBuyer}
+                  />
+              </div>
+            </CardHeader>
+            <CardContent className="p-0 flex-1">
+              <ScrollArea className="h-full max-h-[calc(100vh-350px)]">
+                <div className="divide-y border-t">
+                {selectedBuyer ? (
+                  filteredInvoices.length > 0 ? (
+                    filteredInvoices.map((invoice) => {
+                      const { color, status } = getInvoiceStatus(invoice);
+                      const isPaid = status === 'paid';
+                      const paymentsForInvoice = isPaid ? getPaymentsForInvoice(invoice.id) : [];
+                      const lastPaymentDate = isPaid && paymentsForInvoice.length > 0 ? format(new Date(paymentsForInvoice[0].date), 'PP') : null;
 
-                          return (
-                            <button
-                              key={invoice.id}
-                              onClick={() => handleSelectInvoice(invoice)}
-                              className={`w-full text-left p-4 hover:bg-muted transition-colors ${
-                                selectedInvoice?.id === invoice.id ? 'bg-muted' : ''
-                              }`}
-                            >
-                                <div className={cn("font-medium", color)}>{t('inv_short')}: {invoice.id}</div>
-                                <div className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-                                    <Calendar className="w-3.5 h-3.5"/>
-                                    <span>{new Date(invoice.date).toLocaleDateString()}</span>
-                                </div>
-                                <div className="flex justify-between items-baseline text-sm mt-1">
-                                  <div className="flex items-center gap-2 text-muted-foreground">
-                                    <DollarSign className="w-3.5 h-3.5"/>
-                                    <span>৳ {invoice.subtotal.toFixed(2)}</span>
-                                  </div>
-                                  <span className={cn('font-semibold', color)}>
-                                    {isPaid ? 'Paid' : `Due: ৳ ${invoice.dueAmount.toFixed(2)}`}
-                                  </span>
-                                </div>
-                                {isPaid && lastPaymentDate && (
-                                   <div className="text-xs text-green-600 mt-1">Paid on {lastPaymentDate}</div>
-                                )}
-                            </button>
-                          );
-                        })
-                      ) : (
-                        <div className="text-center p-4 text-sm text-muted-foreground">{t('no_invoices_found')}</div>
-                      )
-                    ) : (
-                      <div className="text-center p-4 text-sm text-muted-foreground">{t('select_a_buyer')}</div>
-                    )}
-                    </div>
-                </CardContent>
-              </Card>
-          </div>
+                      return (
+                        <button
+                          key={invoice.id}
+                          onClick={() => handleSelectInvoice(invoice)}
+                          className={`w-full text-left p-4 hover:bg-muted transition-colors ${
+                            selectedInvoice?.id === invoice.id ? 'bg-muted' : ''
+                          }`}
+                        >
+                            <div className={cn("font-medium", color)}>{t('inv_short')}: {invoice.id}</div>
+                            <div className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                                <Calendar className="w-3.5 h-3.5"/>
+                                <span>{new Date(invoice.date).toLocaleDateString()}</span>
+                            </div>
+                            <div className="flex justify-between items-baseline text-sm mt-1">
+                              <div className="flex items-center gap-2 text-muted-foreground">
+                                <DollarSign className="w-3.5 h-3.5"/>
+                                <span>৳ {invoice.subtotal.toFixed(2)}</span>
+                              </div>
+                              <span className={cn('font-semibold', color)}>
+                                {isPaid ? 'Paid' : `Due: ৳ ${invoice.dueAmount.toFixed(2)}`}
+                              </span>
+                            </div>
+                            {isPaid && lastPaymentDate && (
+                               <div className="text-xs text-green-600 mt-1">Paid on {lastPaymentDate}</div>
+                            )}
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <div className="text-center p-4 text-sm text-muted-foreground">{t('no_invoices_found')}</div>
+                  )
+                ) : (
+                  <div className="text-center p-4 text-sm text-muted-foreground">{t('select_a_buyer')}</div>
+                )}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
 
           {/* Invoice Preview */}
-          <Card className="col-span-2 lg:col-span-2">
+          <Card className="lg:col-span-1">
               <CardHeader className="flex-row items-center justify-between">
                   <CardTitle>{t('invoice_details_title')}</CardTitle>
                   <div className="flex items-center gap-2">
                       {user?.role === 'admin' && (
                         <Button variant="destructive" onClick={handleDeleteClick} disabled={!selectedInvoice || isDeleting}>
                           {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Trash2 className="mr-2 h-4 w-4"/>}
-                          Delete Invoice
+                          Delete
                         </Button>
                       )}
                       <Button onClick={handlePrint} disabled={!selectedInvoice || isPrinting}>
