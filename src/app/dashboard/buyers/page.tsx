@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
@@ -155,13 +156,31 @@ export default function BuyersPage() {
     );
   }, [getInvoicesForBuyer, selectedBuyer, invoiceSearchTerm, localDateRange]);
   
+ const sortedBuyers = useMemo(() => {
+    const buyerLastInvoiceMap = new Map<string, number>();
+    invoices.forEach(invoice => {
+        if (invoice.buyerId) {
+            const invoiceDate = new Date(invoice.date).getTime();
+            if (!buyerLastInvoiceMap.has(invoice.buyerId) || invoiceDate > buyerLastInvoiceMap.get(invoice.buyerId)!) {
+                buyerLastInvoiceMap.set(invoice.buyerId, invoiceDate);
+            }
+        }
+    });
+
+    return [...buyers].sort((a, b) => {
+        const lastA = buyerLastInvoiceMap.get(a.id) || 0;
+        const lastB = buyerLastInvoiceMap.get(b.id) || 0;
+        return lastB - lastA;
+    });
+ }, [buyers, invoices]);
+
   const filteredBuyers = useMemo(() => {
-    if (!buyerSearchTerm) return buyers;
-    return buyers.filter(buyer => 
+    if (!buyerSearchTerm) return sortedBuyers;
+    return sortedBuyers.filter(buyer => 
         buyer.name.toLowerCase().includes(buyerSearchTerm.toLowerCase()) ||
         (buyer.phone && buyer.phone.toLowerCase().includes(buyerSearchTerm.toLowerCase()))
     );
-  }, [buyers, buyerSearchTerm]);
+  }, [sortedBuyers, buyerSearchTerm]);
   
   const getInvoiceStatus = (invoice: Invoice) => {
     if (invoice.dueAmount <= 0.001) { 
