@@ -62,18 +62,21 @@ function InvoicePage() {
   const [invoiceToPrint, setInvoiceToPrint] = useState<DraftInvoice | null>(null);
 
   useEffect(() => {
-    if (invoiceToPrint) {
-      const timer = setTimeout(() => {
-        window.print();
-        resetActiveDraft();
+    const handleAfterPrint = () => {
+      if (invoiceToPrint) {
         setInvoiceToPrint(null);
-        toast({
+        resetActiveDraft();
+         toast({
             title: "Memo Ready",
             description: "A new, empty memo is ready for you.",
         });
-      }, 100);
-      return () => clearTimeout(timer);
-    }
+      }
+    };
+
+    window.addEventListener('afterprint', handleAfterPrint);
+    return () => {
+      window.removeEventListener('afterprint', handleAfterPrint);
+    };
   }, [invoiceToPrint, resetActiveDraft, toast]);
   
   const { id: draftId, customerName, customerAddress, customerPhone, paidAmount, subtotal, items, cashReceived, changeAmount, dueAmount } = activeDraft || {};
@@ -119,6 +122,10 @@ function InvoicePage() {
             
             const finalDraft = await updateActiveDraft({ id: newInvoiceId });
             setInvoiceToPrint(finalDraft);
+            // Use a timeout to allow the state to update before printing
+            setTimeout(() => {
+              window.print();
+            }, 0);
         }
     } catch (error: any) {
         console.error("Failed to save invoice:", error);
@@ -478,8 +485,8 @@ function InvoicePage() {
         </div>
       </div>
       
-      <div className="print-source">
-        {invoiceToPrint && (
+      {invoiceToPrint && (
+        <div className="print-source">
             <InvoicePrintLayout
                 invoiceId={invoiceToPrint.id}
                 currentDate={new Date().toLocaleDateString()}
@@ -493,8 +500,8 @@ function InvoicePage() {
                 printFormat={settings.printFormat}
                 locale={settings.locale}
             />
-        )}
-      </div>
+        </div>
+      )}
 
       <AlertDialog open={!!draftToDelete} onOpenChange={() => setDraftToDelete(null)}>
           <AlertDialogContent>
