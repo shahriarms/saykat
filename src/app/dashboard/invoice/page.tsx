@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,6 +32,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Separator } from '@/components/ui/separator';
 import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
+import { useReactToPrint } from 'react-to-print';
 
 
 function InvoicePage() {
@@ -59,7 +60,20 @@ function InvoicePage() {
   const [draftToDelete, setDraftToDelete] = useState<DraftInvoice | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isPrintConfirmOpen, setPrintConfirmOpen] = useState(false);
-  const [invoiceToPrint, setInvoiceToPrint] = useState<DraftInvoice | null>(null);
+  
+  const printComponentRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useReactToPrint({
+    content: () => printComponentRef.current,
+    documentTitle: activeDraft ? `invoice-${activeDraft.id}` : 'invoice',
+    onAfterPrint: () => {
+        resetActiveDraft();
+        toast({
+            title: "Memo Ready",
+            description: "A new, empty memo is ready for you.",
+        });
+    }
+  });
   
   const { id: draftId, customerName, customerAddress, customerPhone, paidAmount, subtotal, items, cashReceived, changeAmount, dueAmount } = activeDraft || {};
 
@@ -93,7 +107,7 @@ function InvoicePage() {
     setIsProcessing(true);
 
     try {
-        const updatedDraftWithId = await updateActiveDraft({ id: activeDraft.id }); // Ensure latest state is used.
+        const updatedDraftWithId = await updateActiveDraft({ id: activeDraft.id });
         const newInvoiceId = await addInvoice(updatedDraftWithId);
         
         if (newInvoiceId) {
@@ -102,8 +116,9 @@ function InvoicePage() {
               description: t('invoice_saved_toast_description', { invoiceId: newInvoiceId }),
             });
             
-            const finalDraft = await updateActiveDraft({ id: newInvoiceId });
-            setInvoiceToPrint(finalDraft);
+            // The `react-to-print` library needs a moment for the DOM to update with the new ID.
+            await updateActiveDraft({ id: newInvoiceId });
+            setTimeout(handlePrint, 100);
         }
     } catch (error: any) {
         console.error("Failed to save invoice:", error);
@@ -116,40 +131,6 @@ function InvoicePage() {
         setIsProcessing(false);
     }
   };
-  
-  useEffect(() => {
-    if (invoiceToPrint) {
-      const originalTitle = document.title;
-      document.title = `invoice-${invoiceToPrint.id}`;
-
-      const handleAfterPrint = () => {
-        document.title = originalTitle;
-        setInvoiceToPrint(null);
-        resetActiveDraft();
-        toast({
-            title: "Memo Ready",
-            description: "A new, empty memo is ready for you.",
-        });
-        window.removeEventListener('afterprint', handleAfterPrint);
-      };
-
-      window.addEventListener('afterprint', handleAfterPrint);
-      
-      // Delay printing slightly to ensure state has updated and component has rendered
-      const timer = setTimeout(() => {
-        window.print();
-      }, 100);
-      
-      return () => {
-        clearTimeout(timer);
-        window.removeEventListener('afterprint', handleAfterPrint);
-        // Restore title if component unmounts before printing is done
-        if (document.title !== originalTitle) {
-          document.title = originalTitle;
-        }
-      };
-    }
-  }, [invoiceToPrint, resetActiveDraft, toast]);
 
   const [mainCategoryFilter, setMainCategoryFilter] = useState<'Material' | 'Hardware'>('Material');
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -474,10 +455,10 @@ function InvoicePage() {
                       <CardTitle>{t('live_print_preview_title')}</CardTitle>
                   </CardHeader>
                   <CardContent className="h-full min-h-[500px] flex items-center justify-center bg-muted/50 rounded-lg p-4">
-                      {/* Screen-only scalable preview */}
                       <div className="print:hidden w-full h-full overflow-hidden flex justify-center items-center">
                           <div className='w-[800px] transform origin-top scale-90'>
                             <InvoicePrintLayout 
+                                ref={printComponentRef}
                                 invoiceId={draftId}
                                 currentDate={new Date().toLocaleDateString()}
                                 customerName={customerName}
@@ -497,24 +478,7 @@ function InvoicePage() {
           </div>
         </div>
       </div>
-      {invoiceToPrint && (
-        <div className="print-source">
-            <InvoicePrintLayout
-                invoiceId={invoiceToPrint.id}
-                currentDate={new Date().toLocaleDateString()}
-                customerName={invoiceToPrint.customerName}
-                customerAddress={invoiceToPrint.customerAddress}
-                customerPhone={invoiceToPrint.customerPhone}
-                invoiceItems={invoiceToPrint.items}
-                subtotal={invoiceToPrint.subtotal}
-                paidAmount={invoiceToPrint.paidAmount || 0}
-                dueAmount={invoiceToPrint.dueAmount || 0}
-                printFormat={settings.printFormat}
-                locale={settings.locale}
-            />
-        </div>
-      )}
-
+      
       <AlertDialog open={!!draftToDelete} onOpenChange={() => setDraftToDelete(null)}>
           <AlertDialogContent>
               <AlertDialogHeader>

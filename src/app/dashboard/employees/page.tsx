@@ -25,6 +25,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useReactToPrint } from 'react-to-print';
 
 const EmployeeDialog = dynamic(() => import('@/components/employee-dialog'), {
     ssr: false,
@@ -54,6 +55,11 @@ export default function EmployeesPage() {
     const [isEmployeeListDialogOpen, setEmployeeListDialogOpen] = useState(false);
     
     const reportComponentRef = useRef<HTMLDivElement>(null);
+
+    const handlePrint = useReactToPrint({
+      content: () => reportComponentRef.current,
+      documentTitle: selectedEmployee ? `Attendance Report - ${selectedEmployee.name} - ${format(month, 'MMMM yyyy')}` : 'attendance-report',
+    });
     
     useEffect(() => {
         if (employees.length > 0 && !selectedEmployee) {
@@ -104,22 +110,6 @@ export default function EmployeesPage() {
             default: return "";
         }
     };
-    
-    const handlePrint = () => {
-        if (!selectedEmployee) return;
-        
-        const originalTitle = document.title;
-        document.title = `Attendance Report - ${selectedEmployee.name} - ${format(month, 'MMMM yyyy')}`;
-        
-        const handleAfterPrint = () => {
-            document.title = originalTitle;
-            window.removeEventListener('afterprint', handleAfterPrint);
-        };
-        window.addEventListener('afterprint', handleAfterPrint);
-        
-        window.print();
-    };
-
 
     return (
         <>
@@ -251,27 +241,16 @@ export default function EmployeesPage() {
                 onOpenChange={setEmployeeListDialogOpen}
             />}
             
-             <div className="print-source">
+            <div className="hidden">
               {selectedEmployee && (
-                <div className="hidden print:block">
+                <div ref={reportComponentRef}>
                     <EmployeeAttendanceReport
-                        ref={reportComponentRef}
                         employee={selectedEmployee}
                         month={month}
                         attendanceData={monthlyAttendanceData.report}
                     />
                 </div>
               )}
-               <div className="hidden print:block">
-                  {selectedEmployee && (
-                    <EmployeeAttendanceReport
-                        ref={reportComponentRef}
-                        employee={selectedEmployee}
-                        month={month}
-                        attendanceData={monthlyAttendanceData.report}
-                    />
-                  )}
-               </div>
             </div>
         </>
     );

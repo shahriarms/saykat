@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useAppData } from '@/hooks/use-app-data';
 import { useUser } from '@/hooks/use-user';
 import type { Employee, SalaryPayment } from '@/lib/types';
@@ -36,6 +36,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import type { DateRange } from 'react-day-picker';
 import { cn } from '@/lib/utils';
+import { useReactToPrint } from 'react-to-print';
 
 export default function SalariesPage() {
   const { employees, getPaymentsForMonth, addSalaryPayment, getDueSalaryForMonth, centralDateRange } = useAppData();
@@ -47,9 +48,16 @@ export default function SalariesPage() {
   const [paymentAmount, setPaymentAmount] = useState<number | ''>('');
   const [isConfirmingPayment, setConfirmingPayment] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [lastSuccessfulPayment, setLastSuccessfulPayment] = useState<{payment: SalaryPayment, employee: Employee} | null>(null);
+  const [paymentToPrint, setPaymentToPrint] = useState<{payment: SalaryPayment, employee: Employee} | null>(null);
   
   const [localDate, setLocalDate] = useState<Date>(centralDateRange?.from || new Date());
+  const printComponentRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useReactToPrint({
+      content: () => printComponentRef.current,
+      documentTitle: paymentToPrint ? `salary-receipt-for-${paymentToPrint.employee.name}` : 'salary-receipt',
+      onAfterPrint: () => setPaymentToPrint(null),
+  });
 
   useEffect(() => {
     // Only sync from central if the local date is for a different day than central's from date
@@ -59,6 +67,12 @@ export default function SalariesPage() {
           setLocalDate(new Date());
     }
   }, [centralDateRange]);
+
+  useEffect(() => {
+      if (paymentToPrint) {
+          handlePrint();
+      }
+  }, [paymentToPrint, handlePrint]);
 
   const handleResetDate = useCallback(() => {
     setLocalDate(centralDateRange?.from || new Date());
@@ -134,38 +148,11 @@ export default function SalariesPage() {
           description: t('payment_successful_toast_description', { amount: paymentAmount.toFixed(2), name: selectedEmployee.name }),
         });
         
-        setLastSuccessfulPayment({ payment: result, employee: selectedEmployee });
+        setPaymentToPrint({ payment: result, employee: selectedEmployee });
         setPaymentAmount('');
     }
 
   }, [selectedEmployee, paymentAmount, isOverpayment, user, addSalaryPayment, toast, t]);
-
-    useEffect(() => {
-        if (lastSuccessfulPayment) {
-            const originalTitle = document.title;
-            document.title = `salary-receipt-for-${lastSuccessfulPayment.employee.name}`;
-            
-            const handleAfterPrint = () => {
-                document.title = originalTitle;
-                setLastSuccessfulPayment(null);
-                window.removeEventListener('afterprint', handleAfterPrint);
-            };
-            window.addEventListener('afterprint', handleAfterPrint);
-
-            const timer = setTimeout(() => {
-                window.print();
-            }, 100);
-
-            return () => {
-                clearTimeout(timer);
-                window.removeEventListener('afterprint', handleAfterPrint);
-                 if (document.title !== originalTitle) {
-                  document.title = originalTitle;
-                }
-            }
-        }
-    }, [lastSuccessfulPayment]);
-
 
   const handlePaymentConfirmation = () => {
     if (canProcessPayment) {
@@ -175,7 +162,7 @@ export default function SalariesPage() {
   
   const handleHistoryItemClick = (payment: SalaryPayment) => {
     if (selectedEmployee) {
-      setLastSuccessfulPayment({ payment, employee: selectedEmployee });
+      setPaymentToPrint({ payment, employee: selectedEmployee });
     }
   };
 
@@ -362,35 +349,18 @@ export default function SalariesPage() {
                 </div>
              ) : (
                 <ScrollArea className="flex-1 rounded-lg bg-muted/20 p-2">
-                    <div className="print:hidden">
-                        <SalaryReceipt 
-                            employee={selectedEmployee}
-                            paymentAmount={typeof paymentAmount === 'number' ? paymentAmount : 0}
-                            paymentDate={new Date()}
-                        />
-                    </div>
-                    <div className="hidden print:block">
-                        <SalaryReceipt 
-                            employee={selectedEmployee}
-                            paymentAmount={typeof paymentAmount === 'number' ? paymentAmount : 0}
-                            paymentDate={new Date()}
-                        />
-                    </div>
+                    <SalaryReceipt 
+                        ref={printComponentRef}
+                        employee={selectedEmployee}
+                        paymentAmount={paymentToPrint?.payment.amount ?? (typeof paymentAmount === 'number' ? paymentAmount : 0)}
+                        paymentDate={paymentToPrint ? new Date(paymentToPrint.payment.date) : new Date()}
+                    />
                 </ScrollArea>
              )}
           </CardContent>
         </Card>
       </div>
     </div>
-     <div className="print-source">
-        {lastSuccessfulPayment && (
-            <SalaryReceipt
-                employee={lastSuccessfulPayment.employee}
-                paymentAmount={lastSuccessfulPayment.payment.amount}
-                paymentDate={new Date(lastSuccessfulPayment.payment.date)}
-            />
-        )}
-      </div>
     <AlertDialog open={isConfirmingPayment} onOpenChange={setConfirmingPayment}>
         <AlertDialogContent>
             <AlertDialogHeader>

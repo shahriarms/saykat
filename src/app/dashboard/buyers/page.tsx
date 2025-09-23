@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useAppData } from '@/hooks/use-app-data';
 import { useSettings } from '@/hooks/use-settings';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,6 +35,7 @@ import { Users, FileText, ChevronRight, Calendar, DollarSign, Search, Printer, L
 import { useUser } from '@/hooks/use-user';
 import type { DateRange } from 'react-day-picker';
 import { DateRangePicker } from '@/components/date-range-picker';
+import { useReactToPrint } from 'react-to-print';
 
 
 export default function BuyersPage() {
@@ -48,10 +49,16 @@ export default function BuyersPage() {
   const [invoiceSearchTerm, setInvoiceSearchTerm] = useState('');
   const [buyerSearchTerm, setBuyerSearchTerm] = useState('');
   const [isPrinting, setIsPrinting] = useState(false);
-  const [invoiceToPrint, setInvoiceToPrint] = useState<Invoice | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
   const [localDateRange, setLocalDateRange] = useState<DateRange | undefined>(centralDateRange);
+  
+  const printComponentRef = useRef<HTMLDivElement>(null);
+
+  const handlePrintA4 = useReactToPrint({
+      content: () => printComponentRef.current,
+      documentTitle: selectedInvoice ? `invoice-${selectedInvoice.id}` : 'invoice',
+  });
 
   useEffect(() => {
     setLocalDateRange(centralDateRange);
@@ -101,8 +108,7 @@ export default function BuyersPage() {
         setIsPrinting(false);
       }
     } else {
-      setInvoiceToPrint(selectedInvoice);
-      setTimeout(() => window.print(), 100);
+      handlePrintA4();
     }
   };
   
@@ -300,9 +306,10 @@ export default function BuyersPage() {
               <CardContent className="flex-1 overflow-auto">
                   {selectedInvoice ? (
                     <div className="h-full min-h-[500px] flex items-center justify-center bg-muted/50 rounded-lg p-4">
-                        <div className="print:hidden w-full h-full overflow-hidden flex justify-center items-center">
+                        <div className="w-full h-full overflow-hidden flex justify-center items-center">
                           <div className='w-[800px] transform origin-top scale-90'>
                                 <InvoicePrintLayout 
+                                    ref={printComponentRef}
                                     invoiceId={selectedInvoice.id}
                                     currentDate={new Date(selectedInvoice.date).toLocaleDateString()}
                                     customerName={selectedInvoice.customerName}
@@ -329,23 +336,7 @@ export default function BuyersPage() {
           </Card>
         </div>
       </div>
-      {invoiceToPrint && (
-        <div className="print-source">
-            <InvoicePrintLayout
-                invoiceId={invoiceToPrint.id}
-                currentDate={new Date(invoiceToPrint.date).toLocaleDateString()}
-                customerName={invoiceToPrint.customerName}
-                customerAddress={invoiceToPrint.customerAddress}
-                customerPhone={invoiceToPrint.customerPhone}
-                invoiceItems={invoiceToPrint.items}
-                subtotal={invoiceToPrint.subtotal}
-                paidAmount={invoiceToPrint.paidAmount}
-                dueAmount={invoiceToPrint.dueAmount}
-                printFormat={settings.printFormat}
-                locale={settings.locale}
-            />
-        </div>
-      )}
+      
       <AlertDialog open={!!invoiceToDelete} onOpenChange={() => setInvoiceToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
