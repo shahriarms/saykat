@@ -408,7 +408,13 @@ function InvoicePage() {
                                     <TableRow key={item.id}>
                                         <TableCell>
                                             <p className="font-medium">{item.name}</p>
-                                            <p className='text-xs text-muted-foreground'>Suggested: ৳ {item.originalPrice.toFixed(2)}</p>
+                                            <div className='text-xs text-muted-foreground flex items-center gap-x-2 flex-wrap'>
+                                                <span>Sug: ৳{item.originalPrice.toFixed(2)}</span>
+                                                <Separator orientation="vertical" className="h-3" />
+                                                <span className={cn(item.profitMargin < 0 ? 'text-red-500' : 'text-green-600')}>
+                                                    Profit: {item.profitMargin.toFixed(1)}% (৳{item.profitAmount.toFixed(2)})
+                                                </span>
+                                            </div>
                                         </TableCell>
                                         <TableCell>
                                             <Input type="text" inputMode="decimal" value={item.quantity} onChange={e => updateInvoiceItem(item.id, { quantity: e.target.value })} className="h-9" placeholder="0" />

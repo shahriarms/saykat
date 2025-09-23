@@ -2,16 +2,19 @@
 'use client';
 
 import { createContext, useContext, ReactNode, useMemo, useCallback, useState, useEffect } from 'react';
-import type { Invoice, Product, Buyer } from '@/lib/types';
+import type { Invoice, Product, Buyer, InvoiceItem } from '@/lib/types';
 import { useToast } from './use-toast';
 import { useAppData } from './use-app-data';
 
-export interface DraftInvoiceItem extends Omit<Invoice, 'items' | 'id'> {
+export interface DraftInvoiceItem {
     id: string; // product id
     name: string;
     quantity: number | string;
     price: number | string;
     originalPrice: number;
+    buyingPrice: number;
+    profitMargin: number;
+    profitAmount: number;
 }
 
 export interface DraftInvoice {
@@ -245,7 +248,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                 title: "Item Already Added",
                 description: `"${product.name}" is already in the invoice. You can change its quantity.`,
             });
-            return; // Exit without changing state
+            return;
         }
 
         setDrafts(prev => prev.map((draft, index) => {
@@ -257,7 +260,10 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                 quantity: '',
                 price: product.sellingPrice,
                 originalPrice: product.sellingPrice,
-            } as DraftInvoiceItem;
+                buyingPrice: product.buyingPrice,
+                profitMargin: product.profitMargin,
+                profitAmount: 0,
+            };
             
             const newItems = [...draft.items, newItem];
             const { subtotal, changeAmount, paidAmount, dueAmount } = calculateTotals(newItems, draft.paidAmount, draft.cashReceived);
@@ -272,12 +278,17 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
             const newItems = draft.items.map(item => {
                 if (item.id === itemId) {
                     const updatedItem = { ...item, ...itemUpdate };
-                    // Allow empty string for user input, but treat as 0 for calculation
-                    const newQuantity = String(updatedItem.quantity);
-                    const newPrice = String(updatedItem.price);
                     
-                    updatedItem.quantity = newQuantity;
-                    updatedItem.price = newPrice;
+                    const quantity = parseFloat(String(updatedItem.quantity)) || 0;
+                    const price = parseFloat(String(updatedItem.price)) || 0;
+                    
+                    const profitAmount = (price - updatedItem.buyingPrice) * quantity;
+                    const profitMargin = updatedItem.buyingPrice > 0 ? ((price - updatedItem.buyingPrice) / updatedItem.buyingPrice) * 100 : 0;
+                    
+                    updatedItem.quantity = String(updatedItem.quantity); // Keep as string for input field
+                    updatedItem.price = String(updatedItem.price);
+                    updatedItem.profitAmount = profitAmount;
+                    updatedItem.profitMargin = profitMargin;
                     
                     return updatedItem;
                 }
