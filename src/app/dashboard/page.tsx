@@ -276,7 +276,7 @@ export default function Dashboard() {
                         <Card as="button" onClick={() => setGrossProfitReportOpen(true)} className="text-left flex items-center p-4 gap-4">
                             <div className="bg-teal-100 p-3 rounded-full"><ThumbsUp className="h-6 w-6 text-teal-600" /></div>
                             <div>
-                                <p className="text-sm text-muted-foreground">Gross Profit</p>
+                                <p className="text-sm text-muted-foreground">Today's Gross Profit</p>
                                 <p className="text-xl font-bold">৳ {todayStats.grossProfit.toFixed(2)}</p>
                             </div>
                         </Card>
@@ -306,7 +306,7 @@ export default function Dashboard() {
             <div className="lg:col-span-3 grid grid-cols-1 gap-6">
                 <div>
                     <h2 className="text-lg font-semibold mb-4">{t('date_range_summary_title', { range: rangeTitle })}</h2>
-                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7">
                       <Card as="button" onClick={() => setMonthlySalesReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
                          <div className="bg-blue-100 p-3 rounded-full"><ShoppingCart className="h-6 w-6 text-blue-600" /></div>
                          <div>
@@ -342,6 +342,21 @@ export default function Dashboard() {
                           <p className="text-base font-bold">{`${rangeStats.materialSoldKg.toFixed(1)}kg, ${rangeStats.hardwareSoldPcs}pcs`}</p>
                         </div>
                       </Card>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                           <Card className="text-left flex items-center p-4 gap-4">
+                              <div className="bg-emerald-100 p-3 rounded-full"><ThumbsUp className="h-6 w-6 text-emerald-600" /></div>
+                              <div>
+                                <p className="text-sm text-muted-foreground">Total Gross Profit</p>
+                                <p className="text-xl font-bold">৳ {rangeStats.grossProfit.toFixed(2)}</p>
+                              </div>
+                            </Card>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p className="text-sm">Total Gross Profit = Total Sales - Total COGS</p>
+                            <p className="text-sm">৳{rangeStats.grossProfit.toFixed(2)} = ৳{rangeStats.totalSales.toFixed(2)} - ৳{rangeStats.cogs.toFixed(2)}</p>
+                        </TooltipContent>
+                      </Tooltip>
                       <Tooltip>
                         <TooltipTrigger asChild>
                            <Card className="text-left flex items-center p-4 gap-4">
