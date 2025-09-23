@@ -284,11 +284,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
           customerName: draftInvoice.customerName,
           customerAddress: draftInvoice.customerAddress,
           customerPhone: draftInvoice.customerPhone,
-          items: draftInvoice.items.map(({ originalPrice, ...item }) => item),
+          items: draftInvoice.items.map(({ originalPrice, buyingPrice, profitAmount, profitMargin, ...item }) => item),
           subtotal: draftInvoice.subtotal,
           paidAmount: draftInvoice.paidAmount || 0,
           dueAmount: draftInvoice.dueAmount,
           date: new Date().toISOString(),
+          totalProfit: draftInvoice.totalProfit,
         };
         
         if (isDbConnected) {

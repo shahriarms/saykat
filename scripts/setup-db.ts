@@ -67,7 +67,8 @@ const tableCreationQueries = [
       subtotal NUMERIC(10, 2) NOT NULL,
       paid_amount NUMERIC(10, 2) NOT NULL,
       due_amount NUMERIC(10, 2) NOT NULL,
-      date TIMESTAMPTZ NOT NULL
+      date TIMESTAMPTZ NOT NULL,
+      total_profit NUMERIC(10, 2) DEFAULT 0
    );`,
    `DROP TABLE IF EXISTS payments CASCADE;
    CREATE TABLE payments (

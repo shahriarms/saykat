@@ -50,7 +50,7 @@ function formatRow(row: any) {
         }
 
         // Convert numeric strings to numbers
-        if (camelKey === 'subtotal' || camelKey === 'paidAmount' || camelKey === 'dueAmount' || camelKey === 'amount' || camelKey === 'salary') {
+        if (camelKey === 'subtotal' || camelKey === 'paidAmount' || camelKey === 'dueAmount' || camelKey === 'amount' || camelKey === 'salary' || camelKey === 'totalProfit') {
             newRow[camelKey] = parseFloat(row[key]);
         }
     }
@@ -120,8 +120,8 @@ class PostgresDataService {
 
             // Insert invoice
             await client.query(
-                'INSERT INTO invoices (id, buyer_id, customer_name, customer_address, customer_phone, items, subtotal, paid_amount, due_amount, date) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
-                [finalInvoiceData.id, finalInvoiceData.buyerId, finalInvoiceData.customerName, finalInvoiceData.customerAddress, finalInvoiceData.customerPhone, JSON.stringify(items), finalInvoiceData.subtotal, finalInvoiceData.paidAmount, finalInvoiceData.dueAmount, finalInvoiceData.date]
+                'INSERT INTO invoices (id, buyer_id, customer_name, customer_address, customer_phone, items, subtotal, paid_amount, due_amount, date, total_profit) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)',
+                [finalInvoiceData.id, finalInvoiceData.buyerId, finalInvoiceData.customerName, finalInvoiceData.customerAddress, finalInvoiceData.customerPhone, JSON.stringify(items), finalInvoiceData.subtotal, finalInvoiceData.paidAmount, finalInvoiceData.dueAmount, finalInvoiceData.date, finalInvoiceData.totalProfit]
             );
 
             // Update product stock
@@ -342,7 +342,7 @@ class PostgresDataService {
             if (data.employees) for (const e of data.employees) await client.query('INSERT INTO employees (id, name, phone, address, role, salary, joining_date) VALUES ($1, $2, $3, $4, $5, $6, $7)', [e.id, e.name, e.phone, e.address, e.role, e.salary, e.joiningDate]);
             if (data.expenses) for (const e of data.expenses) await client.query('INSERT INTO expenses (id, main_category, name, description, amount, date) VALUES ($1, $2, $3, $4, $5, $6)', [e.id, e.mainCategory, e.name, e.description, e.amount, e.date]);
             if (data.buyers) for (const b of data.buyers) await client.query('INSERT INTO buyers (id, name, address, phone, invoice_ids) VALUES ($1, $2, $3, $4, $5)', [b.id, b.name, b.address, b.phone, JSON.stringify(b.invoiceIds)]);
-            if (data.invoices) for (const i of data.invoices) await client.query('INSERT INTO invoices (id, buyer_id, customer_name, customer_address, customer_phone, items, subtotal, paid_amount, due_amount, date) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [i.id, i.buyerId, i.customerName, i.customerAddress, i.customerPhone, JSON.stringify(i.items), i.subtotal, i.paidAmount, i.dueAmount, i.date]);
+            if (data.invoices) for (const i of data.invoices) await client.query('INSERT INTO invoices (id, buyer_id, customer_name, customer_address, customer_phone, items, subtotal, paid_amount, due_amount, date, total_profit) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [i.id, i.buyerId, i.customerName, i.customerAddress, i.customerPhone, JSON.stringify(i.items), i.subtotal, i.paidAmount, i.dueAmount, i.date, i.totalProfit]);
             if (data.salaryPayments) for (const sp of data.salaryPayments) await client.query('INSERT INTO salary_payments (id, employee_id, amount, date, paid_by) VALUES ($1, $2, $3, $4, $5)', [sp.id, sp.employeeId, sp.amount, sp.date, sp.paidBy]);
             if (data.payments) for (const p of data.payments) await client.query('INSERT INTO payments (id, invoice_id, buyer_id, amount, date) VALUES ($1, $2, $3, $4, $5)', [p.id, p.invoiceId, p.buyerId, p.amount, p.date]);
             if (data.attendance) for (const a of data.attendance) await client.query('INSERT INTO attendance (id, employee_id, date, status) VALUES ($1, $2, $3, $4)', [a.id, a.employeeId, a.date, a.status]);

@@ -39,6 +39,7 @@ export interface Invoice {
   date: string; // ISO 8601 date string
   cashReceived?: number;
   changeAmount?: number;
+  totalProfit?: number;
 }
 
 export interface Buyer {
