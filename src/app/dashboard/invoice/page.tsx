@@ -476,30 +476,10 @@ function InvoicePage() {
                   <CardHeader>
                       <CardTitle>{t('live_print_preview_title')}</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                        {/* Screen-only scalable preview */}
-                        <div className="w-full bg-muted/50 rounded-lg overflow-hidden relative print:hidden" style={{ aspectRatio: '1 / 1.414' }}>
-                           <div className="absolute inset-0 p-4">
-                                <div className="origin-top-left" style={{ transform: 'scale(calc(100% / 800px))' }}>
-                                    <InvoicePrintLayout 
-                                        invoiceId={draftId}
-                                        currentDate={new Date().toLocaleDateString()}
-                                        customerName={customerName}
-                                        customerAddress={customerAddress}
-                                        customerPhone={customerPhone}
-                                        invoiceItems={items}
-                                        subtotal={subtotal}
-                                        paidAmount={paidAmount || 0}
-                                        dueAmount={dueAmount || 0}
-                                        printFormat={settings.printFormat}
-                                        locale={settings.locale}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Hidden, full-size layout for printing */}
-                        <div className="hidden print:block">
+                  <CardContent className="h-full min-h-[500px] flex items-center justify-center bg-muted/50 rounded-lg p-4">
+                      {/* Screen-only scalable preview */}
+                      <div className="print:hidden w-full h-full overflow-hidden flex justify-center items-center">
+                          <div className='w-[800px] transform origin-top scale-90'>
                             <InvoicePrintLayout 
                                 invoiceId={draftId}
                                 currentDate={new Date().toLocaleDateString()}
@@ -513,7 +493,25 @@ function InvoicePage() {
                                 printFormat={settings.printFormat}
                                 locale={settings.locale}
                             />
-                        </div>
+                          </div>
+                      </div>
+
+                      {/* Hidden, full-size layout for printing */}
+                      <div className="hidden print:block">
+                          <InvoicePrintLayout 
+                              invoiceId={draftId}
+                              currentDate={new Date().toLocaleDateString()}
+                              customerName={customerName}
+                              customerAddress={customerAddress}
+                              customerPhone={customerPhone}
+                              invoiceItems={items}
+                              subtotal={subtotal}
+                              paidAmount={paidAmount || 0}
+                              dueAmount={dueAmount || 0}
+                              printFormat={settings.printFormat}
+                              locale={settings.locale}
+                          />
+                      </div>
                   </CardContent>
               </Card>
           </div>
