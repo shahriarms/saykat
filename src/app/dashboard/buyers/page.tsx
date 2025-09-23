@@ -187,8 +187,8 @@ export default function BuyersPage() {
             centralDateRange={centralDateRange}
           />
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="flex flex-col">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <Card className="lg:col-span-1 flex flex-col">
             <CardHeader>
               <CardTitle>{t('all_buyers_title')}</CardTitle>
               <div className="relative pt-2">
@@ -227,7 +227,7 @@ export default function BuyersPage() {
             </CardContent>
           </Card>
 
-          <Card className="flex flex-col">
+          <Card className="lg:col-span-1 flex flex-col">
             <CardHeader>
               <CardTitle className="truncate">{selectedBuyer ? t('buyers_invoices_title', { name: selectedBuyer.name }) : t('invoice_log_title')}</CardTitle>
               <div className="relative pt-2">
@@ -293,7 +293,7 @@ export default function BuyersPage() {
           </Card>
 
           {/* Invoice Preview */}
-          <Card className="lg:col-span-1">
+          <Card className="lg:col-span-2">
               <CardHeader className="flex-row items-center justify-between">
                   <CardTitle>{t('invoice_details_title')}</CardTitle>
                   <div className="flex items-center gap-2">
