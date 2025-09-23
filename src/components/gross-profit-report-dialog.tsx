@@ -79,9 +79,9 @@ export function GrossProfitReportDialog({ open, onOpenChange, invoices }: GrossP
                 body: invoice.items.map(item => [
                     item.name,
                     item.quantity,
-                    '৳'+item.buyingPrice.toFixed(2),
-                    '৳'+item.price.toFixed(2),
-                    '৳'+item.profitAmount.toFixed(2),
+                    '৳'+(parseFloat(String(item.buyingPrice)) || 0).toFixed(2),
+                    '৳'+(parseFloat(String(item.price)) || 0).toFixed(2),
+                    '৳'+(parseFloat(String(item.profitAmount)) || 0).toFixed(2),
                 ]),
                 foot: [['', '', '', 'Invoice Profit', '৳'+(invoice.totalProfit || 0).toFixed(2)]],
                 startY: finalY,
@@ -136,9 +136,9 @@ export function GrossProfitReportDialog({ open, onOpenChange, invoices }: GrossP
                                         <TableRow key={item.id}>
                                             <TableCell className="font-medium">{item.name}</TableCell>
                                             <TableCell className="text-right">{item.quantity}</TableCell>
-                                            <TableCell className="text-right font-mono">৳{item.buyingPrice.toFixed(2)}</TableCell>
-                                            <TableCell className="text-right font-mono">৳{item.price.toFixed(2)}</TableCell>
-                                            <TableCell className="text-right font-mono font-semibold text-green-600">৳{item.profitAmount.toFixed(2)}</TableCell>
+                                            <TableCell className="text-right font-mono">৳{(parseFloat(String(item.buyingPrice)) || 0).toFixed(2)}</TableCell>
+                                            <TableCell className="text-right font-mono">৳{(parseFloat(String(item.price)) || 0).toFixed(2)}</TableCell>
+                                            <TableCell className="text-right font-mono font-semibold text-green-600">৳{(parseFloat(String(item.profitAmount)) || 0).toFixed(2)}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
