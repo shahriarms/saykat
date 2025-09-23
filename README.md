@@ -58,6 +58,22 @@ You can now access your services:
 
 ---
 
+## How Your Data is Kept Safe with Docker (আপনার ডেটা কীভাবে সুরক্ষিত থাকে)
+
+Your application data (products, invoices, etc.) is extremely important. This project uses **Docker Volumes** to ensure your data is always safe, even if you stop or remove the application containers.
+
+Think of it this way:
+- **Docker Container (The Box 🗃️):** A container is like a temporary, isolated box where your application runs. If you just stored data inside this box, the data would be lost forever when you delete the box.
+- **Docker Volume (The Separate Safe Drive 💾):** A Docker Volume is like a special, safe drive that Docker manages separately. Our project connects this safe drive to our database container.
+  - In our `docker-compose.yml` file, the line `postgres_data:/var/lib/postgresql/data` tells Docker: "Take all data from the database's `data` folder and store it in a managed volume named `postgres_data`."
+
+**What does this mean for you?**
+When you run `docker-compose down`, the "boxes" (containers) are removed, but the "safe drive" (`postgres_data` volume) containing all your database information **remains untouched**. The next time you run `docker-compose up`, Docker simply reconnects that same safe drive to the new database container, and all your data is instantly available again, exactly as you left it.
+
+This makes the system robust and ensures your valuable business data is always persistent and secure.
+
+---
+
 ## How to Start the Application Automatically on PC Startup
 *(পিসি চালু করার সাথে সাথে অ্যাপ্লিকেশন স্বয়ংক্রিয়ভাবে চালু করার পদ্ধতি)*
 
