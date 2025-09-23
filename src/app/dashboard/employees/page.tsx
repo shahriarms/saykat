@@ -125,7 +125,7 @@ export default function EmployeesPage() {
         <>
             <div className="flex flex-col gap-6 h-full no-print">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <h1 className="text-2xl font-semibold flex items-center gap-2"><UserCog className="w-6 h-6"/>{t('attendance_page_title')}</h1>
+                    <h1 className="text-xl font-semibold flex items-center gap-2"><UserCog className="w-6 h-6"/>{t('attendance_page_title')}</h1>
                     <div className="flex gap-2 flex-wrap">
                         <Button onClick={() => setEmployeeListDialogOpen(true)} variant="outline">
                             <Users className="mr-2 h-4 w-4" /> Employee List
@@ -178,13 +178,13 @@ export default function EmployeesPage() {
                                 <div className="flex gap-2">
                                      <Popover>
                                         <PopoverTrigger asChild>
-                                            <Button variant="outline"><CalendarIcon className="mr-2 h-4 w-4"/> {format(month, 'MMMM yyyy')}</Button>
+                                            <Button variant="outline" size="sm"><CalendarIcon className="mr-2 h-4 w-4"/> {format(month, 'MMMM yyyy')}</Button>
                                         </PopoverTrigger>
                                         <PopoverContent>
                                             <Calendar mode="single" month={month} onMonthChange={(m) => m && setMonth(m)} captionLayout="dropdown-buttons" fromYear={2020} toYear={new Date().getFullYear() + 5}/>
                                         </PopoverContent>
                                      </Popover>
-                                     <Button onClick={handlePrint} variant="outline" disabled={!selectedEmployee}><Printer className="mr-2 h-4 w-4"/> Print Report</Button>
+                                     <Button onClick={handlePrint} variant="outline" size="sm" disabled={!selectedEmployee}><Printer className="mr-2 h-4 w-4"/> Print Report</Button>
                                 </div>
                             </div>
                         </CardHeader>
@@ -253,7 +253,7 @@ export default function EmployeesPage() {
             
              <div className="print-source">
               {selectedEmployee && (
-                <div className="print:hidden">
+                <div className="hidden print:block">
                     <EmployeeAttendanceReport
                         ref={reportComponentRef}
                         employee={selectedEmployee}
