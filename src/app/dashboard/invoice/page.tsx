@@ -61,18 +61,17 @@ function InvoicePage() {
   const [isPrintConfirmOpen, setPrintConfirmOpen] = useState(false);
   const [invoiceToPrint, setInvoiceToPrint] = useState<DraftInvoice | null>(null);
 
-  useEffect(() => {
+ useEffect(() => {
     const handleAfterPrint = () => {
       if (invoiceToPrint) {
         setInvoiceToPrint(null);
         resetActiveDraft();
-         toast({
-            title: "Memo Ready",
-            description: "A new, empty memo is ready for you.",
+        toast({
+          title: "Memo Ready",
+          description: "A new, empty memo is ready for you.",
         });
       }
     };
-
     window.addEventListener('afterprint', handleAfterPrint);
     return () => {
       window.removeEventListener('afterprint', handleAfterPrint);
@@ -122,10 +121,10 @@ function InvoicePage() {
             
             const finalDraft = await updateActiveDraft({ id: newInvoiceId });
             setInvoiceToPrint(finalDraft);
-            // Use a timeout to allow the state to update before printing
+            
             setTimeout(() => {
               window.print();
-            }, 0);
+            }, 100);
         }
     } catch (error: any) {
         console.error("Failed to save invoice:", error);
@@ -433,26 +432,35 @@ function InvoicePage() {
                     <div className="w-full md:w-80 ml-auto space-y-2">
                     <div className="flex justify-between items-center font-semibold text-lg border-t pt-2 mt-2">
                         <span>{t('subtotal_label')}</span>
-                        <span className="font-medium">৳ {(subtotal ?? 0).toFixed(2)}</span>
+                        <span className="font-medium">৳ {(subtotal || 0).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between items-center">
                         <Label htmlFor='paidAmount' className="shrink-0 text-muted-foreground text-sm">{t('paid_label')}</Label>
-                        <div className="relative w-32">
-                                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">৳</span>
-                                <Input 
-                                    id='paidAmount' 
-                                    type="text"
-                                    inputMode='decimal'
-                                    value={paidAmount ?? ''} 
-                                    onChange={e => updateActiveDraft({ paidAmount: parseFloat(e.target.value) || undefined })} 
-                                    className="h-9 pl-5 text-right font-medium"
-                                    placeholder='0'
-                                />
+                        <div className="relative flex items-center gap-2">
+                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">৳</span>
+                            <Input 
+                                id='paidAmount' 
+                                type="text"
+                                inputMode='decimal'
+                                value={paidAmount ?? ''} 
+                                onChange={e => updateActiveDraft({ paidAmount: parseFloat(e.target.value) || undefined })} 
+                                className="h-9 pl-5 pr-2 text-right font-medium w-32"
+                                placeholder='0'
+                            />
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="h-8 px-2 text-xs"
+                                onClick={() => updateActiveDraft({ paidAmount: subtotal })}
+                            >
+                                Full
+                            </Button>
                         </div>
                     </div>
-                     <div className={cn("flex justify-between items-center font-semibold", (dueAmount ?? 0) > 0 ? "text-destructive" : "text-foreground")}>
+                     <div className={cn("flex justify-between items-center font-semibold", (dueAmount || 0) > 0 ? "text-destructive" : "text-foreground")}>
                         <Label htmlFor='dueAmount' className="shrink-0 text-sm">{t('due_label')}</Label>
-                        <span className="font-medium">৳ {(dueAmount ?? 0).toFixed(2)}</span>
+                        <span className="font-medium">৳ {(dueAmount || 0).toFixed(2)}</span>
                     </div>
                     </div>
                 </CardFooter>
