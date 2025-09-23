@@ -202,7 +202,7 @@ export default function BuyersPage() {
                   />
               </div>
             </CardHeader>
-            <CardContent className="p-0 flex-1">
+            <CardContent className="p-0 flex-1 min-h-0">
               <ScrollArea className="h-full max-h-[calc(100vh-350px)]">
                 <div className="divide-y border-t">
                   {filteredBuyers.map((buyer) => (
@@ -242,7 +242,7 @@ export default function BuyersPage() {
                   />
               </div>
             </CardHeader>
-            <CardContent className="p-0 flex-1">
+            <CardContent className="p-0 flex-1 min-h-0">
               <ScrollArea className="h-full max-h-[calc(100vh-350px)]">
                 <div className="divide-y border-t">
                 {selectedBuyer ? (
