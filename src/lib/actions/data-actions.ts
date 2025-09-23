@@ -1,8 +1,9 @@
 
+
 'use server';
 
 import { Pool } from 'pg';
-import type { Product, Invoice, Buyer, Expense, Employee, SalaryPayment, Payment, Attendance } from '@/lib/types';
+import type { Product, Invoice, Buyer, Expense, Employee, SalaryPayment, Payment, Attendance, InvoiceItem } from '@/lib/types';
 import PostgresDataService from '@/services/data-service.postgres';
 
 // This is a Server Action file. It will only run on the server.
@@ -25,11 +26,11 @@ export async function getAllData(): Promise<Omit<BackupData, 'products'>> {
     return PostgresDataService.getAllData();
 }
 
-export async function addInvoice(invoiceData: Omit<Invoice, 'id'>, items: any[]): Promise<Invoice> {
+export async function addInvoice(invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> {
     if (!usePostgres) {
         throw new Error("Database not connected.");
     }
-    return PostgresDataService.addInvoice(invoiceData, items);
+    return PostgresDataService.addInvoice(invoiceData);
 }
 
 export async function deleteInvoice(invoiceId: number): Promise<{ success: boolean }> {

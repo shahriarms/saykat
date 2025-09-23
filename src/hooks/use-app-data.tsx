@@ -3,7 +3,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
-import type { Product, Invoice, Buyer, Expense, Employee, Attendance, SalaryPayment, Payment, AttendanceStatus } from '@/lib/types';
+import type { Product, Invoice, Buyer, Expense, Employee, Attendance, SalaryPayment, Payment, AttendanceStatus, InvoiceItem } from '@/lib/types';
 import { useToast } from "@/hooks/use-toast";
 import type { DraftInvoice } from './use-invoice-form';
 import { isSameDay, isWithinInterval, startOfDay, endOfDay, startOfMonth, endOfMonth } from 'date-fns';
@@ -279,12 +279,22 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const getProductById = useCallback((productId: string) => products.find(p => p.id === productId), [products]);
 
     const addInvoice = useCallback(async (draftInvoice: DraftInvoice): Promise<number | null> => {
+        
+        const finalItems: InvoiceItem[] = draftInvoice.items.map(item => ({
+            id: item.id,
+            name: item.name,
+            quantity: parseFloat(String(item.quantity)) || 0,
+            price: parseFloat(String(item.price)) || 0,
+            buyingPrice: item.buyingPrice,
+            profitAmount: item.profitAmount,
+        }));
+        
         const invoiceToSave: Omit<Invoice, 'id'> = {
           buyerId: draftInvoice.buyerId,
           customerName: draftInvoice.customerName,
           customerAddress: draftInvoice.customerAddress,
           customerPhone: draftInvoice.customerPhone,
-          items: draftInvoice.items.map(({ originalPrice, buyingPrice, profitAmount, profitMargin, ...item }) => item),
+          items: finalItems,
           subtotal: draftInvoice.subtotal,
           paidAmount: draftInvoice.paidAmount || 0,
           dueAmount: draftInvoice.dueAmount,
@@ -294,7 +304,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         
         if (isDbConnected) {
             try {
-                const newInvoice = await dataActions.addInvoice(invoiceToSave, invoiceToSave.items);
+                const newInvoice = await dataActions.addInvoice(invoiceToSave);
                 await loadAllData();
                 if (settings.printFormat === 'pos' && settings.posPrinterType !== 'disabled') {
                    await printInvoice(newInvoice);

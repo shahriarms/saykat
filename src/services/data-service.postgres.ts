@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { Pool } from 'pg';
@@ -78,7 +79,7 @@ class PostgresDataService {
         return PostgresProductService.getAllProducts();
     }
     
-    static async addInvoice(invoiceData: Omit<Invoice, 'id'>, items: DraftInvoiceItem[]): Promise<Invoice> {
+    static async addInvoice(invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> {
         const db = getPool();
         const client = await db.connect();
         try {
@@ -115,21 +116,12 @@ class PostgresDataService {
                 finalInvoiceData.buyerId = buyerId;
             }
 
-            const finalItems: InvoiceItem[] = items.map(item => ({
-                id: item.id,
-                name: item.name,
-                quantity: parseFloat(String(item.quantity)) || 0,
-                price: parseFloat(String(item.price)) || 0,
-                buyingPrice: item.buyingPrice,
-                profitAmount: item.profitAmount,
-            }));
-
             await client.query(
                 'INSERT INTO invoices (id, buyer_id, customer_name, customer_address, customer_phone, items, subtotal, paid_amount, due_amount, date, total_profit) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)',
-                [finalInvoiceData.id, finalInvoiceData.buyerId, finalInvoiceData.customerName, finalInvoiceData.customerAddress, finalInvoiceData.customerPhone, JSON.stringify(finalItems), finalInvoiceData.subtotal, finalInvoiceData.paidAmount, finalInvoiceData.dueAmount, finalInvoiceData.date, finalInvoiceData.totalProfit]
+                [finalInvoiceData.id, finalInvoiceData.buyerId, finalInvoiceData.customerName, finalInvoiceData.customerAddress, finalInvoiceData.customerPhone, JSON.stringify(finalInvoiceData.items), finalInvoiceData.subtotal, finalInvoiceData.paidAmount, finalInvoiceData.dueAmount, finalInvoiceData.date, finalInvoiceData.totalProfit]
             );
 
-            const stockUpdates = finalItems.map(item => ({
+            const stockUpdates = finalInvoiceData.items.map(item => ({
                 id: item.id,
                 stockChange: -item.quantity,
             }));
