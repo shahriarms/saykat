@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAppData } from '@/hooks/use-app-data';
-import { Plus, Trash2, Printer, X, Loader2, Search } from 'lucide-react';
+import { Plus, Trash2, Printer, X, Loader2, Search, Eye, EyeOff } from 'lucide-react';
 import { useInvoiceForm, InvoiceFormProvider } from '@/hooks/use-invoice-form';
 import { useToast } from '@/hooks/use-toast';
 import { InvoicePrintLayout } from '@/components/invoice-print-layout';
@@ -59,6 +59,8 @@ function InvoicePage() {
   const [draftToDelete, setDraftToDelete] = useState<DraftInvoice | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [invoiceToPrint, setInvoiceToPrint] = useState<DraftInvoice | null>(null);
+  const [showProfit, setShowProfit] = useState(true);
+
 
   useEffect(() => {
     const handleAfterPrint = async () => {
@@ -385,6 +387,9 @@ function InvoicePage() {
                 <CardHeader className="flex-row items-center justify-between">
                     <CardTitle>Invoice Items</CardTitle>
                     <div className="flex gap-2">
+                        <Button variant="outline" size="icon" onClick={() => setShowProfit(prev => !prev)}>
+                            {showProfit ? <EyeOff /> : <Eye />}
+                        </Button>
                         <Button onClick={handlePrintConfirm} disabled={!items || items.length === 0 || isProcessing}>
                             {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>} 
                             {isProcessing ? 'Processing...' : 'Print & Save'}
@@ -408,13 +413,15 @@ function InvoicePage() {
                                     <TableRow key={item.id}>
                                         <TableCell>
                                             <p className="font-medium">{item.name}</p>
-                                            <div className='text-xs text-muted-foreground flex items-center gap-x-2 flex-wrap'>
-                                                <span>Sug: ৳{item.originalPrice.toFixed(2)}</span>
-                                                <Separator orientation="vertical" className="h-3" />
-                                                <span className={cn(item.profitMargin < 0 ? 'text-red-500' : 'text-green-600')}>
-                                                    Profit: {item.profitMargin.toFixed(1)}% (৳{item.profitAmount.toFixed(2)})
-                                                </span>
-                                            </div>
+                                            {showProfit && (
+                                                <div className='text-xs text-muted-foreground flex items-center gap-x-2 flex-wrap'>
+                                                    <span>Sug: ৳{item.originalPrice.toFixed(2)}</span>
+                                                    <Separator orientation="vertical" className="h-3" />
+                                                    <span className={cn(item.profitMargin < 0 ? 'text-red-500' : 'text-green-600')}>
+                                                        Profit: {item.profitMargin.toFixed(1)}% (৳{item.profitAmount.toFixed(2)})
+                                                    </span>
+                                                </div>
+                                            )}
                                         </TableCell>
                                         <TableCell>
                                             <Input type="text" inputMode="decimal" value={item.quantity} onChange={e => updateInvoiceItem(item.id, { quantity: e.target.value })} className="h-9" placeholder="0" />
@@ -553,3 +560,5 @@ export default function InvoicePageWrapper() {
     </InvoiceFormProvider>
   );
 }
+
+    
