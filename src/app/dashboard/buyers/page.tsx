@@ -327,22 +327,23 @@ export default function BuyersPage() {
               </CardHeader>
               <CardContent className="flex-1 overflow-auto">
                   {selectedInvoice ? (
-                    <ScrollArea className="h-full">
-                      <div className="p-4 bg-muted/50 rounded-lg min-w-[820px]">
-                        <div className="print:hidden">
-                            <InvoicePrintLayout 
-                                  invoiceId={selectedInvoice.id}
-                                  currentDate={new Date(selectedInvoice.date).toLocaleDateString()}
-                                  customerName={selectedInvoice.customerName}
-                                  customerAddress={selectedInvoice.customerAddress}
-                                  customerPhone={selectedInvoice.customerPhone}
-                                  invoiceItems={selectedInvoice.items}
-                                  subtotal={selectedInvoice.subtotal}
-                                  paidAmount={selectedInvoice.paidAmount}
-                                  dueAmount={selectedInvoice.dueAmount}
-                                  printFormat={settings.printFormat}
-                                  locale={settings.locale}
-                              />
+                    <div className="h-full min-h-[500px] flex items-center justify-center bg-muted/50 rounded-lg p-4">
+                        <div className="print:hidden w-full h-full overflow-hidden flex justify-center items-center">
+                          <div className='w-[800px] transform origin-top scale-90'>
+                                <InvoicePrintLayout 
+                                    invoiceId={selectedInvoice.id}
+                                    currentDate={new Date(selectedInvoice.date).toLocaleDateString()}
+                                    customerName={selectedInvoice.customerName}
+                                    customerAddress={selectedInvoice.customerAddress}
+                                    customerPhone={selectedInvoice.customerPhone}
+                                    invoiceItems={selectedInvoice.items}
+                                    subtotal={selectedInvoice.subtotal}
+                                    paidAmount={selectedInvoice.paidAmount}
+                                    dueAmount={selectedInvoice.dueAmount}
+                                    printFormat={settings.printFormat}
+                                    locale={settings.locale}
+                                />
+                            </div>
                         </div>
                          <div className="hidden print:block">
                             <InvoicePrintLayout 
@@ -359,8 +360,7 @@ export default function BuyersPage() {
                                   locale={settings.locale}
                               />
                         </div>
-                      </div>
-                    </ScrollArea>
+                    </div>
                   ) : (
                       <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-4">
                           <FileText className="w-12 h-12 mb-4"/>
