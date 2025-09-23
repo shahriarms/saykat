@@ -76,18 +76,21 @@ const createNewDraft = (index: number, lastInvoiceId: number, isLoading: boolean
 };
 
 const calculateTotals = (items: (DraftInvoiceItem | { quantity: number | string, price: number | string })[], paidAmount?: number, cashReceived?: number) => {
+    // 1. Calculate Subtotal
     const subtotal = items.reduce((acc, item) => {
         const quantity = typeof item.quantity === 'number' ? item.quantity : parseFloat(String(item.quantity)) || 0;
         const price = typeof item.price === 'number' ? item.price : parseFloat(String(item.price)) || 0;
         return acc + price * quantity;
     }, 0);
 
-    const validPaidAmount = (typeof paidAmount === 'number' && !isNaN(paidAmount)) ? Math.max(0, Math.min(paidAmount, subtotal)) : 0;
-    
-    const validCashReceived = (typeof cashReceived === 'number' && !isNaN(cashReceived)) ? cashReceived : 0;
+    // 2. Validate Paid Amount
+    const validPaidAmount = (typeof paidAmount === 'number' && !isNaN(paidAmount)) ? paidAmount : 0;
 
+    // 3. Calculate Due Amount
     const dueAmount = subtotal - validPaidAmount;
-    
+
+    // 4. Calculate Change Amount
+    const validCashReceived = (typeof cashReceived === 'number' && !isNaN(cashReceived)) ? cashReceived : 0;
     const changeAmount = (validCashReceived > subtotal) ? validCashReceived - subtotal : 0;
 
     return { subtotal, changeAmount, paidAmount: validPaidAmount, dueAmount };
