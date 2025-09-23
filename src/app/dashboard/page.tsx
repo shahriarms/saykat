@@ -18,6 +18,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import type { DateRange, Invoice, Expense, SalaryPayment, Attendance, Product } from '@/lib/types';
 import dynamic from 'next/dynamic';
 import { DateRangePicker } from '@/components/date-range-picker';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 
 const DailySalesDialog = dynamic(() => import('@/components/daily-sales-report-dialog').then(mod => mod.DailySalesDialog), { ssr: false });
@@ -116,7 +117,7 @@ export default function Dashboard() {
     const profit = grossProfit - totalExpenses - totalSalaryPaid;
     const totalDue = rangeInvoices.reduce((sum, inv) => sum + inv.dueAmount, 0);
     const { materialSoldKg, hardwareSoldPcs } = calculateUnitsSold(rangeInvoices, products);
-    return { totalSales, totalExpenses, totalSalaryPaid, profit, totalDue, materialSoldKg, hardwareSoldPcs };
+    return { totalSales, totalExpenses, totalSalaryPaid, profit, totalDue, materialSoldKg, hardwareSoldPcs, grossProfit };
   }, [rangeInvoices, rangeExpenses, rangeSalaries, getGrossProfitForDateRange, products, calculateUnitsSold]);
   
   const todayStats = useMemo(() => {
@@ -127,7 +128,7 @@ export default function Dashboard() {
       const totalDue = todayInvoices.reduce((sum, inv) => sum + inv.dueAmount, 0);
       const { materialSoldKg, hardwareSoldPcs } = calculateUnitsSold(todayInvoices, products);
       const presentToday = todayAttendance.filter(a => a.status === 'Present').length;
-      return { totalSales, totalExpenses, profit, totalDue, materialSoldKg, hardwareSoldPcs, presentToday };
+      return { totalSales, totalExpenses, profit, totalDue, materialSoldKg, hardwareSoldPcs, presentToday, grossProfit };
   }, [todayInvoices, todayExpenses, todayAttendance, getGrossProfitForDateRange, products, calculateUnitsSold]);
   
   const { salesChartData, expensesChartData } = useMemo(() => {
@@ -249,15 +250,23 @@ export default function Dashboard() {
                       <p className="text-xl font-bold">{todayStats.presentToday} <span className="text-sm text-muted-foreground">/ {employees.length}</span></p>
                   </div>
                 </Card>
-                <Card className="text-left flex items-center p-4 gap-4">
-                  <div className={`p-3 rounded-full ${todayStats.profit >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
-                    <TrendingUp className={`h-6 w-6 ${todayStats.profit >= 0 ? 'text-green-600' : 'text-red-600'}`} />
-                  </div>
-                  <div>
-                      <p className="text-sm text-muted-foreground">{t('todays_profit_card_title')}</p>
-                      <p className={`text-xl font-bold ${todayStats.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>৳ {todayStats.profit.toFixed(2)}</p>
-                  </div>
-                </Card>
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Card className="text-left flex items-center p-4 gap-4">
+                            <div className={`p-3 rounded-full ${todayStats.profit >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+                                <TrendingUp className={`h-6 w-6 ${todayStats.profit >= 0 ? 'text-green-600' : 'text-red-600'}`} />
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">{t('todays_profit_card_title')}</p>
+                                <p className={`text-xl font-bold ${todayStats.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>৳ {todayStats.profit.toFixed(2)}</p>
+                            </div>
+                        </Card>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p className="text-sm">Profit = Gross Profit - Expenses</p>
+                        <p className="text-sm">৳{todayStats.profit.toFixed(2)} = ৳{todayStats.grossProfit.toFixed(2)} - ৳{todayStats.totalExpenses.toFixed(2)}</p>
+                    </TooltipContent>
+                </Tooltip>
             </div>
         </div>
 
@@ -301,15 +310,23 @@ export default function Dashboard() {
                           <p className="text-base font-bold">{`${rangeStats.materialSoldKg.toFixed(1)}kg, ${rangeStats.hardwareSoldPcs}pcs`}</p>
                         </div>
                       </Card>
-                      <Card className="text-left flex items-center p-4 gap-4">
-                        <div className={`p-3 rounded-full ${rangeStats.profit >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
-                            <TrendingUp className={`h-6 w-6 ${rangeStats.profit >= 0 ? 'text-green-600' : 'text-red-600'}`} />
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">{t('profit_card_title')}</p>
-                          <p className={`text-xl font-bold ${rangeStats.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>৳ {rangeStats.profit.toFixed(2)}</p>
-                        </div>
-                      </Card>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                           <Card className="text-left flex items-center p-4 gap-4">
+                              <div className={`p-3 rounded-full ${rangeStats.profit >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+                                  <TrendingUp className={`h-6 w-6 ${rangeStats.profit >= 0 ? 'text-green-600' : 'text-red-600'}`} />
+                              </div>
+                              <div>
+                                <p className="text-sm text-muted-foreground">{t('profit_card_title')}</p>
+                                <p className={`text-xl font-bold ${rangeStats.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>৳ {rangeStats.profit.toFixed(2)}</p>
+                              </div>
+                            </Card>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p className="text-sm">Profit = Gross Profit - (Expenses + Salaries)</p>
+                            <p className="text-sm">৳{rangeStats.profit.toFixed(2)} = ৳{rangeStats.grossProfit.toFixed(2)} - (৳{rangeStats.totalExpenses.toFixed(2)} + ৳{rangeStats.totalSalaryPaid.toFixed(2)})</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                 </div>
             </div>
