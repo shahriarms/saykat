@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect } from 'react';
@@ -187,7 +186,7 @@ export function EmployeeDialog({ open, onOpenChange, employee }: EmployeeDialogP
                                         <div className="relative">
                                             <span className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground">৳</span>
                                             <FormControl>
-                                                <Input type="number" placeholder="0.00" className="pl-8" {...field} value={field.value ?? ''} />
+                                                <Input type="text" inputMode="decimal" placeholder="0.00" className="pl-8" {...field} value={field.value ?? ''} />
                                             </FormControl>
                                         </div>
                                         <FormMessage />

@@ -150,7 +150,7 @@ export function ExpenseDialog({ open, onOpenChange, expense }: ExpenseDialogProp
                                     <FormItem>
                                         <FormLabel>{t('amount_label')}</FormLabel>
                                         <FormControl>
-                                            <Input type="number" placeholder="0.00" {...field} value={field.value ?? ''} />
+                                            <Input type="text" inputMode="decimal" placeholder="0.00" {...field} value={field.value ?? ''} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -181,5 +181,3 @@ export function ExpenseDialog({ open, onOpenChange, expense }: ExpenseDialogProp
         </Dialog>
     );
 }
-
-    

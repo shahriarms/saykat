@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
@@ -45,7 +43,7 @@ export default function SalariesPage() {
   const { t } = useTranslation();
 
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-  const [paymentAmount, setPaymentAmount] = useState<number | ''>('');
+  const [paymentAmount, setPaymentAmount] = useState<string>('');
   const [isConfirmingPayment, setConfirmingPayment] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentToPrint, setPaymentToPrint] = useState<{payment: SalaryPayment, employee: Employee} | null>(null);
@@ -98,19 +96,21 @@ export default function SalariesPage() {
     };
   }, [selectedEmployee, getPaymentsForMonth, getDueSalaryForMonth, localDate]);
 
+  const numericPaymentAmount = parseFloat(paymentAmount) || 0;
+
   const isOverpayment = useMemo(() => {
-      if (typeof paymentAmount !== 'number' || !selectedEmployee) return false;
-      return paymentAmount > dueSalary;
-  }, [paymentAmount, dueSalary, selectedEmployee]);
+      if (numericPaymentAmount <= 0 || !selectedEmployee) return false;
+      return numericPaymentAmount > dueSalary;
+  }, [numericPaymentAmount, dueSalary, selectedEmployee]);
 
   const canProcessPayment = useMemo(() => {
-      if (typeof paymentAmount !== 'number' || paymentAmount <= 0) return false;
+      if (numericPaymentAmount <= 0) return false;
       if (isOverpayment && user?.role !== 'admin') return false;
       return true;
-  }, [paymentAmount, isOverpayment, user]);
+  }, [numericPaymentAmount, isOverpayment, user]);
 
   const handleAddPayment = useCallback(async () => {
-    if (!selectedEmployee || typeof paymentAmount !== 'number' || paymentAmount <= 0) {
+    if (!selectedEmployee || numericPaymentAmount <= 0) {
       toast({
         variant: 'destructive',
         title: t('invalid_amount_toast_title'),
@@ -132,7 +132,7 @@ export default function SalariesPage() {
 
     const result = await addSalaryPayment({
       employeeId: selectedEmployee.id,
-      amount: paymentAmount,
+      amount: numericPaymentAmount,
       date: new Date().toISOString(),
       paidBy: user?.email || 'unknown',
     });
@@ -142,14 +142,14 @@ export default function SalariesPage() {
     if (result) {
         toast({
           title: t('payment_successful_toast_title'),
-          description: t('payment_successful_toast_description', { amount: paymentAmount.toFixed(2), name: selectedEmployee.name }),
+          description: t('payment_successful_toast_description', { amount: numericPaymentAmount.toFixed(2), name: selectedEmployee.name }),
         });
         
         setPaymentToPrint({ payment: result, employee: selectedEmployee });
         setPaymentAmount('');
     }
 
-  }, [selectedEmployee, paymentAmount, isOverpayment, user, addSalaryPayment, toast, t]);
+  }, [selectedEmployee, numericPaymentAmount, isOverpayment, user, addSalaryPayment, toast, t]);
 
   const handlePaymentConfirmation = () => {
     if (canProcessPayment) {
@@ -270,7 +270,7 @@ export default function SalariesPage() {
                                 placeholder={t('enter_amount_to_pay_placeholder')}
                                 className="pl-8"
                                 value={paymentAmount}
-                                onChange={(e) => setPaymentAmount(e.target.value === '' ? '' : parseFloat(e.target.value))}
+                                onChange={(e) => setPaymentAmount(e.target.value)}
                                 disabled={isProcessing}
                             />
                         </div>
@@ -289,7 +289,7 @@ export default function SalariesPage() {
                         
                         <Button className="w-full" disabled={!canProcessPayment || isProcessing} onClick={handlePaymentConfirmation}>
                              {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>}
-                             {isProcessing ? "Processing..." : t('pay_and_print_receipt_button', { amount: typeof paymentAmount === 'number' && paymentAmount > 0 ? ` ৳${paymentAmount.toFixed(2)}` : '' })}
+                             {isProcessing ? "Processing..." : t('pay_and_print_receipt_button', { amount: numericPaymentAmount > 0 ? ` ৳${numericPaymentAmount.toFixed(2)}` : '' })}
                         </Button>
 
                          <div className="flex-1 min-h-0 mt-4">
@@ -348,7 +348,7 @@ export default function SalariesPage() {
                 <ScrollArea className="flex-1 rounded-lg bg-muted/20 p-2">
                     <SalaryReceipt 
                         employee={selectedEmployee}
-                        paymentAmount={paymentToPrint?.payment.amount ?? (typeof paymentAmount === 'number' ? paymentAmount : 0)}
+                        paymentAmount={paymentToPrint?.payment.amount ?? numericPaymentAmount}
                         paymentDate={paymentToPrint ? new Date(paymentToPrint.payment.date) : new Date()}
                     />
                 </ScrollArea>
@@ -371,7 +371,7 @@ export default function SalariesPage() {
             <AlertDialogHeader>
                 <AlertDialogTitle>{t('are_you_sure_title')}</AlertDialogTitle>
                 <AlertDialogDescription>
-                    You are about to pay <strong>৳ {typeof paymentAmount === 'number' ? paymentAmount.toFixed(2) : '0.00'}</strong> to <strong>{selectedEmployee?.name}</strong>. This will be recorded and a receipt will be printed. This action cannot be undone.
+                    You are about to pay <strong>৳ {numericPaymentAmount > 0 ? numericPaymentAmount.toFixed(2) : '0.00'}</strong> to <strong>{selectedEmployee?.name}</strong>. This will be recorded and a receipt will be printed. This action cannot be undone.
                 </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
