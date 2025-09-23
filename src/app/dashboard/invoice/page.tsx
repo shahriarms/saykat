@@ -89,7 +89,7 @@ function InvoicePage() {
         return () => {
             clearTimeout(timer);
             window.removeEventListener('afterprint', handleAfterPrint);
-            // Defensive cleanup
+            // Defensive cleanup in case component unmounts before afterprint
             if (document.title !== originalTitle) {
               document.title = originalTitle;
             }
@@ -469,7 +469,7 @@ function InvoicePage() {
                             <Button
                                 type="button"
                                 size="sm"
-                                variant={isFullyPaid ? "default" : "default"}
+                                variant="default"
                                 className={cn(
                                     "h-8 px-2 text-xs",
                                     isFullyPaid
