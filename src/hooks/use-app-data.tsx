@@ -11,7 +11,6 @@ import { useSettings } from './use-settings';
 import * as productActions from '@/lib/actions/product-actions';
 import * as dataActions from '@/lib/actions/data-actions';
 import { Loader2 } from 'lucide-react';
-import type { DateRange } from 'react-day-picker';
 
 const LOCAL_STORAGE_KEYS = {
     products: 'stockpilot-products',
@@ -38,8 +37,6 @@ interface AppDataContextType {
     isAppDataLoading: boolean;
     isDbConnected: boolean;
     lastInvoiceId: number;
-    centralDateRange: DateRange | undefined;
-    setCentralDateRange: React.Dispatch<React.SetStateAction<DateRange | undefined>>;
     
     // Product Functions
     addProduct: (product: Omit<Product, 'id' | 'sellingPrice'>) => Promise<void>;
@@ -77,6 +74,7 @@ interface AppDataContextType {
 
     // Salary Functions
     addSalaryPayment: (payment: Omit<SalaryPayment, 'id'>) => Promise<SalaryPayment | null>;
+    deleteSalaryPayment: (paymentId: string) => Promise<void>;
     getPaymentsForMonth: (employeeId: string, startDate: Date, endDate: Date) => SalaryPayment[];
     getSalaryPaymentsForDateRange: (startDate: Date, endDate: Date) => SalaryPayment[];
     getDueSalaryForMonth: (employee: Employee, date: Date) => number;
@@ -99,10 +97,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const [isAppDataLoading, setIsAppDataLoading] = useState(true);
     const [isDbConnected, setIsDbConnected] = useState(false);
     const [lastInvoiceId, setLastInvoiceId] = useState(0);
-    const [centralDateRange, setCentralDateRange] = useState<DateRange | undefined>({
-      from: startOfMonth(new Date()),
-      to: endOfMonth(new Date()),
-    });
 
     const loadDataFromLocalStorage = useCallback(() => {
         try {
@@ -641,11 +635,27 @@ export function DataProvider({ children }: { children: ReactNode }) {
             return newPayment;
         }
     }, [isDbConnected, loadAllData, toast, salaryPayments, saveDataToLocalStorage]);
+    
+    const deleteSalaryPayment = useCallback(async (paymentId: string) => {
+        if (isDbConnected) {
+            try {
+                await dataActions.deleteSalaryPayment(paymentId);
+                await loadAllData();
+            } catch (error) {
+                toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete salary payment.' });
+            }
+        } else {
+            const newPayments = salaryPayments.filter(p => p.id !== paymentId);
+            setSalaryPayments(newPayments);
+            saveDataToLocalStorage('salaryPayments', newPayments);
+        }
+    }, [isDbConnected, loadAllData, toast, salaryPayments, saveDataToLocalStorage]);
+
 
     const getPaymentsForMonth = useCallback((employeeId: string, startDate: Date, endDate: Date) => {
         return salaryPayments.filter(p => 
             p.employeeId === employeeId && 
-            isWithinInterval(new Date(p.date), { start: startOfMonth(startDate), end: endOfMonth(endDate) })
+            isWithinInterval(new Date(p.date), { start: startOfDay(startDate), end: endOfDay(endDate) })
         );
     }, [salaryPayments]);
     
@@ -665,22 +675,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     const value = useMemo(() => ({
         products, invoices, buyers, expenses, employees, attendance, salaryPayments, payments, isAppDataLoading, isDbConnected, lastInvoiceId,
-        centralDateRange, setCentralDateRange,
         addProduct, addMultipleProducts, updateProduct, deleteProduct, getProductById,
         addInvoice, deleteInvoice, printInvoice, getBuyerById, getInvoicesForBuyer, getInvoicesForDateRange, getGrossProfitForDateRange,
         addPayment, getPaymentsForInvoice,
         addExpense, updateExpense, deleteExpense, getExpensesForDateRange,
         addEmployee, updateEmployee, deleteEmployee, markAttendance, getAttendanceForDate,
-        addSalaryPayment, getPaymentsForMonth, getSalaryPaymentsForDateRange, getDueSalaryForMonth,
+        addSalaryPayment, deleteSalaryPayment, getPaymentsForMonth, getSalaryPaymentsForDateRange, getDueSalaryForMonth,
     }), [
         products, invoices, buyers, expenses, employees, attendance, salaryPayments, payments, isAppDataLoading, isDbConnected, lastInvoiceId,
-        centralDateRange, setCentralDateRange,
         addProduct, addMultipleProducts, updateProduct, deleteProduct, getProductById,
         addInvoice, deleteInvoice, printInvoice, getBuyerById, getInvoicesForBuyer, getInvoicesForDateRange, getGrossProfitForDateRange,
         addPayment, getPaymentsForInvoice,
         addExpense, updateExpense, deleteExpense, getExpensesForDateRange,
         addEmployee, updateEmployee, deleteEmployee, markAttendance, getAttendanceForDate,
-        addSalaryPayment, getPaymentsForMonth, getSalaryPaymentsForDateRange, getDueSalaryForMonth
+        addSalaryPayment, deleteSalaryPayment, getPaymentsForMonth, getSalaryPaymentsForDateRange, getDueSalaryForMonth
     ]);
     
     if (isAppDataLoading) {

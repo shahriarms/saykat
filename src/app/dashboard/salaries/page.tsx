@@ -27,18 +27,17 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { Users, ChevronRight, DollarSign, Wallet, History, AlertCircle, ShieldCheck, Loader2, Printer, FileText, CalendarIcon, RotateCw } from 'lucide-react';
+import { Users, ChevronRight, DollarSign, Wallet, History, AlertCircle, ShieldCheck, Loader2, Printer, FileText, CalendarIcon, RotateCw, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { format, startOfMonth, endOfMonth, isToday } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { useTranslation } from '@/hooks/use-translation';
 import { SalaryReceipt } from '@/components/salary-receipt';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
 import type { DateRange } from 'react-day-picker';
+import { DateRangePicker } from '@/components/date-range-picker';
 import { cn } from '@/lib/utils';
 
 export default function SalariesPage() {
-  const { employees, getPaymentsForMonth, addSalaryPayment, getDueSalaryForMonth, centralDateRange } = useAppData();
+  const { employees, getPaymentsForMonth, addSalaryPayment, deleteSalaryPayment, getDueSalaryForMonth } = useAppData();
   const { user } = useUser();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -49,7 +48,12 @@ export default function SalariesPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentToPrint, setPaymentToPrint] = useState<{payment: SalaryPayment, employee: Employee} | null>(null);
   
-  const [localDate, setLocalDate] = useState<Date>(centralDateRange?.from || new Date());
+  const [localDateRange, setLocalDateRange] = useState<DateRange | undefined>({
+      from: startOfMonth(new Date()),
+      to: endOfMonth(new Date()),
+  });
+
+  const [paymentToDelete, setPaymentToDelete] = useState<SalaryPayment | null>(null);
 
   useEffect(() => {
       if (paymentToPrint) {
@@ -77,41 +81,25 @@ export default function SalariesPage() {
       }
   }, [paymentToPrint]);
 
-  useEffect(() => {
-    // Only sync from central if the local date is for a different day than central's from date
-    if (centralDateRange?.from && !isToday(centralDateRange.from)) {
-        setLocalDate(centralDateRange.from);
-    } else if (!localDate) {
-          setLocalDate(new Date());
-    }
-  }, [centralDateRange]);
-
-  const handleResetDate = useCallback(() => {
-    setLocalDate(centralDateRange?.from || new Date());
-  }, [centralDateRange]);
-  
   const handleSelectEmployee = (employee: Employee) => {
     setSelectedEmployee(employee);
     setPaymentAmount('');
   };
 
   const { dueSalary, paidThisMonth, paymentsThisMonth } = useMemo(() => {
-    if (!selectedEmployee || !localDate) {
+    if (!selectedEmployee || !localDateRange?.from || !localDateRange?.to) {
       return { dueSalary: 0, paidThisMonth: 0, paymentsThisMonth: [] };
     }
-    const firstDay = startOfMonth(localDate);
-    const lastDay = endOfMonth(localDate);
-    
-    const payments = getPaymentsForMonth(selectedEmployee.id, firstDay, lastDay);
+    const payments = getPaymentsForMonth(selectedEmployee.id, localDateRange.from, localDateRange.to);
     const paid = payments.reduce((acc, p) => acc + (p.amount || 0), 0);
-    const due = getDueSalaryForMonth(selectedEmployee, localDate);
+    const due = getDueSalaryForMonth(selectedEmployee, localDateRange.from);
 
     return {
       dueSalary: due,
       paidThisMonth: paid,
       paymentsThisMonth: payments,
     };
-  }, [selectedEmployee, getPaymentsForMonth, getDueSalaryForMonth, localDate]);
+  }, [selectedEmployee, getPaymentsForMonth, getDueSalaryForMonth, localDateRange]);
 
   const numericPaymentAmount = parseFloat(paymentAmount) || 0;
 
@@ -185,6 +173,22 @@ export default function SalariesPage() {
     await handleAddPayment();
   }
 
+  const handleDeletePayment = (payment: SalaryPayment) => {
+      if (user?.role !== 'admin') {
+          toast({ variant: 'destructive', title: "Permission Denied", description: "Only admins can delete salary payments." });
+          return;
+      }
+      setPaymentToDelete(payment);
+  }
+
+  const confirmDeletePayment = () => {
+      if (paymentToDelete) {
+          deleteSalaryPayment(paymentToDelete.id);
+          setPaymentToDelete(null);
+          toast({ title: "Payment Deleted", description: "The salary payment has been removed."});
+      }
+  }
+
   return (
     <>
     <div className="flex flex-col h-full gap-4 no-print">
@@ -193,34 +197,7 @@ export default function SalariesPage() {
           <Wallet className="w-6 h-6" />
           {t('salaries_page_title')}
         </h1>
-         <div className="flex items-center gap-2">
-             <Popover>
-                  <PopoverTrigger asChild>
-                  <Button
-                      variant={"outline"}
-                      className={cn("w-full sm:w-[280px] justify-start text-left font-normal")}
-                  >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {localDate ? format(localDate, "MMMM yyyy") : <span>{t('pick_a_date')}</span>}
-                  </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                  <Calendar
-                      mode="single"
-                      selected={localDate}
-                      onSelect={(date) => setLocalDate(date || new Date())}
-                      captionLayout="dropdown-buttons"
-                      fromYear={2020}
-                      toYear={new Date().getFullYear() + 5}
-                      initialFocus
-                  />
-                  </PopoverContent>
-              </Popover>
-            <Button variant="outline" size="icon" onClick={handleResetDate}>
-                <RotateCw className="h-4 w-4" />
-                <span className="sr-only">Reset Date</span>
-            </Button>
-        </div>
+        <DateRangePicker initialDateRange={localDateRange} onDateChange={setLocalDateRange} />
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
         {/* Employee List */}
@@ -317,23 +294,37 @@ export default function SalariesPage() {
                                         <TableRow>
                                             <TableHead>{t('date_header')}</TableHead>
                                             <TableHead className="text-right">{t('amount_header')}</TableHead>
+                                            <TableHead className="w-10"></TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {paymentsThisMonth.length > 0 ? (
                                             paymentsThisMonth.map(payment => (
-                                                <TableRow 
-                                                  key={payment.id} 
-                                                  onClick={() => handleHistoryItemClick(payment)}
-                                                  className="cursor-pointer hover:bg-muted"
-                                                >
-                                                    <TableCell>{format(new Date(payment.date), 'PP')}</TableCell>
-                                                    <TableCell className="text-right font-mono">৳ {(payment.amount || 0).toFixed(2)}</TableCell>
+                                                <TableRow key={payment.id}>
+                                                    <TableCell 
+                                                        onClick={() => handleHistoryItemClick(payment)}
+                                                        className="cursor-pointer hover:bg-muted/50"
+                                                    >
+                                                        {format(new Date(payment.date), 'PP')}
+                                                    </TableCell>
+                                                    <TableCell 
+                                                        onClick={() => handleHistoryItemClick(payment)}
+                                                        className="text-right font-mono cursor-pointer hover:bg-muted/50"
+                                                    >
+                                                        ৳ {(payment.amount || 0).toFixed(2)}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {user?.role === 'admin' && (
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDeletePayment(payment)}>
+                                                                <Trash2 className="w-4 h-4 text-destructive"/>
+                                                            </Button>
+                                                        )}
+                                                    </TableCell>
                                                 </TableRow>
                                             ))
                                         ) : (
                                             <TableRow>
-                                                <TableCell colSpan={2} className="text-center h-24 text-muted-foreground">
+                                                <TableCell colSpan={3} className="text-center h-24 text-muted-foreground">
                                                     {t('no_payments_this_month')}
                                                 </TableCell>
                                             </TableRow>
@@ -396,6 +387,22 @@ export default function SalariesPage() {
                 <AlertDialogAction onClick={confirmPayment} disabled={isProcessing}>
                     {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Confirm & Print
+                </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+     <AlertDialog open={!!paymentToDelete} onOpenChange={() => setPaymentToDelete(null)}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>{t('are_you_sure_title')}</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This will permanently delete the salary payment of <strong>৳{paymentToDelete?.amount.toFixed(2)}</strong>. This action cannot be undone.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmDeletePayment} className="bg-destructive hover:bg-destructive/90">
+                    Delete Payment
                 </AlertDialogAction>
             </AlertDialogFooter>
         </AlertDialogContent>

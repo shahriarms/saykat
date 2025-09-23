@@ -249,6 +249,11 @@ class PostgresDataService {
         return formatRow(newPayment) as SalaryPayment;
     }
 
+    static async deleteSalaryPayment(paymentId: string): Promise<void> {
+        const db = getPool();
+        await db.query('DELETE FROM salary_payments WHERE id = $1', [paymentId]);
+    }
+
     static async addPayment(paymentData: Omit<Payment, 'id' | 'date'>): Promise<{ payment: Payment, updatedInvoice: Invoice }> {
         const db = getPool();
         const client = await db.connect();
@@ -355,5 +360,3 @@ class PostgresDataService {
 }
 
 export default PostgresDataService;
-
-    

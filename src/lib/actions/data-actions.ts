@@ -93,6 +93,15 @@ export async function addSalaryPayment(paymentData: Omit<SalaryPayment, 'id'>): 
     return PostgresDataService.addSalaryPayment(paymentData);
 }
 
+export async function deleteSalaryPayment(paymentId: string): Promise<{ success: boolean }> {
+    if (!usePostgres) {
+        throw new Error("Database not connected.");
+    }
+    await PostgresDataService.deleteSalaryPayment(paymentId);
+    return { success: true };
+}
+
+
 export async function addPayment(paymentData: Omit<Payment, 'id' | 'date'>): Promise<{ payment: Payment, updatedInvoice: Invoice }> {
      if (!usePostgres) {
         throw new Error("Database not connected.");
