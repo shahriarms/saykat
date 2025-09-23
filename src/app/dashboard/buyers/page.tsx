@@ -218,7 +218,7 @@ export default function BuyersPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="p-0 flex-1 min-h-0">
-                  <ScrollArea className="h-full max-h-[65vh] lg:max-h-full">
+                  <ScrollArea className="h-full">
                     <div className="divide-y">
                       {filteredBuyers.map((buyer) => (
                         <button
@@ -258,7 +258,7 @@ export default function BuyersPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="p-0 flex-1 min-h-0">
-                    <ScrollArea className="h-full max-h-[65vh] lg:max-h-full">
+                    <ScrollArea className="h-full">
                         <div className="divide-y">
                         {selectedBuyer ? (
                           filteredInvoices.length > 0 ? (
@@ -383,7 +383,7 @@ export default function BuyersPage() {
                 invoiceItems={invoiceToPrint.items}
                 subtotal={invoiceToPrint.subtotal}
                 paidAmount={invoiceToPrint.paidAmount}
-                dueAmount={invoiceToPrint.dueAmount}
+                dueAmount={invoiceToAmmount.dueAmount}
                 printFormat={settings.printFormat}
                 locale={settings.locale}
             />
@@ -410,3 +410,5 @@ export default function BuyersPage() {
     </>
   );
 }
+
+    
