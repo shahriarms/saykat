@@ -234,33 +234,36 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
     }, [activeDraftIndex]);
 
     const addInvoiceItem = useCallback((product: Product) => {
+        const currentDraft = drafts[activeDraftIndex];
+        if (!currentDraft) return;
+
+        const existingItem = currentDraft.items.find(item => item.id === product.id);
+
+        if (existingItem) {
+            toast({
+                variant: 'destructive',
+                title: "Item Already Added",
+                description: `"${product.name}" is already in the invoice. You can change its quantity.`,
+            });
+            return; // Exit without changing state
+        }
+
         setDrafts(prev => prev.map((draft, index) => {
             if (index !== activeDraftIndex) return draft;
 
-            const existingItem = draft.items.find(item => item.id === product.id);
-            let newItems;
-            if (existingItem) {
-                // If item exists, do not auto-increment. Keep the existing items array.
-                newItems = draft.items;
-                 toast({
-                    variant: 'destructive',
-                    title: "Item Already Added",
-                    description: `"${product.name}" is already in the invoice. You can change its quantity.`,
-                });
-            } else {
-                const newItem: DraftInvoiceItem = {
-                    id: product.id,
-                    name: product.name,
-                    quantity: '',
-                    price: product.sellingPrice,
-                    originalPrice: product.sellingPrice,
-                } as DraftInvoiceItem;
-                newItems = [...draft.items, newItem];
-            }
+            const newItem: DraftInvoiceItem = {
+                id: product.id,
+                name: product.name,
+                quantity: '',
+                price: product.sellingPrice,
+                originalPrice: product.sellingPrice,
+            } as DraftInvoiceItem;
+            
+            const newItems = [...draft.items, newItem];
             const { subtotal, changeAmount, paidAmount, dueAmount } = calculateTotals(newItems, draft.paidAmount, draft.cashReceived);
             return { ...draft, items: newItems, subtotal, changeAmount, paidAmount, dueAmount };
         }));
-    }, [activeDraftIndex, toast]);
+    }, [activeDraftIndex, toast, drafts]);
     
     const updateInvoiceItem = useCallback((itemId: string, itemUpdate: { [key: string]: any }) => {
         setDrafts(prev => prev.map((draft, index) => {
