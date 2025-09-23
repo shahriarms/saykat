@@ -103,12 +103,7 @@ function InvoicePage() {
             });
             
             const finalDraft = await updateActiveDraft({ id: newInvoiceId });
-            
-            const timer = setTimeout(() => {
-                setInvoiceToPrint(finalDraft);
-            }, 100);
-            
-            return () => clearTimeout(timer);
+            setInvoiceToPrint(finalDraft);
         }
     } catch (error: any) {
         console.error("Failed to save invoice:", error);
@@ -140,6 +135,7 @@ function InvoicePage() {
 
       window.addEventListener('afterprint', handleAfterPrint);
       
+      // Delay printing slightly to ensure state has updated and component has rendered
       const timer = setTimeout(() => {
         window.print();
       }, 100);
@@ -147,6 +143,7 @@ function InvoicePage() {
       return () => {
         clearTimeout(timer);
         window.removeEventListener('afterprint', handleAfterPrint);
+        // Restore title if component unmounts before printing is done
         if (document.title !== originalTitle) {
           document.title = originalTitle;
         }
@@ -494,23 +491,6 @@ function InvoicePage() {
                                 locale={settings.locale}
                             />
                           </div>
-                      </div>
-
-                      {/* Hidden, full-size layout for printing */}
-                      <div className="hidden print:block">
-                          <InvoicePrintLayout 
-                              invoiceId={draftId}
-                              currentDate={new Date().toLocaleDateString()}
-                              customerName={customerName}
-                              customerAddress={customerAddress}
-                              customerPhone={customerPhone}
-                              invoiceItems={items}
-                              subtotal={subtotal}
-                              paidAmount={paidAmount || 0}
-                              dueAmount={dueAmount || 0}
-                              printFormat={settings.printFormat}
-                              locale={settings.locale}
-                          />
                       </div>
                   </CardContent>
               </Card>
