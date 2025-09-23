@@ -84,8 +84,8 @@ const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, EmployeeAttend
             </div>
 
              <div className="flex justify-between mt-24 print:mt-24 text-xs print:text-[9px]">
-                <div className="border-t-2 border-gray-400 w-48 print:w-40 text-center pt-1">Employee's Signature</div>
-                <div className="border-t-2 border-gray-400 w-48 print:w-40 text-center pt-1">Manager's Signature</div>
+                <div className="border-t-2 border-gray-400 text-center pt-1">Employee's Signature</div>
+                <div className="border-t-2 border-gray-400 text-center pt-1">Manager's Signature</div>
             </div>
           </CardContent>
         </Card>
