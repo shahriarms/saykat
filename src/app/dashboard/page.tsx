@@ -121,7 +121,7 @@ export default function Dashboard() {
     const totalDue = rangeInvoices.reduce((sum, inv) => sum + inv.dueAmount, 0);
     const { materialSoldKg, hardwareSoldPcs } = calculateUnitsSold(rangeInvoices, products);
     return { totalSales, totalExpenses, totalSalaryPaid, profit, totalDue, materialSoldKg, hardwareSoldPcs, grossProfit, cogs };
-  }, [rangeInvoices, rangeExpenses, rangeSalaries, getGrossProfitForDateRange, products, calculateUnitsSold]);
+  }, [rangeInvoices, rangeExpenses, rangeSalaries, products, calculateUnitsSold, getGrossProfitForDateRange]);
   
   const todayStats = useMemo(() => {
       const totalSales = todayInvoices.reduce((sum, inv) => sum + inv.subtotal, 0);
@@ -133,7 +133,7 @@ export default function Dashboard() {
       const presentToday = todayAttendance.filter(a => a.status === 'Present').length;
       
       return { totalSales, totalExpenses, profit, totalDue, materialSoldKg, hardwareSoldPcs, presentToday, grossProfit, cogs };
-  }, [todayInvoices, todayExpenses, todayAttendance, getGrossProfitForDateRange, products, calculateUnitsSold]);
+  }, [todayInvoices, todayExpenses, todayAttendance, products, calculateUnitsSold, getGrossProfitForDateRange]);
   
   const { salesChartData, expensesChartData } = useMemo(() => {
     if (!date?.from || !date?.to) return { salesChartData: [], expensesChartData: [] };
