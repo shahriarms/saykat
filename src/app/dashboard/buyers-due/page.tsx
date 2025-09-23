@@ -427,18 +427,30 @@ export default function BuyersDuePage() {
                       <div className="bg-background">
                            <div className="no-print">
                             {(selectedBuyer && selectedInvoice) ? (
-                                <PaymentReceipt
-                                    buyer={selectedBuyer}
-                                    invoice={selectedInvoice}
-                                    paymentHistory={getPaymentsForInvoice(selectedInvoice.id)}
-                                    newPaymentAmount={numericPaymentAmount}
-                                />
+                                <div className="print:hidden">
+                                  <PaymentReceipt
+                                      buyer={selectedBuyer}
+                                      invoice={selectedInvoice}
+                                      paymentHistory={getPaymentsForInvoice(selectedInvoice.id)}
+                                      newPaymentAmount={numericPaymentAmount}
+                                  />
+                                </div>
                             ) : (
                                 <div className="text-center text-muted-foreground p-8 flex flex-col justify-center items-center h-full border rounded-lg">
                                     <FileText className="w-12 h-12 mb-4 text-muted-foreground/50"/>
                                     <p>{t('select_invoice_for_preview')}</p>
                                 </div>
                             )}
+                           </div>
+                           <div className="hidden print:block">
+                             {(selectedBuyer && selectedInvoice) && (
+                                <PaymentReceipt
+                                    buyer={selectedBuyer}
+                                    invoice={selectedInvoice}
+                                    paymentHistory={getPaymentsForInvoice(selectedInvoice.id)}
+                                    newPaymentAmount={numericPaymentAmount}
+                                />
+                             )}
                            </div>
                       </div>
                   </div>

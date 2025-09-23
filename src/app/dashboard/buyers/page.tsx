@@ -329,19 +329,36 @@ export default function BuyersPage() {
                   {selectedInvoice ? (
                     <ScrollArea className="h-full">
                       <div className="p-4 bg-muted/50 rounded-lg min-w-[820px]">
-                        <InvoicePrintLayout 
-                              invoiceId={selectedInvoice.id}
-                              currentDate={new Date(selectedInvoice.date).toLocaleDateString()}
-                              customerName={selectedInvoice.customerName}
-                              customerAddress={selectedInvoice.customerAddress}
-                              customerPhone={selectedInvoice.customerPhone}
-                              invoiceItems={selectedInvoice.items}
-                              subtotal={selectedInvoice.subtotal}
-                              paidAmount={selectedInvoice.paidAmount}
-                              dueAmount={selectedInvoice.dueAmount}
-                              printFormat={settings.printFormat}
-                              locale={settings.locale}
-                          />
+                        <div className="print:hidden">
+                            <InvoicePrintLayout 
+                                  invoiceId={selectedInvoice.id}
+                                  currentDate={new Date(selectedInvoice.date).toLocaleDateString()}
+                                  customerName={selectedInvoice.customerName}
+                                  customerAddress={selectedInvoice.customerAddress}
+                                  customerPhone={selectedInvoice.customerPhone}
+                                  invoiceItems={selectedInvoice.items}
+                                  subtotal={selectedInvoice.subtotal}
+                                  paidAmount={selectedInvoice.paidAmount}
+                                  dueAmount={selectedInvoice.dueAmount}
+                                  printFormat={settings.printFormat}
+                                  locale={settings.locale}
+                              />
+                        </div>
+                         <div className="hidden print:block">
+                            <InvoicePrintLayout 
+                                  invoiceId={selectedInvoice.id}
+                                  currentDate={new Date(selectedInvoice.date).toLocaleDateString()}
+                                  customerName={selectedInvoice.customerName}
+                                  customerAddress={selectedInvoice.customerAddress}
+                                  customerPhone={selectedInvoice.customerPhone}
+                                  invoiceItems={selectedInvoice.items}
+                                  subtotal={selectedInvoice.subtotal}
+                                  paidAmount={selectedInvoice.paidAmount}
+                                  dueAmount={selectedInvoice.dueAmount}
+                                  printFormat={settings.printFormat}
+                                  locale={settings.locale}
+                              />
+                        </div>
                       </div>
                     </ScrollArea>
                   ) : (

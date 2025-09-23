@@ -253,13 +253,25 @@ export default function EmployeesPage() {
             
              <div className="print-source">
               {selectedEmployee && (
-                <EmployeeAttendanceReport
-                    ref={reportComponentRef}
-                    employee={selectedEmployee}
-                    month={month}
-                    attendanceData={monthlyAttendanceData.report}
-                />
+                <div className="print:hidden">
+                    <EmployeeAttendanceReport
+                        ref={reportComponentRef}
+                        employee={selectedEmployee}
+                        month={month}
+                        attendanceData={monthlyAttendanceData.report}
+                    />
+                </div>
               )}
+               <div className="hidden print:block">
+                  {selectedEmployee && (
+                    <EmployeeAttendanceReport
+                        ref={reportComponentRef}
+                        employee={selectedEmployee}
+                        month={month}
+                        attendanceData={monthlyAttendanceData.report}
+                    />
+                  )}
+               </div>
             </div>
         </>
     );

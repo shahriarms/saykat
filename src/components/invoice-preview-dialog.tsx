@@ -90,19 +90,36 @@ export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePre
             
             <ScrollArea className="h-[70vh] rounded-md border">
                 <div className="p-4 bg-muted/50">
-                    <InvoicePrintLayout 
-                        invoiceId={invoice.id}
-                        currentDate={new Date(invoice.date).toLocaleDateString()}
-                        customerName={invoice.customerName}
-                        customerAddress={invoice.customerAddress}
-                        customerPhone={invoice.customerPhone}
-                        invoiceItems={invoice.items}
-                        subtotal={invoice.subtotal}
-                        paidAmount={invoice.paidAmount}
-                        dueAmount={invoice.dueAmount}
-                        printFormat={settings.printFormat}
-                        locale={settings.locale}
-                    />
+                     <div className="print:hidden">
+                        <InvoicePrintLayout 
+                            invoiceId={invoice.id}
+                            currentDate={new Date(invoice.date).toLocaleDateString()}
+                            customerName={invoice.customerName}
+                            customerAddress={invoice.customerAddress}
+                            customerPhone={invoice.customerPhone}
+                            invoiceItems={invoice.items}
+                            subtotal={invoice.subtotal}
+                            paidAmount={invoice.paidAmount}
+                            dueAmount={invoice.dueAmount}
+                            printFormat={settings.printFormat}
+                            locale={settings.locale}
+                        />
+                    </div>
+                     <div className="hidden print:block">
+                        <InvoicePrintLayout 
+                            invoiceId={invoice.id}
+                            currentDate={new Date(invoice.date).toLocaleDateString()}
+                            customerName={invoice.customerName}
+                            customerAddress={invoice.customerAddress}
+                            customerPhone={invoice.customerPhone}
+                            invoiceItems={invoice.items}
+                            subtotal={invoice.subtotal}
+                            paidAmount={invoice.paidAmount}
+                            dueAmount={invoice.dueAmount}
+                            printFormat={settings.printFormat}
+                            locale={settings.locale}
+                        />
+                    </div>
                 </div>
             </ScrollArea>
 

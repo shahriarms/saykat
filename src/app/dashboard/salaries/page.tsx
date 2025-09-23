@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
@@ -361,11 +362,20 @@ export default function SalariesPage() {
                 </div>
              ) : (
                 <ScrollArea className="flex-1 rounded-lg bg-muted/20 p-2">
-                    <SalaryReceipt 
-                        employee={selectedEmployee}
-                        paymentAmount={typeof paymentAmount === 'number' ? paymentAmount : 0}
-                        paymentDate={new Date()}
-                    />
+                    <div className="print:hidden">
+                        <SalaryReceipt 
+                            employee={selectedEmployee}
+                            paymentAmount={typeof paymentAmount === 'number' ? paymentAmount : 0}
+                            paymentDate={new Date()}
+                        />
+                    </div>
+                    <div className="hidden print:block">
+                        <SalaryReceipt 
+                            employee={selectedEmployee}
+                            paymentAmount={typeof paymentAmount === 'number' ? paymentAmount : 0}
+                            paymentDate={new Date()}
+                        />
+                    </div>
                 </ScrollArea>
              )}
           </CardContent>
