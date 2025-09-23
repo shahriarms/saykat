@@ -50,11 +50,14 @@ export function TopNavBar() {
                   className={cn(
                     "relative flex flex-col items-center justify-center gap-1 rounded-md p-2 text-center transition-all duration-200 ease-in-out transform hover:bg-accent/50 sm:hover:scale-105",
                      isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
-                     isMobile ? 'w-16 h-16' : 'w-24 h-20'
+                     "h-16 w-16 sm:h-20 sm:w-24" // Mobile-first: h-16, sm and up: h-20
                   )}
                 >
                     <Icon className={cn("h-6 w-6 sm:h-7 sm:w-7 transition-colors", isActive && 'text-primary')} />
-                    <span className={cn("text-xs font-medium truncate transition-colors", isActive ? 'text-primary' : 'text-muted-foreground', isMobile ? 'hidden' : 'block')}>
+                    <span className={cn(
+                        "text-xs font-medium truncate transition-colors hidden sm:block", // Hidden on mobile, block on sm and up
+                        isActive ? 'text-primary' : 'text-muted-foreground'
+                    )}>
                         {t(item.labelKey)}
                     </span>
                     {isActive && (
