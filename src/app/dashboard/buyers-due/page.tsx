@@ -298,8 +298,8 @@ export default function BuyersDuePage() {
               centralDateRange={centralDateRange}
             />
         </div>
-        <div className="grid md:grid-cols-5 gap-6 flex-1">
-          <Card className="md:col-span-2 lg:col-span-1 flex flex-col">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <Card className="lg:col-span-1 flex flex-col">
             <CardHeader className="flex-shrink-0">
               <CardTitle>{t('buyers_with_due_title')}</CardTitle>
               <div className="relative pt-2">
@@ -308,8 +308,8 @@ export default function BuyersDuePage() {
               </div>
             </CardHeader>
             <CardContent className="p-0 flex-1 min-h-0">
-              <ScrollArea className="h-full">
-                <div className="divide-y">
+              <ScrollArea className="h-full max-h-[calc(100vh-350px)]">
+                <div className="divide-y border-t">
                   {filteredBuyersWithDue.length > 0 ? filteredBuyersWithDue.map((buyer) => (
                     <button key={buyer.id} onClick={() => handleSelectBuyer(buyer)} className={`w-full text-left p-4 hover:bg-muted transition-colors ${selectedBuyer?.id === buyer.id ? 'bg-muted' : '' }`}>
                       <div className="flex justify-between items-center">
@@ -328,7 +328,7 @@ export default function BuyersDuePage() {
             </CardContent>
           </Card>
 
-          <Card className="md:col-span-3 lg:col-span-1 flex flex-col">
+          <Card className="lg:col-span-1 flex flex-col">
             <CardHeader className="flex-shrink-0">
               <CardTitle className="truncate">{selectedBuyer ? t('due_invoices_title') : t('select_buyer_title')}</CardTitle>
               <CardDescription>{selectedBuyer ? t('for_buyer_subtitle', { name: selectedBuyer.name }) : t('outstanding_balances_subtitle')}</CardDescription>
@@ -338,8 +338,8 @@ export default function BuyersDuePage() {
               </div>
             </CardHeader>
             <CardContent className="p-0 flex-1 min-h-0">
-              <ScrollArea className="h-full">
-                <div className="divide-y">
+              <ScrollArea className="h-full max-h-[calc(100vh-350px)]">
+                <div className="divide-y border-t">
                   {selectedBuyer ? (
                     filteredDueInvoices.length > 0 ? (
                       filteredDueInvoices.map((invoice) => (
@@ -362,7 +362,7 @@ export default function BuyersDuePage() {
             </CardContent>
           </Card>
           
-          <Card className="md:col-span-5 lg:col-span-3 flex flex-col">
+          <Card className="lg:col-span-2 flex flex-col">
               <CardHeader className="flex-row items-center justify-between no-print">
                   <div>
                       <CardTitle>{t('receive_payment_title')}</CardTitle>
@@ -381,9 +381,9 @@ export default function BuyersDuePage() {
                       </Button>
                   </div>
               </CardHeader>
-              <CardContent className="space-y-4 no-print">
+              <CardContent className="space-y-4 no-print flex-1 min-h-0">
                   {selectedInvoice ? (
-                      <>
+                      <div className="h-full flex flex-col gap-4">
                           <div className="flex justify-between items-start p-4 bg-muted/50 rounded-lg">
                             <div>
                                 <p>{t('invoice_label')}: <span className="font-mono">{selectedInvoice.id}</span></p>
@@ -412,48 +412,28 @@ export default function BuyersDuePage() {
                                   {t('receive_and_print_button')}
                               </Button>
                           </div>
-                      </>
-                  ) : (
-                      <div className="text-center text-muted-foreground py-8">{t('select_invoice_to_receive_payment')}</div>
-                  )}
-              </CardContent>
-              <div className="flex-1 flex flex-col min-h-0">
-                  <div className="flex items-center gap-2 px-6 pt-4 no-print">
-                      <History className="w-5 h-5" />
-                      <h3 className="text-lg font-semibold">{t('live_receipt_preview_title')}</h3>
-                  </div>
-                  <div className="p-6 pt-2 flex-1">
-                      <div className="bg-background">
-                           <div className="no-print">
-                            {(selectedBuyer && selectedInvoice) ? (
-                                <div className="print:hidden">
-                                  <PaymentReceipt
-                                      buyer={selectedBuyer}
-                                      invoice={selectedInvoice}
-                                      paymentHistory={getPaymentsForInvoice(selectedInvoice.id)}
-                                      newPaymentAmount={numericPaymentAmount}
-                                  />
-                                </div>
-                            ) : (
-                                <div className="text-center text-muted-foreground p-8 flex flex-col justify-center items-center h-full border rounded-lg">
-                                    <FileText className="w-12 h-12 mb-4 text-muted-foreground/50"/>
-                                    <p>{t('select_invoice_for_preview')}</p>
-                                </div>
-                            )}
-                           </div>
-                           <div className="hidden print:block">
-                             {(selectedBuyer && selectedInvoice) && (
+                          <div className="flex-1 flex flex-col min-h-0">
+                            <div className="flex items-center gap-2 pt-4 no-print">
+                                <History className="w-5 h-5" />
+                                <h3 className="text-lg font-semibold">{t('live_receipt_preview_title')}</h3>
+                            </div>
+                            <ScrollArea className="flex-1 rounded-lg bg-background p-2 mt-2">
                                 <PaymentReceipt
                                     buyer={selectedBuyer}
                                     invoice={selectedInvoice}
                                     paymentHistory={getPaymentsForInvoice(selectedInvoice.id)}
                                     newPaymentAmount={numericPaymentAmount}
                                 />
-                             )}
-                           </div>
+                            </ScrollArea>
+                          </div>
                       </div>
-                  </div>
-              </div>
+                  ) : (
+                      <div className="flex-1 flex flex-col justify-center items-center text-center text-muted-foreground py-8 border rounded-lg h-full">
+                        <FileText className="w-12 h-12 mb-4 text-muted-foreground/50"/>
+                        {t('select_invoice_to_receive_payment')}
+                      </div>
+                  )}
+              </CardContent>
           </Card>
         </div>
       </div>
@@ -526,3 +506,5 @@ export default function BuyersDuePage() {
     </>
   );
 }
+
+    
