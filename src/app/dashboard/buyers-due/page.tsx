@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
@@ -287,9 +286,9 @@ export default function BuyersDuePage() {
 
   return (
     <>
-      <div className="flex flex-col h-full gap-4 no-print">
+      <div className="flex flex-col h-full gap-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <h1 className="text-2xl font-semibold flex items-center gap-2 no-print">
+            <h1 className="text-2xl font-semibold flex items-center gap-2">
             <HandCoins className="w-6 h-6" />
             {t('buyers_due_page_title')}
             </h1>
@@ -300,7 +299,7 @@ export default function BuyersDuePage() {
             />
         </div>
         <div className="grid md:grid-cols-5 gap-6 flex-1">
-          <Card className="md:col-span-2 lg:col-span-1 flex flex-col no-print">
+          <Card className="md:col-span-2 lg:col-span-1 flex flex-col">
             <CardHeader className="flex-shrink-0">
               <CardTitle>{t('buyers_with_due_title')}</CardTitle>
               <div className="relative pt-2">
@@ -329,7 +328,7 @@ export default function BuyersDuePage() {
             </CardContent>
           </Card>
 
-          <Card className="md:col-span-3 lg:col-span-1 flex flex-col no-print">
+          <Card className="md:col-span-3 lg:col-span-1 flex flex-col">
             <CardHeader className="flex-shrink-0">
               <CardTitle className="truncate">{selectedBuyer ? t('due_invoices_title') : t('select_buyer_title')}</CardTitle>
               <CardDescription>{selectedBuyer ? t('for_buyer_subtitle', { name: selectedBuyer.name }) : t('outstanding_balances_subtitle')}</CardDescription>

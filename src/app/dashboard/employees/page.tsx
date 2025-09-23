@@ -25,7 +25,6 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useReactToPrint } from 'react-to-print';
 
 const EmployeeDialog = dynamic(() => import('@/components/employee-dialog'), {
     ssr: false,
@@ -54,12 +53,45 @@ export default function EmployeesPage() {
     const [isAddEmployeeDialogOpen, setAddEmployeeDialogOpen] = useState(false);
     const [isEmployeeListDialogOpen, setEmployeeListDialogOpen] = useState(false);
     
-    const reportComponentRef = useRef<HTMLDivElement>(null);
+    const [isPrinting, setIsPrinting] = useState(false);
+    const [reportToPrint, setReportToPrint] = useState<any>(null);
 
-    const handlePrint = useReactToPrint({
-      content: () => reportComponentRef.current,
-      documentTitle: selectedEmployee ? `Attendance Report - ${selectedEmployee.name} - ${format(month, 'MMMM yyyy')}` : 'attendance-report',
-    });
+    useEffect(() => {
+      if (reportToPrint) {
+        setIsPrinting(true);
+        const originalTitle = document.title;
+        document.title = `attendance-report-${selectedEmployee?.name}`;
+        
+        const handleAfterPrint = () => {
+          document.title = originalTitle;
+          setReportToPrint(null);
+          setIsPrinting(false);
+          window.removeEventListener('afterprint', handleAfterPrint);
+        };
+
+        window.addEventListener('afterprint', handleAfterPrint);
+        
+        const timer = setTimeout(() => {
+          window.print();
+        }, 100);
+
+        return () => {
+          clearTimeout(timer);
+          window.removeEventListener('afterprint', handleAfterPrint);
+          document.title = originalTitle;
+        };
+      }
+    }, [reportToPrint, selectedEmployee]);
+
+    const handlePrint = () => {
+      if (selectedEmployee) {
+        setReportToPrint({
+            employee: selectedEmployee,
+            month: month,
+            attendanceData: monthlyAttendanceData.report
+        });
+      }
+    }
     
     useEffect(() => {
         if (employees.length > 0 && !selectedEmployee) {
@@ -174,7 +206,10 @@ export default function EmployeesPage() {
                                             <Calendar mode="single" month={month} onMonthChange={(m) => m && setMonth(m)} captionLayout="dropdown-buttons" fromYear={2020} toYear={new Date().getFullYear() + 5}/>
                                         </PopoverContent>
                                      </Popover>
-                                     <Button onClick={handlePrint} variant="outline" size="sm" disabled={!selectedEmployee}><Printer className="mr-2 h-4 w-4"/> Print Report</Button>
+                                     <Button onClick={handlePrint} variant="outline" size="sm" disabled={!selectedEmployee || isPrinting}>
+                                        {isPrinting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>} 
+                                        Print Report
+                                     </Button>
                                 </div>
                             </div>
                         </CardHeader>
@@ -241,15 +276,13 @@ export default function EmployeesPage() {
                 onOpenChange={setEmployeeListDialogOpen}
             />}
             
-            <div className="hidden">
-              {selectedEmployee && (
-                <div ref={reportComponentRef}>
-                    <EmployeeAttendanceReport
-                        employee={selectedEmployee}
-                        month={month}
-                        attendanceData={monthlyAttendanceData.report}
-                    />
-                </div>
+             <div className="print-source">
+              {reportToPrint && (
+                <EmployeeAttendanceReport
+                    employee={reportToPrint.employee}
+                    month={reportToPrint.month}
+                    attendanceData={reportToPrint.attendanceData}
+                />
               )}
             </div>
         </>

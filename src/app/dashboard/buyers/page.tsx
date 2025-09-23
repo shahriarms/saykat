@@ -35,7 +35,6 @@ import { Users, FileText, ChevronRight, Calendar, DollarSign, Search, Printer, L
 import { useUser } from '@/hooks/use-user';
 import type { DateRange } from 'react-day-picker';
 import { DateRangePicker } from '@/components/date-range-picker';
-import { useReactToPrint } from 'react-to-print';
 
 
 export default function BuyersPage() {
@@ -52,14 +51,8 @@ export default function BuyersPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
   const [localDateRange, setLocalDateRange] = useState<DateRange | undefined>(centralDateRange);
+  const [invoiceToPrint, setInvoiceToPrint] = useState<Invoice | null>(null);
   
-  const printComponentRef = useRef<HTMLDivElement>(null);
-
-  const handlePrintA4 = useReactToPrint({
-      content: () => printComponentRef.current,
-      documentTitle: selectedInvoice ? `invoice-${selectedInvoice.id}` : 'invoice',
-  });
-
   useEffect(() => {
     setLocalDateRange(centralDateRange);
   }, [centralDateRange]);
@@ -108,9 +101,38 @@ export default function BuyersPage() {
         setIsPrinting(false);
       }
     } else {
-      handlePrintA4();
+      setInvoiceToPrint(selectedInvoice);
     }
   };
+
+  useEffect(() => {
+    if (invoiceToPrint) {
+        setIsPrinting(true);
+        const originalTitle = document.title;
+        document.title = `invoice-${invoiceToPrint.id}`;
+        
+        const handleAfterPrint = () => {
+            document.title = originalTitle;
+            setInvoiceToPrint(null);
+            setIsPrinting(false);
+            window.removeEventListener('afterprint', handleAfterPrint);
+        };
+
+        window.addEventListener('afterprint', handleAfterPrint);
+        
+        const timer = setTimeout(() => {
+            window.print();
+        }, 100); 
+        
+        return () => {
+            clearTimeout(timer);
+            window.removeEventListener('afterprint', handleAfterPrint);
+            if (document.title !== originalTitle) {
+              document.title = originalTitle;
+            }
+        };
+    }
+}, [invoiceToPrint]);
   
   const handleDeleteClick = () => {
     if (selectedInvoice && user?.role === 'admin') {
@@ -166,7 +188,7 @@ export default function BuyersPage() {
 
   return (
     <>
-      <div className="flex flex-col h-full gap-4 no-print">
+      <div className="flex flex-col h-full gap-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h1 className="text-2xl font-semibold flex items-center gap-2">
               <Users className="w-6 h-6" />
@@ -309,7 +331,6 @@ export default function BuyersPage() {
                         <div className="w-full h-full overflow-hidden flex justify-center items-center">
                           <div className='w-[800px] transform origin-top scale-90'>
                                 <InvoicePrintLayout 
-                                    ref={printComponentRef}
                                     invoiceId={selectedInvoice.id}
                                     currentDate={new Date(selectedInvoice.date).toLocaleDateString()}
                                     customerName={selectedInvoice.customerName}
@@ -335,6 +356,24 @@ export default function BuyersPage() {
               </CardContent>
           </Card>
         </div>
+      </div>
+
+      <div className="print-source">
+        {invoiceToPrint && (
+            <InvoicePrintLayout
+                invoiceId={invoiceToPrint.id}
+                currentDate={new Date(invoiceToPrint.date).toLocaleDateString()}
+                customerName={invoiceToPrint.customerName}
+                customerAddress={invoiceToPrint.customerAddress}
+                customerPhone={invoiceToPrint.customerPhone}
+                invoiceItems={invoiceToPrint.items}
+                subtotal={invoiceToPrint.subtotal}
+                paidAmount={invoiceToPrint.paidAmount}
+                dueAmount={invoiceToPrint.dueAmount}
+                printFormat={settings.printFormat}
+                locale={settings.locale}
+            />
+        )}
       </div>
       
       <AlertDialog open={!!invoiceToDelete} onOpenChange={() => setInvoiceToDelete(null)}>

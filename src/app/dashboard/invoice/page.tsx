@@ -32,7 +32,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Separator } from '@/components/ui/separator';
 import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
-import { useReactToPrint } from 'react-to-print';
 
 
 function InvoicePage() {
@@ -60,20 +59,22 @@ function InvoicePage() {
   const [draftToDelete, setDraftToDelete] = useState<DraftInvoice | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isPrintConfirmOpen, setPrintConfirmOpen] = useState(false);
-  
-  const printComponentRef = useRef<HTMLDivElement>(null);
+  const [invoiceToPrint, setInvoiceToPrint] = useState<DraftInvoice | null>(null);
 
-  const handlePrint = useReactToPrint({
-    content: () => printComponentRef.current,
-    documentTitle: activeDraft ? `invoice-${activeDraft.id}` : 'invoice',
-    onAfterPrint: () => {
+  useEffect(() => {
+    if (invoiceToPrint) {
+      const timer = setTimeout(() => {
+        window.print();
         resetActiveDraft();
+        setInvoiceToPrint(null);
         toast({
             title: "Memo Ready",
             description: "A new, empty memo is ready for you.",
         });
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  });
+  }, [invoiceToPrint, resetActiveDraft, toast]);
   
   const { id: draftId, customerName, customerAddress, customerPhone, paidAmount, subtotal, items, cashReceived, changeAmount, dueAmount } = activeDraft || {};
 
@@ -116,9 +117,8 @@ function InvoicePage() {
               description: t('invoice_saved_toast_description', { invoiceId: newInvoiceId }),
             });
             
-            // The `react-to-print` library needs a moment for the DOM to update with the new ID.
-            await updateActiveDraft({ id: newInvoiceId });
-            setTimeout(handlePrint, 100);
+            const finalDraft = await updateActiveDraft({ id: newInvoiceId });
+            setInvoiceToPrint(finalDraft);
         }
     } catch (error: any) {
         console.error("Failed to save invoice:", error);
@@ -455,10 +455,9 @@ function InvoicePage() {
                       <CardTitle>{t('live_print_preview_title')}</CardTitle>
                   </CardHeader>
                   <CardContent className="h-full min-h-[500px] flex items-center justify-center bg-muted/50 rounded-lg p-4">
-                      <div className="print:hidden w-full h-full overflow-hidden flex justify-center items-center">
+                      <div className="w-full h-full overflow-hidden flex justify-center items-center">
                           <div className='w-[800px] transform origin-top scale-90'>
                             <InvoicePrintLayout 
-                                ref={printComponentRef}
                                 invoiceId={draftId}
                                 currentDate={new Date().toLocaleDateString()}
                                 customerName={customerName}
@@ -479,6 +478,24 @@ function InvoicePage() {
         </div>
       </div>
       
+      <div className="print-source">
+        {invoiceToPrint && (
+            <InvoicePrintLayout
+                invoiceId={invoiceToPrint.id}
+                currentDate={new Date().toLocaleDateString()}
+                customerName={invoiceToPrint.customerName}
+                customerAddress={invoiceToPrint.customerAddress}
+                customerPhone={invoiceToPrint.customerPhone}
+                invoiceItems={invoiceToPrint.items}
+                subtotal={invoiceToPrint.subtotal}
+                paidAmount={invoiceToPrint.paidAmount || 0}
+                dueAmount={invoiceToPrint.dueAmount || 0}
+                printFormat={settings.printFormat}
+                locale={settings.locale}
+            />
+        )}
+      </div>
+
       <AlertDialog open={!!draftToDelete} onOpenChange={() => setDraftToDelete(null)}>
           <AlertDialogContent>
               <AlertDialogHeader>

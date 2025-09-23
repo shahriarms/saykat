@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
@@ -36,7 +37,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import type { DateRange } from 'react-day-picker';
 import { cn } from '@/lib/utils';
-import { useReactToPrint } from 'react-to-print';
 
 export default function SalariesPage() {
   const { employees, getPaymentsForMonth, addSalaryPayment, getDueSalaryForMonth, centralDateRange } = useAppData();
@@ -51,13 +51,16 @@ export default function SalariesPage() {
   const [paymentToPrint, setPaymentToPrint] = useState<{payment: SalaryPayment, employee: Employee} | null>(null);
   
   const [localDate, setLocalDate] = useState<Date>(centralDateRange?.from || new Date());
-  const printComponentRef = useRef<HTMLDivElement>(null);
 
-  const handlePrint = useReactToPrint({
-      content: () => printComponentRef.current,
-      documentTitle: paymentToPrint ? `salary-receipt-for-${paymentToPrint.employee.name}` : 'salary-receipt',
-      onAfterPrint: () => setPaymentToPrint(null),
-  });
+  useEffect(() => {
+      if (paymentToPrint) {
+          const timer = setTimeout(() => {
+              window.print();
+              setPaymentToPrint(null);
+          }, 100);
+          return () => clearTimeout(timer);
+      }
+  }, [paymentToPrint]);
 
   useEffect(() => {
     // Only sync from central if the local date is for a different day than central's from date
@@ -67,12 +70,6 @@ export default function SalariesPage() {
           setLocalDate(new Date());
     }
   }, [centralDateRange]);
-
-  useEffect(() => {
-      if (paymentToPrint) {
-          handlePrint();
-      }
-  }, [paymentToPrint, handlePrint]);
 
   const handleResetDate = useCallback(() => {
     setLocalDate(centralDateRange?.from || new Date());
@@ -350,7 +347,6 @@ export default function SalariesPage() {
              ) : (
                 <ScrollArea className="flex-1 rounded-lg bg-muted/20 p-2">
                     <SalaryReceipt 
-                        ref={printComponentRef}
                         employee={selectedEmployee}
                         paymentAmount={paymentToPrint?.payment.amount ?? (typeof paymentAmount === 'number' ? paymentAmount : 0)}
                         paymentDate={paymentToPrint ? new Date(paymentToPrint.payment.date) : new Date()}
@@ -360,6 +356,15 @@ export default function SalariesPage() {
           </CardContent>
         </Card>
       </div>
+    </div>
+    <div className="print-source">
+        {paymentToPrint && (
+            <SalaryReceipt
+                employee={paymentToPrint.employee}
+                paymentAmount={paymentToPrint.payment.amount}
+                paymentDate={new Date(paymentToPrint.payment.date)}
+            />
+        )}
     </div>
     <AlertDialog open={isConfirmingPayment} onOpenChange={setConfirmingPayment}>
         <AlertDialogContent>
