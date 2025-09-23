@@ -383,7 +383,7 @@ export default function BuyersPage() {
                 invoiceItems={invoiceToPrint.items}
                 subtotal={invoiceToPrint.subtotal}
                 paidAmount={invoiceToPrint.paidAmount}
-                dueAmount={invoiceToAmmount.dueAmount}
+                dueAmount={invoiceToPrint.dueAmount}
                 printFormat={settings.printFormat}
                 locale={settings.locale}
             />
@@ -410,5 +410,3 @@ export default function BuyersPage() {
     </>
   );
 }
-
-    
