@@ -131,10 +131,11 @@ export default function Dashboard() {
       const { grossProfit, cogs } = getGrossProfitForDateRange(todayInvoices);
       const profit = grossProfit - totalExpenses;
       const totalDue = todayInvoices.reduce((sum, inv) => sum + inv.dueAmount, 0);
+      const cashInHand = profit - totalDue;
       const { materialSoldKg, hardwareSoldPcs } = calculateUnitsSold(todayInvoices, products);
       const presentToday = todayAttendance.filter(a => a.status === 'Present').length;
       
-      return { totalSales, totalExpenses, profit, totalDue, materialSoldKg, hardwareSoldPcs, presentToday, grossProfit, cogs };
+      return { totalSales, totalExpenses, profit, totalDue, materialSoldKg, hardwareSoldPcs, presentToday, grossProfit, cogs, cashInHand };
   }, [todayInvoices, todayExpenses, todayAttendance, products, calculateUnitsSold, getGrossProfitForDateRange]);
   
   const { salesChartData, expensesChartData } = useMemo(() => {
@@ -220,7 +221,7 @@ export default function Dashboard() {
 
         <div>
             <h2 className="text-lg font-semibold mb-4">{t('todays_summary_title')}</h2>
-             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
+             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-9">
                 <Card as="button" onClick={() => setDailySalesReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
                   <div className="bg-blue-100 p-3 rounded-full"><DollarSign className="h-6 w-6 text-blue-600" /></div>
                   <div>
@@ -301,6 +302,23 @@ export default function Dashboard() {
                         <p className="text-sm">Cost of Goods Sold (Total Purchase Price of Sold Items)</p>
                     </TooltipContent>
                  </Tooltip>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Card className="text-left flex items-center p-4 gap-4">
+                            <div className={`p-3 rounded-full ${todayStats.cashInHand >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+                                <Wallet className={`h-6 w-6 ${todayStats.cashInHand >= 0 ? 'text-green-600' : 'text-red-600'}`} />
+                            </div>
+                            <div>
+                            <p className="text-sm text-muted-foreground">Today's Cash in Hand</p>
+                            <p className={`text-xl font-bold ${todayStats.cashInHand >= 0 ? 'text-green-600' : 'text-red-600'}`}>৳ {todayStats.cashInHand.toFixed(2)}</p>
+                            </div>
+                        </Card>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p className="text-sm">Cash in Hand = Net Profit - Total Due</p>
+                        <p className="text-sm">৳{todayStats.cashInHand.toFixed(2)} = ৳{todayStats.profit.toFixed(2)} - ৳{todayStats.totalDue.toFixed(2)}</p>
+                    </TooltipContent>
+                </Tooltip>
             </div>
         </div>
 
@@ -397,7 +415,7 @@ export default function Dashboard() {
                                     <Wallet className={`h-6 w-6 ${rangeStats.cashInHand >= 0 ? 'text-green-600' : 'text-red-600'}`} />
                                 </div>
                                 <div>
-                                <p className="text-sm text-muted-foreground">Cash in Hand</p>
+                                <p className="text-sm text-muted-foreground">Total Cash in Hand</p>
                                 <p className={`text-xl font-bold ${rangeStats.cashInHand >= 0 ? 'text-green-600' : 'text-red-600'}`}>৳ {rangeStats.cashInHand.toFixed(2)}</p>
                                 </div>
                             </Card>
