@@ -1,4 +1,3 @@
-
 // This file contains the PostgreSQL implementation for the ProductService.
 // It is only imported and used on the server-side when a POSTGRES_URL is available.
 import { Pool, PoolClient } from 'pg';
@@ -6,14 +5,17 @@ import type { Product } from '@/lib/types';
 
 let pool: Pool | null = null;
 
-// Initialize pool only if the connection string is available.
-if (process.env.POSTGRES_URL) {
-    pool = new Pool({
-        connectionString: process.env.POSTGRES_URL,
-    });
-} else {
-    // This is a safeguard, though server actions should prevent this from being used without a DB.
-    console.warn("PostgresProductService: POSTGRES_URL is not set. Service will not function.");
+// Lazy initialization of the pool
+function getPool(): Pool {
+    if (!process.env.POSTGRES_URL) {
+        throw new Error("PostgresProductService: POSTGRES_URL is not set. Service will not function.");
+    }
+    if (!pool) {
+        pool = new Pool({
+            connectionString: process.env.POSTGRES_URL,
+        });
+    }
+    return pool;
 }
 
 
@@ -36,28 +38,28 @@ function formatProduct(row: any): Product {
 
 class PostgresProductService {
     static async checkConnection(): Promise<void> {
-        if (!pool) throw new Error("Database not connected.");
-        await pool.query('SELECT 1');
+        const db = getPool();
+        await db.query('SELECT 1');
     }
 
     static async getAllProducts(): Promise<Product[]> {
-        if (!pool) return [];
-        const { rows } = await pool.query('SELECT * FROM products ORDER BY name ASC');
+        const db = getPool();
+        const { rows } = await db.query('SELECT * FROM products ORDER BY name ASC');
         return rows.map(formatProduct);
     }
 
     static async getProductById(productId: string): Promise<Product | undefined> {
-        if (!pool) return undefined;
-        const { rows } = await pool.query('SELECT * FROM products WHERE id = $1', [productId]);
+        const db = getPool();
+        const { rows } = await db.query('SELECT * FROM products WHERE id = $1', [productId]);
         return formatProduct(rows[0]);
     }
 
     static async addProduct(productData: Omit<Product, 'id'>): Promise<Product> {
-        if (!pool) throw new Error("Database not connected.");
+        const db = getPool();
         const newId = `prod-${Date.now()}`;
         const newProduct: Product = { ...productData, id: newId };
 
-        await pool.query(
+        await db.query(
             'INSERT INTO products (id, name, sku, "buyingPrice", "profitMargin", "sellingPrice", stock, "mainCategory", category, "subCategory") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
             [newProduct.id, newProduct.name, newProduct.sku, newProduct.buyingPrice, newProduct.profitMargin, newProduct.sellingPrice, newProduct.stock, newProduct.mainCategory, newProduct.category, newProduct.subCategory]
         );
@@ -65,8 +67,8 @@ class PostgresProductService {
     }
     
     static async addMultipleProducts(productsData: Omit<Product, 'id'>[]): Promise<Product[]> {
-        if (!pool) throw new Error("Database not connected.");
-        const client = await pool.connect();
+        const db = getPool();
+        const client = await db.connect();
         try {
             await client.query('BEGIN');
             const newProducts = await Promise.all(productsData.map(async p => {
@@ -89,9 +91,9 @@ class PostgresProductService {
     }
 
     static async updateProduct(productId: string, updatedData: Omit<Product, 'id'>): Promise<Product | null> {
-        if (!pool) throw new Error("Database not connected.");
+        const db = getPool();
         const { name, sku, buyingPrice, profitMargin, sellingPrice, stock, mainCategory, category, subCategory } = updatedData;
-        const result = await pool.query(
+        const result = await db.query(
             'UPDATE products SET name = $1, sku = $2, "buyingPrice" = $3, "profitMargin" = $4, "sellingPrice" = $5, stock = $6, "mainCategory" = $7, category = $8, "subCategory" = $9 WHERE id = $10 RETURNING *',
             [name, sku, buyingPrice, profitMargin, sellingPrice, stock, mainCategory, category, subCategory, productId]
         );
@@ -99,9 +101,9 @@ class PostgresProductService {
     }
     
     static async updateMultipleStocks(updates: { id: string; stockChange: number }[], client?: PoolClient): Promise<void> {
-        if (!pool) throw new Error("Database not connected.");
+        const db = getPool();
         // If a client is passed, use it (for transactions). Otherwise, create a new one.
-        const queryRunner = client || await pool.connect();
+        const queryRunner = client || await db.connect();
 
         try {
             for (const update of updates) {
@@ -120,8 +122,8 @@ class PostgresProductService {
 
 
     static async deleteProduct(productId: string): Promise<string | null> {
-        if (!pool) throw new Error("Database not connected.");
-        const result = await pool.query('DELETE FROM products WHERE id = $1 RETURNING name', [productId]);
+        const db = getPool();
+        const result = await db.query('DELETE FROM products WHERE id = $1 RETURNING name', [productId]);
         return result.rows[0]?.name || null;
     }
 }
