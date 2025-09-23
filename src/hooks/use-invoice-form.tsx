@@ -82,19 +82,10 @@ const calculateTotals = (items: (DraftInvoiceItem | { quantity: number | string,
         return acc + price * quantity;
     }, 0);
 
-    let validPaidAmount = (typeof paidAmount === 'number' && !isNaN(paidAmount)) ? paidAmount : 0;
+    const validPaidAmount = (typeof paidAmount === 'number' && !isNaN(paidAmount)) ? Math.max(0, Math.min(paidAmount, subtotal)) : 0;
     
-    // Constraint: paidAmount cannot be more than subtotal
-    if (validPaidAmount > subtotal) {
-        validPaidAmount = subtotal;
-    }
-    
-    // Change is the cash received minus the total bill, if cash received is greater.
     const changeAmount = (cashReceived && cashReceived > subtotal) ? cashReceived - subtotal : 0;
-    
-    // Due is the subtotal minus what's been paid.
     const dueAmount = subtotal - validPaidAmount;
-
 
     return { subtotal, changeAmount, paidAmount: validPaidAmount, dueAmount };
 };
