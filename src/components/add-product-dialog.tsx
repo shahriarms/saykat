@@ -33,8 +33,8 @@ const productSchema = z.object({
   mainCategory: z.enum(['Material', 'Hardware'], { required_error: 'You must select a main category.' }),
   category: z.string().min(2, { message: 'Category must be at least 2 characters.'}),
   subCategory: z.string().min(1, { message: 'Sub-category is required.'}),
-  buyingPrice: z.coerce.number().positive({ message: 'Buying price must be a positive number.' }),
-  profitMargin: z.coerce.number().min(0, { message: 'Profit margin cannot be negative.' }),
+  buyingPrice: z.coerce.number().optional().default(0),
+  profitMargin: z.coerce.number().optional().default(0),
   sellingPrice: z.coerce.number(),
   stock: z.coerce.number().nonnegative({ message: 'Stock must be a non-negative number.' }),
 });
@@ -75,14 +75,14 @@ export function AddProductDialog({ open, onOpenChange }: AddProductDialogProps) 
   }, [mainCategory, form]);
 
   useEffect(() => {
-    const bp = parseFloat(String(buyingPrice));
-    const pm = parseFloat(String(profitMargin));
+    const bp = parseFloat(String(buyingPrice)) || 0;
+    const pm = parseFloat(String(profitMargin)) || 0;
 
     if (isFinite(bp) && isFinite(pm)) {
       const calculatedPrice = bp + (bp * pm / 100);
       form.setValue('sellingPrice', parseFloat(calculatedPrice.toFixed(2)));
     } else {
-      form.setValue('sellingPrice', undefined);
+      form.setValue('sellingPrice', 0);
     }
   }, [buyingPrice, profitMargin, form]);
 
@@ -222,7 +222,7 @@ export function AddProductDialog({ open, onOpenChange }: AddProductDialogProps) 
                 <FormItem>
                     <FormLabel>{t('buying_price_label')}</FormLabel>
                     <FormControl>
-                    <Input type="text" inputMode="decimal" placeholder="10.50" {...field} value={field.value ?? ''} />
+                    <Input type="text" inputMode="decimal" placeholder="0.00" {...field} value={field.value ?? ''} />
                     </FormControl>
                     <FormMessage />
                 </FormItem>
@@ -235,7 +235,7 @@ export function AddProductDialog({ open, onOpenChange }: AddProductDialogProps) 
                 <FormItem>
                     <FormLabel>{t('profit_margin_label')}</FormLabel>
                     <FormControl>
-                    <Input type="text" inputMode="decimal" placeholder="15" {...field} value={field.value ?? ''} />
+                    <Input type="text" inputMode="decimal" placeholder="0" {...field} value={field.value ?? ''} />
                     </FormControl>
                     <FormMessage />
                 </FormItem>
