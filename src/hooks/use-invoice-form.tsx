@@ -249,6 +249,15 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
         const currentDraft = drafts[activeDraftIndex];
         if (!currentDraft) return;
 
+        if (product.stock <= 0) {
+            toast({
+                variant: 'destructive',
+                title: "Out of Stock",
+                description: `"${product.name}" is out of stock and cannot be added.`,
+            });
+            return;
+        }
+
         const existingItem = currentDraft.items.find(item => item.id === product.id);
 
         if (existingItem) {
@@ -361,3 +370,5 @@ export function useInvoiceForm() {
     }
     return context;
 }
+
+    
