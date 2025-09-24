@@ -42,30 +42,30 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
     return '#0ea5e9'; // sky-500
   }, [fillPercentage]);
 
-  const containerHeight = 128; // Reduced from 160
+  const containerHeight = 112; // h-28 -> 7rem -> 112px
   const indicatorHeight = (containerHeight * fillPercentage) / 100;
   
   // Adjust label position to avoid overlapping with container rim or bottom
   const getLabelYPosition = () => {
     const rawY = containerHeight - indicatorHeight;
-    if (rawY < 16) return 16; // Keep it below the rim (was 20)
-    if (rawY > containerHeight - 20) return containerHeight - 20; // Keep it above the bottom text (was 25)
+    if (rawY < 14) return 14; 
+    if (rawY > containerHeight - 16) return containerHeight - 16;
     return rawY;
   }
 
   return (
-    <div className="relative w-full flex flex-col items-center justify-end gap-1 pt-2 h-full overflow-visible">
+    <div className="relative w-full flex flex-col items-center justify-center gap-1 pt-2 h-full overflow-visible">
         
         {/* Main container */}
         <div 
-            className="relative w-20 h-32 flex items-center justify-center" // Reduced from w-24 h-40
+            className="relative w-16 h-28 flex items-center justify-center" 
         >
              {/* SVG Container for liquid and glass effect */}
-            <svg width="100%" height="100%" viewBox="0 0 80 128" className="absolute top-0 left-0">
+            <svg width="100%" height="100%" viewBox="0 0 64 112" className="absolute top-0 left-0">
                 <defs>
                     {/* This clipPath ensures the liquid and wave stay inside the glass body */}
                     <clipPath id="glass-body-clip">
-                        <path d="M4 8 C 4 8, 4 124, 4 124 L 76 124 C 76 124, 76 8, 76 8 Z" />
+                        <path d="M4 8 C 4 8, 4 108, 4 108 L 60 108 C 60 108, 60 8, 60 8 Z" />
                     </clipPath>
                     <linearGradient id="glassGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                         <stop offset="0%" style={{stopColor: 'white', stopOpacity: 0.3}} />
@@ -95,11 +95,11 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
                 {/* Glass outline - drawn on top of the clipped liquid */}
                 <g>
                     {/* Main body outline */}
-                    <path d="M4 8 C 4 8, 4 124, 4 124 L 76 124 C 76 124, 76 8, 76 8" stroke="#a0aec0" strokeWidth="1.5" fill="url(#glassGradient)" />
+                    <path d="M4 8 C 4 8, 4 108, 4 108 L 60 108 C 60 108, 60 8, 60 8" stroke="#a0aec0" strokeWidth="1.5" fill="url(#glassGradient)" />
                     {/* Top Rim */}
-                    <path d="M4 8 C 4 -1.6, 76 -1.6, 76 8 C 76 17.6, 4 17.6, 4 8 Z" fill="#e2e8f0" stroke="#a0aec0" strokeWidth="1.5" />
+                    <path d="M4 8 C 4 -1.6, 60 -1.6, 60 8 C 60 17.6, 4 17.6, 4 8 Z" fill="#e2e8f0" stroke="#a0aec0" strokeWidth="1.5" />
                     {/* Bottom Base */}
-                    <ellipse cx="40" cy="124" rx="36" ry="4" fill="#e2e8f0" stroke="#a0aec0" strokeWidth="1.5"/>
+                    <ellipse cx="32" cy="108" rx="28" ry="4" fill="#e2e8f0" stroke="#a0aec0" strokeWidth="1.5"/>
                 </g>
             </svg>
             
@@ -113,30 +113,30 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
                     zIndex: 10
                 }}
             >
-                <svg width="50" height="30" viewBox="0 0 50 30" className="absolute -top-4 -left-px overflow-visible">
+                <svg width="40" height="30" viewBox="0 0 40 30" className="absolute -top-4 -left-px overflow-visible">
                    <path 
-                     d="M 0,15 Q 15,15 25,10"
+                     d="M 0,15 Q 10,15 15,12"
                      stroke="#000000"
                      fill="none"
-                     strokeWidth="1.5"
+                     strokeWidth="1"
                      markerEnd="url(#arrowhead)"
                    />
                 </svg>
-                <div className="absolute text-xs font-semibold whitespace-nowrap" style={{ left: '30px', top: '-14px', color: indicatorColor }}>
+                <div className="absolute text-[10px] font-semibold whitespace-nowrap" style={{ left: '20px', top: '-14px', color: indicatorColor }}>
                     {formatValue(currentStock)}{unit}
                 </div>
             </div>
         </div>
         
         {/* Base Platform */}
-        <div className="w-24 h-1.5 bg-gray-300/60 rounded-full blur-sm" />
+        <div className="w-20 h-1.5 bg-gray-300/60 rounded-full blur-sm" />
         
         {/* Labels: Total Size and Product Name */}
         <div className="text-center pt-1">
-             <p className="text-[10px] text-gray-500">
+             <p className="text-[9px] text-gray-500">
                 Size: {formatValue(maxStock)} {unit}
             </p>
-            <p className="text-xs font-semibold text-gray-700 h-8 flex items-start justify-center pt-1 text-center">
+            <p className="text-[11px] font-semibold text-gray-700 h-8 flex items-start justify-center pt-1 text-center">
                 {productName}
             </p>
         </div>
