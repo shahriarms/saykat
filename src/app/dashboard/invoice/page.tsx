@@ -435,21 +435,38 @@ function InvoicePage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {items && items.length > 0 ? items.map(item => (
+                                {items && items.length > 0 ? items.map((item, index) => {
+                                    const product = invoiceItemProducts[index];
+                                    return (
                                     <TableRow key={item.id}>
                                         <TableCell>
-                                            <p className="font-medium">{item.name}</p>
-                                            <div className='text-xs text-muted-foreground flex items-center gap-x-2 flex-wrap'>
-                                                <span>Sug: ৳{item.originalPrice.toFixed(2)}</span>
-                                                {showProfit && (
-                                                    <>
-                                                        <Separator orientation="vertical" className="h-3" />
-                                                        <span>Buy: ৳{item.buyingPrice.toFixed(2)}</span>
-                                                        <Separator orientation="vertical" className="h-3" />
-                                                        <span className={cn(item.profitMargin < 0 ? 'text-red-500' : 'text-green-600')}>
-                                                            Profit: {item.profitMargin.toFixed(1)}% (৳{item.profitAmount.toFixed(2)})
-                                                        </span>
-                                                    </>
+                                           <div className="flex items-center gap-4">
+                                                <div className="flex-1">
+                                                    <p className="font-medium">{item.name}</p>
+                                                    <div className='text-xs text-muted-foreground flex items-center gap-x-2 flex-wrap'>
+                                                        <span>Sug: ৳{item.originalPrice.toFixed(2)}</span>
+                                                        {showProfit && (
+                                                            <>
+                                                                <Separator orientation="vertical" className="h-3" />
+                                                                <span>Buy: ৳{item.buyingPrice.toFixed(2)}</span>
+                                                                <Separator orientation="vertical" className="h-3" />
+                                                                <span className={cn(item.profitMargin < 0 ? 'text-red-500' : 'text-green-600')}>
+                                                                    Profit: {item.profitMargin.toFixed(1)}% (৳{item.profitAmount.toFixed(2)})
+                                                                </span>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                {product && (
+                                                    <div className="hidden sm:block">
+                                                         <StockVolumeDisplay
+                                                            productName={product.name}
+                                                            currentStock={product.stock}
+                                                            totalSold={product.totalSold}
+                                                            maxStock={product.totalEverAdded}
+                                                            unit={product.mainCategory === 'Material' ? 'kg' : 'pcs'}
+                                                        />
+                                                    </div>
                                                 )}
                                             </div>
                                         </TableCell>
@@ -469,35 +486,12 @@ function InvoicePage() {
                                             </Button>
                                         </TableCell>
                                     </TableRow>
-                                )) : (
+                                )}) : (
                                     <TableRow><TableCell colSpan={5} className="text-center py-6 text-muted-foreground">No items added yet.</TableCell></TableRow>
                                 )}
                             </TableBody>
                         </Table>
                     </ScrollArea>
-                    {invoiceItemProducts.length > 0 && (
-                        <div className="p-4 border-t border-b">
-                            <Carousel opts={{ align: 'start' }} className="w-full px-12">
-                                <CarouselContent className="-ml-1 h-[240px]">
-                                    {invoiceItemProducts.map(product => (
-                                        <CarouselItem key={product.id} className="basis-1/3 md:basis-1/4 lg:basis-1/5 pl-1">
-                                            <div className="p-1 h-full flex items-center justify-center">
-                                                <StockVolumeDisplay
-                                                    productName={product.name}
-                                                    currentStock={product.stock}
-                                                    totalSold={product.totalSold}
-                                                    maxStock={product.totalEverAdded}
-                                                    unit={product.mainCategory === 'Material' ? 'kg' : 'pcs'}
-                                                />
-                                            </div>
-                                        </CarouselItem>
-                                    ))}
-                                </CarouselContent>
-                                <CarouselPrevious />
-                                <CarouselNext />
-                            </Carousel>
-                        </div>
-                    )}
                 </CardContent>
                 <CardFooter className="flex-col items-stretch space-y-2 pt-4">
                     <div className="w-full md:w-80 ml-auto space-y-2">
