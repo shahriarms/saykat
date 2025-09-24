@@ -30,25 +30,24 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
     return '#22c55e'; // green-500
   }, [fillPercentage]);
 
-  // SVG path calculation
-  const startY = 160 - (160 * fillPercentage / 100); // 160 is the height of the container
-  const pathD = `M 40 ${startY} C 60 ${startY}, 80 ${startY - 20}, 120 ${startY - 20}`;
-
+  const containerHeight = 160; // h-40 -> 160px
+  const indicatorHeight = (containerHeight * fillPercentage) / 100;
+  const lineY = containerHeight - indicatorHeight;
 
   return (
-    <div className="relative w-full flex flex-col items-center justify-center gap-2 pt-2 h-[260px]">
+    <div className="relative w-full flex flex-col items-center justify-start gap-2 pt-2 h-[260px]">
         {/* Product Name */}
-        <p className="text-sm font-semibold text-gray-700 absolute top-0 left-1/2 -translate-x-1/2">
+        <p className="text-sm font-semibold text-gray-700 text-center h-10 flex items-center">
             {productName}
         </p>
 
         {/* Main container */}
-        <div className="relative w-20 h-40 bg-gray-200 rounded-lg mt-6">
+        <div className="relative w-20 h-40 bg-gray-200 rounded-lg mt-1">
             {/* Inner colored box representing stock level */}
             <div 
                 className="absolute bottom-0 left-0 w-full rounded-lg"
                 style={{ 
-                    height: `${fillPercentage}%`,
+                    height: `${indicatorHeight}px`,
                     backgroundColor: indicatorColor,
                     transition: 'height 0.5s ease-in-out, background-color 0.5s ease-in-out',
                 }}
@@ -57,31 +56,40 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
         
         {/* Total Stock Size Label */}
         <p className="text-xs text-gray-500 mt-1">
-            stock size: {formatValue(maxStock)} {unit}
+            Stock Size: {formatValue(maxStock)} {unit}
         </p>
 
-        {/* Floating label and connecting line */}
-        {fillPercentage > 1 && (
+        {/* Floating label and connecting line, only if there is stock */}
+        {fillPercentage > 0 && (
              <div 
-                className="absolute top-[88px] left-1/2" // Position relative to the container's top
-                style={{ 
-                    transform: `translateY(${startY - 160}px)`, // Move the whole group up
+                className="absolute top-[80px] left-1/2 w-[180px] h-px"
+                style={{
+                    transform: `translateY(${lineY}px)`,
                     transition: 'transform 0.5s ease-in-out',
                 }}
             >
-                <svg width="150" height="40" className="absolute" style={{ overflow: 'visible', left: '-10px', top: '-25px' }}>
-                    <path 
-                        d={pathD}
-                        stroke={indicatorColor} 
-                        strokeWidth="2" 
-                        fill="none" 
-                    />
-                </svg>
-                <div 
-                    className="absolute text-sm font-semibold"
-                    style={{ left: '115px', top: `${startY - 35}px`, color: indicatorColor }}
+               {/* Horizontal line part */}
+               <div
+                  className="absolute left-[-20px] top-0 h-px"
+                  style={{
+                      width: '80px',
+                      backgroundColor: indicatorColor,
+                  }}
+               />
+               {/* Vertical line part */}
+               <div
+                  className="absolute left-[60px] top-[-10px] w-px"
+                  style={{
+                      height: '10px',
+                      backgroundColor: indicatorColor,
+                  }}
+               />
+               {/* Text Label */}
+               <div 
+                    className="absolute text-sm font-semibold whitespace-nowrap"
+                    style={{ left: '65px', top: '-28px', color: indicatorColor }}
                 >
-                    {formatValue(currentStock)}{unit}
+                    Remaining: {formatValue(currentStock)}{unit}
                 </div>
             </div>
         )}
