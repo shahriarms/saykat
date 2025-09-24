@@ -44,7 +44,14 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
 
   const containerHeight = 160;
   const indicatorHeight = (containerHeight * fillPercentage) / 100;
-  const lineAndLabelY = fillPercentage > 95 ? indicatorHeight - 30 : containerHeight - indicatorHeight - 20;
+  
+  // Adjust label position to avoid overlapping with container rim or bottom
+  const getLabelYPosition = () => {
+    const rawY = containerHeight - indicatorHeight;
+    if (rawY < 20) return 20; // Keep it below the rim
+    if (rawY > containerHeight - 25) return containerHeight - 25; // Keep it above the bottom text
+    return rawY;
+  }
 
   return (
     <div className="relative w-full flex flex-col items-center justify-end gap-2 pt-2 h-full overflow-visible">
@@ -68,6 +75,9 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
                         <stop offset="80%" style={{stopColor: 'white', stopOpacity: 0.1}} />
                         <stop offset="100%" style={{stopColor: 'white', stopOpacity: 0.3}} />
                     </linearGradient>
+                    <marker id="arrowhead" markerWidth="5" markerHeight="3.5" refX="5" refY="1.75" orient="auto">
+                        <polygon points="0 0, 5 1.75, 0 3.5" />
+                    </marker>
                 </defs>
 
                 {/* The liquid and wave, clipped by the path above */}
@@ -79,8 +89,6 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
                             transform: `translateY(${containerHeight - indicatorHeight}px)`,
                             transition: 'transform 0.5s ease-in-out, fill 0.5s ease-in-out',
                         }}
-                        // This path starts from the top of the SVG and goes down to fill the area.
-                        d="M 0 0 C 30 10, 60 -10, 90 0 L 96 0 L 96 160 L 0 160 Z"
                     />
                 </g>
 
@@ -99,7 +107,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
              <div 
                 className="absolute left-full top-0 w-px h-px"
                 style={{
-                    transform: `translateY(${containerHeight - indicatorHeight}px)`,
+                    transform: `translateY(${getLabelYPosition()}px)`,
                     transition: 'transform 0.5s ease-in-out',
                     overflow: 'visible',
                     zIndex: 10
@@ -113,11 +121,6 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
                      strokeWidth="2"
                      markerEnd="url(#arrowhead)"
                    />
-                    <defs>
-                        <marker id="arrowhead" markerWidth="5" markerHeight="3.5" refX="5" refY="1.75" orient="auto">
-                            <polygon points="0 0, 5 1.75, 0 3.5" fill={indicatorColor} />
-                        </marker>
-                    </defs>
                 </svg>
                 <div className="absolute text-sm font-semibold whitespace-nowrap" style={{ left: '35px', top: '-18px', color: indicatorColor }}>
                     {formatValue(currentStock)}{unit}
