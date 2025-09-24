@@ -38,11 +38,8 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
   const lineY = containerHeight - indicatorHeight;
 
   return (
-    <div className="relative w-full flex flex-col items-center justify-start gap-2 pt-2 h-[260px] overflow-visible">
-        <p className="text-sm font-semibold text-gray-700 text-center h-10 flex items-center">
-            {productName}
-        </p>
-
+    <div className="relative w-full flex flex-col items-center justify-end gap-2 pt-2 h-[260px] overflow-visible">
+        
         {/* Main container */}
         <div className="relative w-28 h-40 mt-1">
             {/* SVG Glass Container */}
@@ -99,8 +96,19 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
             )}
         </div>
         
-        {/* Total Stock Size Label */}
-        <p className="text-xs text-gray-500 mt-1">
+        {/* Platform and Shadow */}
+        <div className="flex flex-col items-center">
+            <div className="w-28 h-2 bg-gray-200 rounded-full border border-gray-300"></div>
+            <div className="w-24 h-2 bg-gray-300/50 rounded-full blur-md" />
+        </div>
+        
+        {/* Product Name Label */}
+        <p className="text-sm font-semibold text-gray-700 text-center h-10 flex items-center pt-1">
+            {productName}
+        </p>
+
+        {/* Total Stock Size Label - hidden but kept for structure */}
+        <p className="text-xs text-gray-500 mt-1 hidden">
             Stock Size: {formatValue(maxStock)} {unit}
         </p>
     </div>
