@@ -76,7 +76,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
                         <stop offset="100%" style={{stopColor: 'white', stopOpacity: 0.3}} />
                     </linearGradient>
                     <marker id="arrowhead" markerWidth="5" markerHeight="3.5" refX="5" refY="1.75" orient="auto">
-                        <polygon points="0 0, 5 1.75, 0 3.5" />
+                        <polygon points="0 0, 5 1.75, 0 3.5" fill={indicatorColor} />
                     </marker>
                 </defs>
 
