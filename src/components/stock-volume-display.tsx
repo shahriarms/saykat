@@ -15,7 +15,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
   maxStock,
   unit,
 }) => {
-  const fillPercentage = maxStock > 0 ? Math.min((currentStock / maxStock) * 100, 100) : 0;
+  const fillPercentage = maxStock > 0 ? (currentStock / maxStock) * 100 : 0;
   
   const formattedStock = currentStock.toLocaleString(undefined, {
       minimumFractionDigits: unit === 'kg' ? 1 : 0,
@@ -27,7 +27,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
       maximumFractionDigits: unit === 'kg' ? 2 : 0,
   });
 
-  const waveColor = '#38bdf8'; // A nice, friendly blue color like the image.
+  const waveColor = '#38bdf8'; // A nice, friendly blue color (cyan-400)
 
   return (
     <div className="relative w-full flex flex-col items-center justify-center gap-1">
@@ -110,4 +110,3 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
     </div>
   );
 };
-
