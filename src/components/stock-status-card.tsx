@@ -11,28 +11,38 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
-import { Product } from '@/lib/types';
+import { Product, Invoice } from '@/lib/types';
 import { StockVolumeDisplay } from './stock-volume-display';
 import { Weight, ThumbsUp } from 'lucide-react';
 
 interface StockStatusCardProps {
   products: Product[];
+  invoices: Invoice[];
 }
 
-export function StockStatusCard({ products }: StockStatusCardProps) {
-  const { materialProducts, hardwareProducts, maxMaterialStock, maxHardwareStock } = React.useMemo(() => {
-    const materialProducts = products.filter(p => p.mainCategory === 'Material');
-    const hardwareProducts = products.filter(p => p.mainCategory === 'Hardware');
+export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
+  const { materialProducts, hardwareProducts } = React.useMemo(() => {
+    const soldQuantities = new Map<string, number>();
+    invoices.forEach(invoice => {
+      invoice.items.forEach(item => {
+        soldQuantities.set(item.id, (soldQuantities.get(item.id) || 0) + item.quantity);
+      });
+    });
 
-    const maxMaterialStock = Math.max(...materialProducts.map(p => p.stock), 100);
-    const maxHardwareStock = Math.max(...hardwareProducts.map(p => p.stock), 100);
+    const enrichedProducts = products.map(p => {
+      const totalSold = soldQuantities.get(p.id) || 0;
+      const totalEverAdded = p.stock + totalSold;
+      return { ...p, totalSold, totalEverAdded };
+    });
 
-    return { materialProducts, hardwareProducts, maxMaterialStock, maxHardwareStock };
-  }, [products]);
+    const materialProducts = enrichedProducts.filter(p => p.mainCategory === 'Material');
+    const hardwareProducts = enrichedProducts.filter(p => p.mainCategory === 'Hardware');
+
+    return { materialProducts, hardwareProducts };
+  }, [products, invoices]);
 
   const renderCarousel = (
-    productList: Product[],
-    maxStock: number,
+    productList: (Product & { totalSold: number, totalEverAdded: number })[],
     unit: string
   ) => {
     if (productList.length === 0) {
@@ -58,8 +68,8 @@ export function StockStatusCard({ products }: StockStatusCardProps) {
                 <Card className="overflow-hidden">
                   <CardContent className="flex flex-col items-center justify-center p-3 gap-2">
                     <StockVolumeDisplay
-                      currentStock={product.stock}
-                      maxStock={maxStock}
+                      currentStock={product.totalSold} // Show sold quantity
+                      maxStock={product.totalEverAdded} // Max is total ever added
                       unit={unit}
                     />
                     <div className="text-center">
@@ -95,10 +105,10 @@ export function StockStatusCard({ products }: StockStatusCardProps) {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="material" className="pt-4">
-            {renderCarousel(materialProducts, maxMaterialStock, 'kg')}
+            {renderCarousel(materialProducts, 'kg')}
           </TabsContent>
           <TabsContent value="hardware" className="pt-4">
-            {renderCarousel(hardwareProducts, maxHardwareStock, 'pcs')}
+            {renderCarousel(hardwareProducts, 'pcs')}
           </TabsContent>
         </Tabs>
       </CardContent>

@@ -187,7 +187,7 @@ export default function Dashboard() {
           <DateRangePicker initialDateRange={centralDateRange} onDateChange={setCentralDateRange} />
         </div>
         
-        <StockStatusCard products={products} />
+        <StockStatusCard products={products} invoices={allInvoices} />
 
         <div>
             <h2 className="text-lg font-semibold mb-4">Recent Memos</h2>
