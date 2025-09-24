@@ -23,10 +23,18 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
 }) => {
   const fillPercentage = maxStock > 0 ? (currentStock / maxStock) * 100 : 0;
   
-  const formatValue = (value: number) => value.toLocaleString(undefined, {
-      minimumFractionDigits: unit === 'kg' ? 2 : 0,
-      maximumFractionDigits: unit === 'kg' ? 2 : 0,
-  });
+  const formatValue = (value: number) => {
+    if (unit === 'kg') {
+        return value.toLocaleString(undefined, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1,
+        });
+    }
+    return value.toLocaleString(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    });
+  };
 
   const indicatorColor = React.useMemo(() => {
     if (fillPercentage < 20) return '#ef4444'; // red-500
@@ -46,57 +54,72 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
         
         {/* Main container */}
         <div 
-            className="relative w-24 h-40 rounded-t-lg bg-gray-200/50 border-2 border-gray-300/70"
-            style={{
-                boxShadow: 'inset 0 0 10px rgba(0,0,0,0.1)',
-            }}
+            className="relative w-24 h-40"
         >
-            {/* Top Rim */}
-            <div 
-                className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-[105%] h-3 rounded-[50%] border-2 border-gray-400/60 bg-gray-300/50"
-                style={{ content: '""' }}
-            ></div>
+            {/* SVG Glass Container */}
+            <svg width="100%" height="100%" viewBox="0 0 96 160" className="absolute top-0 left-0">
+                <defs>
+                    <linearGradient id="glassGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style={{stopColor: 'white', stopOpacity: 0.3}} />
+                        <stop offset="20%" style={{stopColor: 'white', stopOpacity: 0.1}} />
+                        <stop offset="40%" style={{stopColor: 'white', stopOpacity: 0.05}} />
+                        <stop offset="60%" style={{stopColor: 'white', stopOpacity: 0.05}} />
+                        <stop offset="80%" style={{stopColor: 'white', stopOpacity: 0.1}} />
+                        <stop offset="100%" style={{stopColor: 'white', stopOpacity: 0.3}} />
+                    </linearGradient>
+                </defs>
+                {/* Main body */}
+                <path d="M5 10 C 5 10, 5 155, 5 155 L 91 155 C 91 155, 91 10, 91 10" stroke="#a0aec0" strokeWidth="2" fill="url(#glassGradient)" />
+                {/* Top Rim */}
+                <path d="M5 10 C 5 -2, 91 -2, 91 10 C 91 22, 5 22, 5 10 Z" fill="#e2e8f0" stroke="#a0aec0" strokeWidth="2" />
+                {/* Bottom Base */}
+                <ellipse cx="48" cy="155" rx="43" ry="5" fill="#e2e8f0" stroke="#a0aec0" strokeWidth="2"/>
+            </svg>
             
             {/* Inner colored box representing stock level */}
             <div 
-                className="absolute bottom-0 left-0 w-full overflow-hidden"
+                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[86px] overflow-hidden"
                 style={{ 
                     height: `${indicatorHeight}px`,
-                    backgroundColor: indicatorColor,
-                    transition: 'height 0.5s ease-in-out, background-color 0.5s ease-in-out',
+                    transition: 'height 0.5s ease-in-out',
                 }}
             >
-                 {/* Animated Waves */}
-                <div className="absolute -bottom-1 left-0 w-full h-4">
-                    <div 
-                        className="absolute w-[200%] h-full bg-white/20 rounded-[45%] "
-                        style={{
-                            animation: 'wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite',
-                            transform: 'translate3d(0, 0, 0)',
-                            left: '-100%',
-                            bottom: 0,
-                        }}
-                    />
-                    <div 
-                        className="absolute w-[200%] h-full bg-white/10 rounded-[40%] "
-                        style={{
-                            animation: 'wave 11s cubic-bezier(0.36, 0.45, 0.63, 0.53) -.125s infinite, swell 7s ease -1.25s infinite',
-                            transform: 'translate3d(0, 0, 0)',
-                             left: '-100%',
-                            bottom: 0,
-                        }}
-                    />
+                <div 
+                    className="absolute bottom-0 left-0 w-full h-full"
+                    style={{
+                        backgroundColor: indicatorColor,
+                        transition: 'background-color 0.5s ease-in-out',
+                    }}
+                >
+                     {/* Animated Waves */}
+                    <div className="absolute -bottom-1 left-0 w-full h-4">
+                        <div 
+                            className="absolute w-[200%] h-full bg-white/20 rounded-[45%] "
+                            style={{
+                                animation: 'wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite',
+                                transform: 'translate3d(0, 0, 0)',
+                                left: '-100%',
+                                bottom: 0,
+                            }}
+                        />
+                        <div 
+                            className="absolute w-[200%] h-full bg-white/10 rounded-[40%] "
+                            style={{
+                                animation: 'wave 11s cubic-bezier(0.36, 0.45, 0.63, 0.53) -.125s infinite, swell 7s ease -1.25s infinite',
+                                transform: 'translate3d(0, 0, 0)',
+                                 left: '-100%',
+                                bottom: 0,
+                            }}
+                        />
+                    </div>
+                </div>
+                 {/* Top surface of the liquid */}
+                 <div className="absolute top-0 left-0 w-full h-2.5">
+                    <svg width="100%" height="100%" viewBox="0 0 86 10" preserveAspectRatio="none">
+                        <path d="M0 5 C 20 10, 66 0, 86 5 L 86 10 L 0 10 Z" fill={indicatorColor} style={{ transition: 'fill 0.5s ease-in-out' }}/>
+                    </svg>
                 </div>
             </div>
-            
-            {/* Bottom Base */}
-            <div 
-                className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[105%] h-2 rounded-[50%] bg-gray-300/70 border-2 border-gray-400/50"
-                style={{ content: '""' }}
-            ></div>
-
-            {/* Glare effect */}
-            <div className="absolute top-0 left-2 w-4 h-full rounded-full bg-white/20 -skew-x-12"></div>
             
             {/* Floating label and connecting line */}
              <div 
@@ -136,7 +159,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
              <p className="text-xs text-gray-500">
                 Stock Size: {formatValue(maxStock)} {unit}
             </p>
-            <p className="text-sm font-semibold text-gray-700 h-10 flex items-start justify-center pt-1">
+            <p className="text-sm font-semibold text-gray-700 h-10 flex items-start justify-center pt-1 text-center">
                 {productName}
             </p>
         </div>

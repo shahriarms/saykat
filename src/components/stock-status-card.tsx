@@ -25,14 +25,16 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
     const soldQuantities = new Map<string, number>();
     invoices.forEach(invoice => {
       invoice.items.forEach(item => {
-        soldQuantities.set(item.id, (soldQuantities.get(item.id) || 0) + item.quantity);
+        const quantity = parseFloat(String(item.quantity)) || 0;
+        soldQuantities.set(item.id, (soldQuantities.get(item.id) || 0) + quantity);
       });
     });
 
     const enrichedProducts = products.map(p => {
       const totalSold = soldQuantities.get(p.id) || 0;
-      const totalEverAdded = p.stock + totalSold;
-      return { ...p, totalSold, totalEverAdded };
+      const currentStock = parseFloat(String(p.stock)) || 0;
+      const totalEverAdded = currentStock + totalSold;
+      return { ...p, stock: currentStock, totalSold, totalEverAdded };
     });
 
     const materialProducts = enrichedProducts.filter(p => p.mainCategory === 'Material');
