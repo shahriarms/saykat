@@ -51,10 +51,21 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
     const productsAfterCategoryFilter = categoryFilter ? productsForTab.filter(p => p.category === categoryFilter) : productsForTab;
     const uniqueSubCategories = [...new Set(productsAfterCategoryFilter.map(p => p.subCategory).filter(Boolean))];
 
-    const finalFiltered = productsForTab
+    // Default sort by stock percentage (ascending)
+    productsForTab.sort((a, b) => {
+        const stockPercentA = a.totalEverAdded > 0 ? (a.stock / a.totalEverAdded) * 100 : 0;
+        const stockPercentB = b.totalEverAdded > 0 ? (b.stock / b.totalEverAdded) * 100 : 0;
+        return stockPercentA - stockPercentB;
+    });
+    
+    const isAnyFilterActive = searchTerm || categoryFilter || subCategoryFilter;
+
+    const finalFiltered = isAnyFilterActive ?
+      productsForTab
       .filter(p => searchTerm ? p.name.toLowerCase().includes(searchTerm.toLowerCase()) : true)
       .filter(p => categoryFilter ? p.category === categoryFilter : true)
-      .filter(p => subCategoryFilter ? p.subCategory === subCategoryFilter : true);
+      .filter(p => subCategoryFilter ? p.subCategory === subCategoryFilter : true)
+      : productsForTab;
 
     return {
       filteredProducts: finalFiltered,
@@ -85,7 +96,7 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
         opts={{}}
         className="w-full px-12"
       >
-        <CarouselContent className="flex flex-wrap h-[400px]">
+        <CarouselContent className="flex flex-wrap -ml-1 h-[400px]">
           {productList.map(product => (
             <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/5 pl-1">
               <div className="p-1 h-[200px] flex items-center justify-center">
