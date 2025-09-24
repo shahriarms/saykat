@@ -85,7 +85,7 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
         opts={{ align: 'start' }}
         className="w-full px-12"
       >
-        <CarouselContent className="-ml-1 flex flex-wrap h-[450px]">
+        <CarouselContent className="flex flex-wrap h-[450px]">
           {productList.map(product => (
             <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/5 pl-1">
               <div className="p-1 h-[200px] flex items-center justify-center">
@@ -94,6 +94,7 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
                     currentStock={product.stock}
                     totalSold={product.totalSold}
                     maxStock={product.totalEverAdded}
+                    unit={product.mainCategory === 'Material' ? 'kg' : 'pcs'}
                   />
               </div>
             </CarouselItem>
@@ -114,10 +115,10 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
       <CardContent>
         <Tabs value={activeTab} onValueChange={value => setActiveTab(value as 'Material' | 'Hardware')}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="material">
+            <TabsTrigger value="Material">
               <Weight className="mr-2 h-4 w-4" /> Material
             </TabsTrigger>
-            <TabsTrigger value="hardware">
+            <TabsTrigger value="Hardware">
               <ThumbsUp className="mr-2 h-4 w-4" /> Hardware
             </TabsTrigger>
           </TabsList>
@@ -154,10 +155,10 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
               <Button variant="outline" onClick={resetFilters}>Reset</Button>
           </div>
 
-          <TabsContent value="material" className="pt-4">
+          <TabsContent value="Material" className="pt-4">
             {renderCarousel(filteredProducts)}
           </TabsContent>
-          <TabsContent value="hardware" className="pt-4">
+          <TabsContent value="Hardware" className="pt-4">
             {renderCarousel(filteredProducts)}
           </TabsContent>
         </Tabs>
