@@ -19,8 +19,8 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
   currentStock,
   totalSold,
   maxStock,
-  unit,
 }) => {
+  const unit = React.useMemo(() => (productName.toLowerCase().includes('kg') ? 'kg' : 'pcs'), [productName]);
   const fillPercentage = maxStock > 0 ? (currentStock / maxStock) * 100 : 0;
   
   const formatValue = (value: number) => {
@@ -53,9 +53,13 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
         <div 
             className="relative w-24 h-40"
         >
-            {/* SVG Glass Container */}
-            <svg width="100%" height="100%" viewBox="0 0 96 160" className="absolute top-0 left-0 z-10">
+             {/* SVG Container for liquid and glass effect */}
+            <svg width="100%" height="100%" viewBox="0 0 96 160" className="absolute top-0 left-0">
                 <defs>
+                    {/* This clipPath ensures the liquid and wave stay inside the glass body */}
+                    <clipPath id="glass-body-clip">
+                        <path d="M5 10 C 5 10, 5 155, 5 155 L 91 155 C 91 155, 91 10, 91 10 Z" />
+                    </clipPath>
                     <linearGradient id="glassGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                         <stop offset="0%" style={{stopColor: 'white', stopOpacity: 0.3}} />
                         <stop offset="20%" style={{stopColor: 'white', stopOpacity: 0.1}} />
@@ -65,25 +69,30 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
                         <stop offset="100%" style={{stopColor: 'white', stopOpacity: 0.3}} />
                     </linearGradient>
                 </defs>
-                {/* Main body */}
-                <path d="M5 10 C 5 10, 5 155, 5 155 L 91 155 C 91 155, 91 10, 91 10" stroke="#a0aec0" strokeWidth="2" fill="url(#glassGradient)" />
-                {/* Top Rim */}
-                <path d="M5 10 C 5 -2, 91 -2, 91 10 C 91 22, 5 22, 5 10 Z" fill="#e2e8f0" stroke="#a0aec0" strokeWidth="2" />
-                {/* Bottom Base */}
-                <ellipse cx="48" cy="155" rx="43" ry="5" fill="#e2e8f0" stroke="#a0aec0" strokeWidth="2"/>
-            </svg>
-            
-            {/* SVG Water level indicator with wave */}
-            <svg width="86" height={containerHeight} className="absolute bottom-0 left-1/2 -translate-x-1/2 overflow-hidden">
-                 <path
-                    className="animate-wave-flow"
-                    fill={indicatorColor}
-                    style={{
-                        transform: `translateY(${containerHeight - indicatorHeight}px)`,
-                        transition: 'transform 0.5s ease-in-out, fill 0.5s ease-in-out',
-                    }}
-                    d="M 0 0 C 30 10, 60 -10, 90 0 L 90 160 L 0 160 Z"
-                 />
+
+                {/* The liquid and wave, clipped by the path above */}
+                <g clipPath="url(#glass-body-clip)">
+                    <path
+                        className="animate-wave-flow"
+                        fill={indicatorColor}
+                        style={{
+                            transform: `translateY(${containerHeight - indicatorHeight}px)`,
+                            transition: 'transform 0.5s ease-in-out, fill 0.5s ease-in-out',
+                        }}
+                        // This path starts from the top of the SVG and goes down to fill the area.
+                        d="M 0 0 C 30 10, 60 -10, 90 0 L 96 0 L 96 160 L 0 160 Z"
+                    />
+                </g>
+
+                {/* Glass outline - drawn on top of the clipped liquid */}
+                <g>
+                    {/* Main body outline */}
+                    <path d="M5 10 C 5 10, 5 155, 5 155 L 91 155 C 91 155, 91 10, 91 10" stroke="#a0aec0" strokeWidth="2" fill="url(#glassGradient)" />
+                    {/* Top Rim */}
+                    <path d="M5 10 C 5 -2, 91 -2, 91 10 C 91 22, 5 22, 5 10 Z" fill="#e2e8f0" stroke="#a0aec0" strokeWidth="2" />
+                    {/* Bottom Base */}
+                    <ellipse cx="48" cy="155" rx="43" ry="5" fill="#e2e8f0" stroke="#a0aec0" strokeWidth="2"/>
+                </g>
             </svg>
             
             {/* Floating label and connecting line */}
