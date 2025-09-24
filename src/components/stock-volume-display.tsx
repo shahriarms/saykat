@@ -38,7 +38,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
   const indicatorHeight = (containerHeight * fillPercentage) / 100;
   
   // Adjust lineY if the indicator is near the top to prevent clipping
-  const lineAndLabelY = fillPercentage > 50 ? indicatorHeight - 30 : indicatorHeight + 10;
+  const lineAndLabelY = fillPercentage > 95 ? indicatorHeight - 30 : containerHeight - indicatorHeight - 20;
   
 
   return (
@@ -102,7 +102,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
              <div 
                 className="absolute left-full top-0 w-px h-px"
                 style={{
-                    transform: `translateY(${lineAndLabelY}px)`,
+                    transform: `translateY(${containerHeight - indicatorHeight}px)`,
                     transition: 'transform 0.5s ease-in-out',
                     overflow: 'visible',
                     zIndex: 10
@@ -136,7 +136,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
              <p className="text-xs text-gray-500">
                 Stock Size: {formatValue(maxStock)} {unit}
             </p>
-            <p className="text-sm font-semibold text-gray-700 h-10 flex items-start pt-1">
+            <p className="text-sm font-semibold text-gray-700 h-10 flex items-start justify-center pt-1">
                 {productName}
             </p>
         </div>
