@@ -82,8 +82,11 @@ function InvoicePage() {
         const totalSold = soldQuantities.get(product.id) || 0;
         const currentStock = parseFloat(String(product.stock)) || 0;
         const totalEverAdded = currentStock + totalSold;
+        
+        const quantityInCart = parseFloat(String(item.quantity)) || 0;
+        const liveStock = currentStock - quantityInCart;
 
-        return { ...product, stock: currentStock, totalSold, totalEverAdded };
+        return { ...product, stock: liveStock, totalSold, totalEverAdded };
     }).filter((p): p is Product & { totalSold: number; totalEverAdded: number } => p !== null);
   }, [activeDraft, products, allInvoices]);
 
@@ -317,99 +320,11 @@ function InvoicePage() {
         </Card>
 
         {/* Main Content Area */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-0">
-          {/* Column 1: Customer Info & Product Adder */}
-          <div className="flex flex-col gap-4">
-            <Card>
-                <CardHeader>
-                    <CardTitle>{activeDraft.label}</CardTitle>
-                    <CardDescription>{t('invoice_no_label')}: {draftId}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="customerName">{t('customer_name_label')}</Label>
-                           <Input
-                              id="customerName"
-                              placeholder={t('customer_name_placeholder')}
-                              value={customerName || ''}
-                              onChange={handleCustomerNameChange}
-                              autoComplete="off"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="customerPhone">{t('customer_phone_label')}</Label>
-                            <Input id="customerPhone" placeholder={t('customer_phone_placeholder')} value={customerPhone || ''} onChange={(e) => updateActiveDraft({ customerPhone: e.target.value })} />
-                        </div>
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="customerAddress">{t('customer_address_label')}</Label>
-                        <Input id="customerAddress" placeholder={t('customer_address_placeholder')} value={customerAddress || ''} onChange={(e) => updateActiveDraft({ customerAddress: e.target.value })} />
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card className="flex-1 flex flex-col">
-                <CardHeader className="flex-shrink-0">
-                    <CardTitle>{t('add_products_label')}</CardTitle>
-                    <RadioGroup
-                        value={mainCategoryFilter}
-                        onValueChange={(value) => setMainCategoryFilter(value as 'Material' | 'Hardware')}
-                        className="flex space-x-4 pt-2"
-                    >
-                        <div className="flex items-center space-x-2"><RadioGroupItem value="Material" id="r-material" /><Label htmlFor="r-material">{t('material_tab')}</Label></div>
-                        <div className="flex items-center space-x-2"><RadioGroupItem value="Hardware" id="r-hardware" /><Label htmlFor="r-hardware">{t('hardware_tab')}</Label></div>
-                    </RadioGroup>
-                </CardHeader>
-                <CardContent className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-4 min-h-0">
-                        {/* Category List */}
-                        <div className="flex flex-col gap-2 min-h-0">
-                           <Label>{t('category_header')}</Label>
-                            <div className="relative">
-                               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                               <Input placeholder="Search..." className="pl-8 h-9" value={categorySearch} onChange={e => setCategorySearch(e.target.value)} />
-                            </div>
-                           <ScrollArea className="flex-1 border rounded-md force-show-scrollbar">
-                               <div className="p-2 space-y-1">
-                                    <Button variant={!categoryFilter ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setCategoryFilter('')}>{t('all_categories')}</Button>
-                                    {categories.map(c => <Button key={c} variant={categoryFilter === c ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setCategoryFilter(c)}>{c}</Button>)}
-                               </div>
-                           </ScrollArea>
-                        </div>
-                        {/* Sub-Category List */}
-                        <div className="flex flex-col gap-2 min-h-0">
-                            <Label>{t('subcategory_header')}</Label>
-                            <div className="relative">
-                               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                               <Input placeholder="Search..." className="pl-8 h-9" value={subCategorySearch} onChange={e => setSubCategorySearch(e.target.value)} disabled={!categoryFilter}/>
-                            </div>
-                           <ScrollArea className="flex-1 border rounded-md force-show-scrollbar">
-                                <div className="p-2 space-y-1">
-                                     <Button variant={!subCategoryFilter ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setSubCategoryFilter('')} disabled={!categoryFilter}>{t('all_subcategories')}</Button>
-                                     {categoryFilter && subCategories.map(sc => <Button key={sc} variant={subCategoryFilter === sc ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setSubCategoryFilter(sc)}>{sc}</Button>)}
-                                </div>
-                           </ScrollArea>
-                        </div>
-                        {/* Product List */}
-                         <div className="flex flex-col gap-2 min-h-0">
-                            <Label>{t('products_sidebar')}</Label>
-                            <div className="relative">
-                               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                               <Input placeholder="Search..." className="pl-8 h-9" value={productSearch} onChange={e => setProductSearch(e.target.value)} />
-                            </div>
-                           <ScrollArea className="flex-1 border rounded-md force-show-scrollbar">
-                                <div className="p-2 space-y-1">
-                                     {filteredProducts.map(p => <Button key={p.id} variant="ghost" className="w-full justify-start h-8 text-xs" onClick={() => handleAddProduct(p)}>{p.name}</Button>)}
-                                </div>
-                           </ScrollArea>
-                        </div>
-                </CardContent>
-            </Card>
-          </div>
-
-          {/* Column 2: Invoice Items */}
-          <div className="flex flex-col gap-4">
-              <Card className="flex flex-col">
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-4 flex-1 min-h-0">
+          
+          {/* Left Column: Invoice Items & Product Adder */}
+          <div className="xl:col-span-3 flex flex-col gap-4">
+              <Card className="flex-1 flex flex-col">
                 <CardHeader className="flex-row items-center justify-between">
                     <CardTitle>Invoice Items</CardTitle>
                     <div className="flex gap-2">
@@ -423,7 +338,7 @@ function InvoicePage() {
                     </div>
                 </CardHeader>
                 <CardContent className='p-0 flex-1 flex flex-col'>
-                    <ScrollArea className="h-full max-h-[calc(100vh-500px)]">
+                    <ScrollArea className="flex-1">
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -461,7 +376,7 @@ function InvoicePage() {
                                                 <div className="w-16 mx-auto">
                                                      <StockVolumeDisplay
                                                         productName={product.name}
-                                                        currentStock={product.stock - (parseFloat(String(item.quantity)) || 0)}
+                                                        currentStock={product.stock}
                                                         totalSold={product.totalSold}
                                                         maxStock={product.totalEverAdded}
                                                         unit={product.mainCategory === 'Material' ? 'kg' : 'pcs'}
@@ -534,7 +449,95 @@ function InvoicePage() {
                     </div>
                 </CardFooter>
               </Card>
-              <Card>
+              <Card className="flex-1 flex flex-col">
+                <CardHeader className="flex-shrink-0">
+                    <CardTitle>{t('add_products_label')}</CardTitle>
+                    <RadioGroup
+                        value={mainCategoryFilter}
+                        onValueChange={(value) => setMainCategoryFilter(value as 'Material' | 'Hardware')}
+                        className="flex space-x-4 pt-2"
+                    >
+                        <div className="flex items-center space-x-2"><RadioGroupItem value="Material" id="r-material" /><Label htmlFor="r-material">{t('material_tab')}</Label></div>
+                        <div className="flex items-center space-x-2"><RadioGroupItem value="Hardware" id="r-hardware" /><Label htmlFor="r-hardware">{t('hardware_tab')}</Label></div>
+                    </RadioGroup>
+                </CardHeader>
+                <CardContent className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-4 min-h-0">
+                        {/* Category List */}
+                        <div className="flex flex-col gap-2 min-h-0">
+                           <Label>{t('category_header')}</Label>
+                            <div className="relative">
+                               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                               <Input placeholder="Search..." className="pl-8 h-9" value={categorySearch} onChange={e => setCategorySearch(e.target.value)} />
+                            </div>
+                           <ScrollArea className="flex-1 border rounded-md force-show-scrollbar">
+                               <div className="p-2 space-y-1">
+                                    <Button variant={!categoryFilter ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setCategoryFilter('')}>{t('all_categories')}</Button>
+                                    {categories.map(c => <Button key={c} variant={categoryFilter === c ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setCategoryFilter(c)}>{c}</Button>)}
+                               </div>
+                           </ScrollArea>
+                        </div>
+                        {/* Sub-Category List */}
+                        <div className="flex flex-col gap-2 min-h-0">
+                            <Label>{t('subcategory_header')}</Label>
+                            <div className="relative">
+                               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                               <Input placeholder="Search..." className="pl-8 h-9" value={subCategorySearch} onChange={e => setSubCategorySearch(e.target.value)} disabled={!categoryFilter}/>
+                            </div>
+                           <ScrollArea className="flex-1 border rounded-md force-show-scrollbar">
+                                <div className="p-2 space-y-1">
+                                     <Button variant={!subCategoryFilter ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setSubCategoryFilter('')} disabled={!categoryFilter}>{t('all_subcategories')}</Button>
+                                     {categoryFilter && subCategories.map(sc => <Button key={sc} variant={subCategoryFilter === sc ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setSubCategoryFilter(sc)}>{sc}</Button>)}
+                                </div>
+                           </ScrollArea>
+                        </div>
+                        {/* Product List */}
+                         <div className="flex flex-col gap-2 min-h-0">
+                            <Label>{t('products_sidebar')}</Label>
+                            <div className="relative">
+                               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                               <Input placeholder="Search..." className="pl-8 h-9" value={productSearch} onChange={e => setProductSearch(e.target.value)} />
+                            </div>
+                           <ScrollArea className="flex-1 border rounded-md force-show-scrollbar">
+                                <div className="p-2 space-y-1">
+                                     {filteredProducts.map(p => <Button key={p.id} variant="ghost" className="w-full justify-start h-8 text-xs" onClick={() => handleAddProduct(p)}>{p.name}</Button>)}
+                                </div>
+                           </ScrollArea>
+                        </div>
+                </CardContent>
+              </Card>
+          </div>
+
+          {/* Right Column: Customer Info & Preview */}
+          <div className="xl:col-span-2 flex flex-col gap-4">
+            <Card>
+                <CardHeader>
+                    <CardTitle>{activeDraft.label}</CardTitle>
+                    <CardDescription>{t('invoice_no_label')}: {draftId}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="customerName">{t('customer_name_label')}</Label>
+                           <Input
+                              id="customerName"
+                              placeholder={t('customer_name_placeholder')}
+                              value={customerName || ''}
+                              onChange={handleCustomerNameChange}
+                              autoComplete="off"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="customerPhone">{t('customer_phone_label')}</Label>
+                            <Input id="customerPhone" placeholder={t('customer_phone_placeholder')} value={customerPhone || ''} onChange={(e) => updateActiveDraft({ customerPhone: e.target.value })} />
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="customerAddress">{t('customer_address_label')}</Label>
+                        <Input id="customerAddress" placeholder={t('customer_address_placeholder')} value={customerAddress || ''} onChange={(e) => updateActiveDraft({ customerAddress: e.target.value })} />
+                    </div>
+                </CardContent>
+            </Card>
+            <Card className="flex-1">
                   <CardHeader>
                       <CardTitle>{t('live_print_preview_title')}</CardTitle>
                   </CardHeader>
