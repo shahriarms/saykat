@@ -461,7 +461,7 @@ function InvoicePage() {
                                                     <div className="hidden sm:block">
                                                          <StockVolumeDisplay
                                                             productName={product.name}
-                                                            currentStock={product.stock}
+                                                            currentStock={product.stock - (parseFloat(String(item.quantity)) || 0)}
                                                             totalSold={product.totalSold}
                                                             maxStock={product.totalEverAdded}
                                                             unit={product.mainCategory === 'Material' ? 'kg' : 'pcs'}
