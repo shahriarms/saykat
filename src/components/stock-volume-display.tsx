@@ -20,8 +20,8 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
   const fillPercentage = maxStock > 0 ? (currentStock / maxStock) * 100 : 0;
   
   const formatValue = (value: number) => value.toLocaleString(undefined, {
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1,
+      minimumFractionDigits: unit === 'kg' ? 2 : 0,
+      maximumFractionDigits: unit === 'kg' ? 2 : 0,
   });
 
   const indicatorColor = React.useMemo(() => {
@@ -30,7 +30,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
     return '#22c55e'; // green-500
   }, [fillPercentage]);
 
-  const containerHeight = 160; // h-40 -> 160px
+  const containerHeight = 160; // h-40 in pixels
   const indicatorHeight = (containerHeight * fillPercentage) / 100;
   const lineY = containerHeight - indicatorHeight;
 
@@ -62,24 +62,24 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
         {/* Floating label and connecting line, only if there is stock */}
         {fillPercentage > 0 && (
              <div 
-                className="absolute top-[80px] left-[calc(50%-2rem)] w-px h-px" // Adjusted left position
+                className="absolute top-[80px] left-[calc(50%-3.5rem)] w-px h-px"
                 style={{
                     transform: `translateY(${lineY}px)`,
                     transition: 'transform 0.5s ease-in-out',
-                    overflow: 'visible', // Ensure the label is not clipped
+                    overflow: 'visible',
                 }}
             >
                  <div
                     className="absolute left-0 top-0 h-px"
                     style={{
-                        width: '40px', // Horizontal line
+                        width: '40px',
                         backgroundColor: indicatorColor,
                     }}
                 />
                 <div
                     className="absolute left-[40px] top-[-20px] w-px"
                     style={{
-                        height: '20px', // Vertical line
+                        height: '20px',
                         backgroundColor: indicatorColor,
                     }}
                 />
