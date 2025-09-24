@@ -90,10 +90,16 @@ export default {
             height: '0',
           },
         },
+        'wave-flow': {
+          '0%': { d: 'path("M 0 0 C 30 10, 60 -10, 90 0 L 90 160 L 0 160 Z")' },
+          '50%': { d: 'path("M 0 0 C 30 -10, 60 10, 90 0 L 90 160 L 0 160 Z")' },
+          '100%': { d: 'path("M 0 0 C 30 10, 60 -10, 90 0 L 90 160 L 0 160 Z")' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'wave-flow': 'wave-flow 4s linear infinite',
       },
     },
   },

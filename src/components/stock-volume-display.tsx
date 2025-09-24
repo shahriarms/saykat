@@ -42,12 +42,9 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
     return '#22c55e'; // green-500
   }, [fillPercentage]);
 
-  const containerHeight = 160; // h-40 in pixels
+  const containerHeight = 160;
   const indicatorHeight = (containerHeight * fillPercentage) / 100;
-  
-  // Adjust lineY if the indicator is near the top to prevent clipping
   const lineAndLabelY = fillPercentage > 95 ? indicatorHeight - 30 : containerHeight - indicatorHeight - 20;
-  
 
   return (
     <div className="relative w-full flex flex-col items-center justify-end gap-2 pt-2 h-full overflow-visible">
@@ -57,7 +54,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
             className="relative w-24 h-40"
         >
             {/* SVG Glass Container */}
-            <svg width="100%" height="100%" viewBox="0 0 96 160" className="absolute top-0 left-0">
+            <svg width="100%" height="100%" viewBox="0 0 96 160" className="absolute top-0 left-0 z-10">
                 <defs>
                     <linearGradient id="glassGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                         <stop offset="0%" style={{stopColor: 'white', stopOpacity: 0.3}} />
@@ -76,54 +73,18 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
                 <ellipse cx="48" cy="155" rx="43" ry="5" fill="#e2e8f0" stroke="#a0aec0" strokeWidth="2"/>
             </svg>
             
-            {/* Inner colored box representing stock level */}
-            <div 
-                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[86px] overflow-hidden"
-                style={{ 
-                    height: `${indicatorHeight}px`,
-                    transition: 'height 0.5s ease-in-out',
-                }}
-            >
-                <div 
-                    className="absolute bottom-0 left-0 w-full h-full"
+            {/* SVG Water level indicator with wave */}
+            <svg width="86" height={containerHeight} className="absolute bottom-0 left-1/2 -translate-x-1/2 overflow-hidden">
+                 <path
+                    className="animate-wave-flow"
+                    fill={indicatorColor}
                     style={{
-                        backgroundColor: indicatorColor,
-                        transition: 'background-color 0.5s ease-in-out',
+                        transform: `translateY(${containerHeight - indicatorHeight}px)`,
+                        transition: 'transform 0.5s ease-in-out, fill 0.5s ease-in-out',
                     }}
-                >
-                     {/* Animated Waves */}
-                    <div className="absolute -bottom-1 left-0 w-full h-4">
-                        <div 
-                            className="absolute w-[200%] h-full rounded-[45%]"
-                            style={{
-                                animation: 'wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite',
-                                transform: 'translate3d(0, 0, 0)',
-                                left: '-100%',
-                                bottom: 0,
-                                background: 'inherit',
-                                opacity: 0.4
-                            }}
-                        />
-                        <div 
-                            className="absolute w-[200%] h-full rounded-[40%]"
-                            style={{
-                                animation: 'wave 11s cubic-bezier(0.36, 0.45, 0.63, 0.53) -.125s infinite, swell 7s ease -1.25s infinite',
-                                transform: 'translate3d(0, 0, 0)',
-                                 left: '-100%',
-                                bottom: 0,
-                                background: 'inherit',
-                                opacity: 0.2
-                            }}
-                        />
-                    </div>
-                </div>
-                 {/* Top surface of the liquid */}
-                 <div className="absolute top-0 left-0 w-full h-2.5">
-                    <svg width="100%" height="100%" viewBox="0 0 86 10" preserveAspectRatio="none">
-                        <path d="M0 5 C 20 10, 66 0, 86 5 L 86 10 L 0 10 Z" fill={indicatorColor} style={{ transition: 'fill 0.5s ease-in-out' }}/>
-                    </svg>
-                </div>
-            </div>
+                    d="M 0 0 C 30 10, 60 -10, 90 0 L 90 160 L 0 160 Z"
+                 />
+            </svg>
             
             {/* Floating label and connecting line */}
              <div 
