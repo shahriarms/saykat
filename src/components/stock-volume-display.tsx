@@ -17,20 +17,32 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
 }) => {
   const fillPercentage = maxStock > 0 ? (currentStock / maxStock) * 100 : 0;
   
-  const formattedStock = currentStock.toLocaleString(undefined, {
-      minimumFractionDigits: unit === 'kg' ? 1 : 0,
-      maximumFractionDigits: unit === 'kg' ? 2 : 0,
+  const formattedStock = (value: number) => value.toLocaleString(undefined, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 1,
   });
 
-  const formattedMaxStock = maxStock.toLocaleString(undefined, {
-      minimumFractionDigits: unit === 'kg' ? 1 : 0,
-      maximumFractionDigits: unit === 'kg' ? 2 : 0,
-  });
+  const waveColor = '#22c5e5'; // cyan-500
 
-  const waveColor = '#38bdf8'; // A nice, friendly blue color (cyan-400)
+  const scaleMarkers = React.useMemo(() => {
+    if (maxStock <= 0) return [];
+    const markers = [];
+    const steps = [25, 50, 75]; // Percentages for markers
+    for (const step of steps) {
+        if (step < (fillPercentage + 10) && step > (fillPercentage -10)) continue; // Avoid overlap with current level
+        if (step < 95 && step > 5) {
+             markers.push({
+                percentage: step,
+                value: formattedStock((maxStock * step) / 100),
+            });
+        }
+    }
+    return markers;
+  }, [maxStock, fillPercentage]);
+
 
   return (
-    <div className="relative w-full flex flex-col items-center justify-center gap-1">
+    <div className="relative w-full flex flex-col items-center justify-center gap-2 pt-4">
         <style>
         {`
           @keyframes wave {
@@ -49,7 +61,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
             border-bottom-left-radius: 12px;
             border-bottom-right-radius: 12px;
           }
-          .wave {
+          .wave-shape {
             background: ${waveColor};
             border-radius: 40%;
             position: absolute;
@@ -59,7 +71,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
             opacity: 0.6;
             animation: wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
           }
-          .wave.two {
+          .wave-shape.two {
             animation: wave 11s cubic-bezier(0.36, 0.45, 0.63, 0.53) -0.125s infinite;
             opacity: 0.9;
             bottom: -10%;
@@ -68,7 +80,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
       </style>
         
         <div className="text-center text-gray-800 font-bold drop-shadow-sm pointer-events-none">
-            <div className="text-xl">{formattedStock}</div>
+            <div className="text-xl">{formattedStock(currentStock)}</div>
             <div className="text-xs uppercase text-gray-700">{unit}</div>
         </div>
 
@@ -86,8 +98,8 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
                         height: `${fillPercentage}%`,
                     }}
                     >
-                        <div className="wave" style={{bottom: '-150%'}}></div>
-                        <div className="wave two" style={{bottom: '-125%'}}></div>
+                        <div className="wave-shape" style={{bottom: '-150%'}}></div>
+                        <div className="wave-shape two" style={{bottom: '-125%'}}></div>
                     </div>
                 </div>
                 
@@ -99,12 +111,27 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
             </div>
 
             {/* Scale Indicator */}
-            <div className="relative h-32 flex flex-col justify-between text-xs text-muted-foreground font-medium">
-                <div>
-                    <p>Full</p>
-                    <p className="font-mono -mt-1">{formattedMaxStock}</p>
+            <div className="relative h-32 w-16 text-xs text-muted-foreground font-medium">
+                {/* Full and Empty Labels */}
+                <div className="absolute -top-1 right-0 text-right w-full">
+                    <p className="font-semibold">Full</p>
+                    <p className="font-mono -mt-1">{formattedStock(maxStock)}</p>
                 </div>
-                <p>Empty</p>
+                <p className="absolute -bottom-1 right-0 text-right font-semibold w-full">Empty</p>
+
+                {/* Dynamic Markers */}
+                {scaleMarkers.map(marker => (
+                    <div key={marker.percentage} className="absolute right-0 text-right w-full" style={{ bottom: `calc(${marker.percentage}% - 6px)`}}>
+                       <span className="font-mono">{marker.value}</span>
+                    </div>
+                ))}
+                
+                {/* Current Level Floating Marker */}
+                {fillPercentage > 5 && fillPercentage < 95 && (
+                     <div className="absolute right-0 text-right w-full" style={{ bottom: `calc(${fillPercentage}% - 6px)`}}>
+                        <span className="font-mono font-bold text-primary bg-background/80 px-1 rounded">{formattedStock(currentStock)}</span>
+                     </div>
+                )}
             </div>
         </div>
     </div>
