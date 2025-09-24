@@ -35,7 +35,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
   const lineY = containerHeight - indicatorHeight;
 
   return (
-    <div className="relative w-full flex flex-col items-center justify-start gap-2 pt-2 h-[260px]">
+    <div className="relative w-full flex flex-col items-center justify-start gap-2 pt-2 h-[260px] overflow-visible">
         {/* Product Name */}
         <p className="text-sm font-semibold text-gray-700 text-center h-10 flex items-center">
             {productName}
@@ -62,34 +62,35 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
         {/* Floating label and connecting line, only if there is stock */}
         {fillPercentage > 0 && (
              <div 
-                className="absolute top-[80px] left-1/2 w-[180px] h-px"
+                className="absolute top-[80px] left-1/2 w-px h-px"
                 style={{
                     transform: `translateY(${lineY}px)`,
                     transition: 'transform 0.5s ease-in-out',
+                    overflow: 'visible', // Ensure the label is not clipped
                 }}
             >
-               {/* Horizontal line part */}
-               <div
-                  className="absolute left-[-20px] top-0 h-px"
-                  style={{
-                      width: '80px',
-                      backgroundColor: indicatorColor,
-                  }}
-               />
-               {/* Vertical line part */}
-               <div
-                  className="absolute left-[60px] top-[-10px] w-px"
-                  style={{
-                      height: '10px',
-                      backgroundColor: indicatorColor,
-                  }}
-               />
-               {/* Text Label */}
-               <div 
+                {/* Horizontal line part */}
+                <div
+                    className="absolute left-[-20px] top-0 h-px"
+                    style={{
+                        width: '80px',
+                        backgroundColor: indicatorColor,
+                    }}
+                />
+                {/* Vertical line part */}
+                <div
+                    className="absolute left-[60px] top-[-10px] w-px"
+                    style={{
+                        height: '10px',
+                        backgroundColor: indicatorColor,
+                    }}
+                />
+                {/* Text Label */}
+                <div 
                     className="absolute text-sm font-semibold whitespace-nowrap"
                     style={{ left: '65px', top: '-28px', color: indicatorColor }}
                 >
-                    Remaining: {formatValue(currentStock)}{unit}
+                    {formatValue(currentStock)}{unit}
                 </div>
             </div>
         )}
