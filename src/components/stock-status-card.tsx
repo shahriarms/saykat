@@ -82,10 +82,10 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
 
     return (
       <Carousel
-        opts={{ align: 'start' }}
+        opts={{}}
         className="w-full px-12"
       >
-        <CarouselContent className="flex flex-wrap h-[450px]">
+        <CarouselContent className="flex flex-wrap h-[400px]">
           {productList.map(product => (
             <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/5 pl-1">
               <div className="p-1 h-[200px] flex items-center justify-center">
