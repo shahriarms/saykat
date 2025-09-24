@@ -423,29 +423,6 @@ function InvoicePage() {
                     </div>
                 </CardHeader>
                 <CardContent className='p-0 flex-1 flex flex-col'>
-                    {invoiceItemProducts.length > 0 && (
-                        <div className="p-4 border-b">
-                            <Carousel opts={{ align: 'start' }} className="w-full px-12">
-                                <CarouselContent className="-ml-1 h-[240px]">
-                                    {invoiceItemProducts.map(product => (
-                                        <CarouselItem key={product.id} className="basis-1/3 md:basis-1/4 lg:basis-1/5 pl-1">
-                                            <div className="p-1 h-full flex items-center justify-center">
-                                                <StockVolumeDisplay
-                                                    productName={product.name}
-                                                    currentStock={product.stock}
-                                                    totalSold={product.totalSold}
-                                                    maxStock={product.totalEverAdded}
-                                                    unit={product.mainCategory === 'Material' ? 'kg' : 'pcs'}
-                                                />
-                                            </div>
-                                        </CarouselItem>
-                                    ))}
-                                </CarouselContent>
-                                <CarouselPrevious />
-                                <CarouselNext />
-                            </Carousel>
-                        </div>
-                    )}
                     <ScrollArea className="h-full max-h-[calc(100vh-500px)]">
                         <Table>
                             <TableHeader>
@@ -498,6 +475,29 @@ function InvoicePage() {
                             </TableBody>
                         </Table>
                     </ScrollArea>
+                    {invoiceItemProducts.length > 0 && (
+                        <div className="p-4 border-t border-b">
+                            <Carousel opts={{ align: 'start' }} className="w-full px-12">
+                                <CarouselContent className="-ml-1 h-[240px]">
+                                    {invoiceItemProducts.map(product => (
+                                        <CarouselItem key={product.id} className="basis-1/3 md:basis-1/4 lg:basis-1/5 pl-1">
+                                            <div className="p-1 h-full flex items-center justify-center">
+                                                <StockVolumeDisplay
+                                                    productName={product.name}
+                                                    currentStock={product.stock}
+                                                    totalSold={product.totalSold}
+                                                    maxStock={product.totalEverAdded}
+                                                    unit={product.mainCategory === 'Material' ? 'kg' : 'pcs'}
+                                                />
+                                            </div>
+                                        </CarouselItem>
+                                    ))}
+                                </CarouselContent>
+                                <CarouselPrevious />
+                                <CarouselNext />
+                            </Carousel>
+                        </div>
+                    )}
                 </CardContent>
                 <CardFooter className="flex-col items-stretch space-y-2 pt-4">
                     <div className="w-full md:w-80 ml-auto space-y-2">
