@@ -34,6 +34,7 @@ const MonthlyDueDialog = dynamic(() => import('@/components/monthly-due-report-d
 const MonthlyUnitsSoldDialog = dynamic(() => import('@/components/monthly-units-sold-report-dialog').then(mod => mod.MonthlyUnitsSoldDialog), { ssr: false });
 const MonthlySalaryReportDialog = dynamic(() => import('@/components/monthly-salary-report-dialog').then(mod => mod.MonthlySalaryReportDialog), { ssr: false });
 const InvoicePreviewDialog = dynamic(() => import('@/components/invoice-preview-dialog').then(mod => mod.InvoicePreviewDialog), { ssr: false });
+const StockStatusCard = dynamic(() => import('@/components/stock-status-card').then(mod => mod.StockStatusCard), { ssr: false });
 
 
 export default function Dashboard() {
@@ -213,6 +214,8 @@ export default function Dashboard() {
                 <div className="text-center text-muted-foreground p-8 border rounded-lg">No recent invoices found.</div>
             )}
         </div>
+        
+        <StockStatusCard products={products} />
 
         <div>
             <h2 className="text-lg font-semibold mb-4">{t('todays_summary_title')}</h2>
