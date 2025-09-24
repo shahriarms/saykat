@@ -59,14 +59,13 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
       <Carousel
         opts={{
           align: 'start',
-          loop: productList.length > 5,
         }}
         className="w-full px-12"
       >
-        <CarouselContent>
+        <CarouselContent className="-ml-1 flex-wrap h-[400px]">
           {productList.map(product => (
-            <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/5">
-              <div className="p-1 h-[280px] flex items-center justify-center">
+            <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/5 pl-1">
+              <div className="p-1 h-[200px] flex items-center justify-center">
                   <StockVolumeDisplay
                     productName={product.name}
                     currentStock={product.stock}
