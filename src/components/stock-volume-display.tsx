@@ -16,19 +16,13 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
   unit,
 }) => {
   const fillPercentage = maxStock > 0 ? Math.min((currentStock / maxStock) * 100, 100) : 0;
-
-  const getColorClass = (type: 'bg' | 'border' | 'text' | 'wave') => {
-    if (fillPercentage < 20) return type === 'wave' ? '#ef4444' : `${type}-red-500`; // Low stock
-    if (fillPercentage < 60) return type === 'wave' ? '#f59e0b' : `${type}-amber-500`; // Medium stock
-    return type === 'wave' ? '#22c55e' : `${type}-green-500`; // Healthy stock
-  };
-
+  
   const formattedStock = currentStock.toLocaleString(undefined, {
       minimumFractionDigits: unit === 'kg' ? 1 : 0,
       maximumFractionDigits: unit === 'kg' ? 2 : 0,
   });
 
-  const waveColor = getColorClass('wave');
+  const waveColor = '#38bdf8'; // A nice, friendly blue color like the image.
 
   return (
     <div className="relative w-24 h-32 flex items-center justify-center">
@@ -41,6 +35,14 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
           }
           .wave-container {
             transition: height 0.5s ease-in-out;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            overflow: hidden;
+            border-bottom-left-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
           }
           .wave {
             background: ${waveColor};
@@ -48,24 +50,23 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
             position: absolute;
             width: 200%;
             height: 200%;
-            bottom: 0;
             left: -50%;
             opacity: 0.6;
             animation: wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
           }
           .wave.two {
             animation: wave 11s cubic-bezier(0.36, 0.45, 0.63, 0.53) -0.125s infinite;
-            opacity: 0.8;
+            opacity: 0.9;
             bottom: -10%;
           }
         `}
       </style>
       
-      {/* Tank body */}
-      <div className={cn("w-full h-full rounded-lg border-4 shadow-inner relative overflow-hidden bg-gray-200/50", getColorClass('border'))}>
-        {/* Liquid fill container */}
+      {/* Tank body - transparent glass effect */}
+      <div className={cn("w-full h-full rounded-lg border-2 border-gray-300 bg-gray-200/30 shadow-inner relative overflow-hidden")}>
+         {/* Liquid fill container */}
         <div 
-          className={cn("wave-container absolute bottom-0 left-0 right-0 w-full")}
+          className="wave-container"
           style={{ 
             height: `${fillPercentage}%`,
           }}
@@ -75,16 +76,13 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
         </div>
       </div>
       
-      {/* Tank top lid */}
-      <div className={cn("absolute -top-1 left-1/2 w-[105%] h-3 rounded-full -translate-x-1/2 bg-gray-300 border-2", getColorClass('border'))}></div>
+      {/* Tank top lid for 3D effect */}
+      <div className={cn("absolute top-0 left-1/2 w-full h-3 rounded-t-full -translate-x-1/2 bg-gray-200/70 border-2 border-b-0 border-gray-300")}></div>
       
-      {/* Tank bottom */}
-       <div className={cn("absolute -bottom-1 left-1/2 w-[105%] h-3 rounded-full -translate-x-1/2 bg-gray-200 border-2", getColorClass('border'))}></div>
-
       {/* Text Display */}
-      <div className="relative z-10 text-center text-gray-800 font-bold drop-shadow-sm">
+      <div className="absolute z-10 text-center text-gray-800 font-bold drop-shadow-sm pointer-events-none">
         <div className="text-xl">{formattedStock}</div>
-        <div className="text-xs uppercase">{unit}</div>
+        <div className="text-xs uppercase text-gray-700">{unit}</div>
       </div>
     </div>
   );
