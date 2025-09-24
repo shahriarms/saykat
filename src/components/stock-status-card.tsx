@@ -99,7 +99,7 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
         <CarouselContent className="flex flex-wrap -ml-1 h-[400px]">
           {productList.map(product => (
             <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/5 pl-1">
-              <div className="p-1 h-[200px] flex items-center justify-center">
+              <div className="p-1 h-[220px] flex items-center justify-center">
                   <StockVolumeDisplay
                     productName={product.name}
                     currentStock={product.stock}
