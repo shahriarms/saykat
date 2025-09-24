@@ -1,3 +1,4 @@
+
 'use client';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -36,7 +37,7 @@ export function TopNavBar() {
   const isMobile = useIsMobile();
 
   return (
-    <nav className="border-b shadow-sm bg-card">
+    <nav className="border-b shadow-sm bg-muted/30">
       <div className="flex justify-center items-center gap-1 sm:gap-2 px-2 overflow-x-auto no-scrollbar">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
