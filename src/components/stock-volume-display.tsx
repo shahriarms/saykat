@@ -58,7 +58,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
         
         {/* Main container */}
         <div 
-            className="relative w-20 h-32" // Reduced from w-24 h-40
+            className="relative w-20 h-32 flex items-center justify-center" // Reduced from w-24 h-40
         >
              {/* SVG Container for liquid and glass effect */}
             <svg width="100%" height="100%" viewBox="0 0 80 128" className="absolute top-0 left-0">
