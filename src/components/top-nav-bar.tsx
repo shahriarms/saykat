@@ -37,7 +37,7 @@ export function TopNavBar() {
   const isMobile = useIsMobile();
 
   return (
-    <nav className="sticky top-16 z-10 border-b shadow-sm">
+    <nav className="bg-card border-b shadow-sm">
       <div className="flex justify-center items-center gap-1 sm:gap-2 px-2 overflow-x-auto no-scrollbar">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
