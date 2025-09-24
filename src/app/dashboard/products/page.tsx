@@ -193,7 +193,7 @@ export default function ProductsPage() {
     <div className="flex flex-col gap-4 h-full">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-2xl font-semibold">{t('products_page_title')}</h1>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <input
             type="file"
             ref={fileInputRef}
@@ -212,6 +212,7 @@ export default function ProductsPage() {
           <Button onClick={() => setAddDialogOpen(true)}>
             <PlusCircle className="mr-2 h-4 w-4" />
             <span className="hidden sm:inline">{t('add_product_button')}</span>
+            <span className="sm:hidden">Add</span>
           </Button>
         </div>
       </div>
@@ -239,7 +240,7 @@ export default function ProductsPage() {
                         />
                     </div>
                     <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value === 'all' ? '' : value)}>
-                        <SelectTrigger className="w-full md:w-[180px]">
+                        <SelectTrigger className="w-full md:w-48">
                             <SelectValue placeholder={t('filter_by_category_placeholder')} />
                         </SelectTrigger>
                         <SelectContent>
@@ -248,7 +249,7 @@ export default function ProductsPage() {
                         </SelectContent>
                     </Select>
                     <Select value={subCategoryFilter} onValueChange={(value) => setSubCategoryFilter(value === 'all' ? '' : value)}>
-                        <SelectTrigger className="w-full md:w-[180px]">
+                        <SelectTrigger className="w-full md:w-48">
                             <SelectValue placeholder={t('filter_by_subcategory_placeholder')} />
                         </SelectTrigger>
                         <SelectContent>

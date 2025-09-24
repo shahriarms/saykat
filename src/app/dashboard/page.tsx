@@ -189,7 +189,7 @@ export default function Dashboard() {
         <div>
             <h2 className="text-lg font-semibold mb-4">Recent Memos</h2>
              {recentMemos.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                     {recentMemos.map(invoice => (
                         <button key={invoice.id} onClick={() => setSelectedInvoice(invoice)} className="group bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 overflow-hidden">
                            <div className="p-4 bg-white relative overflow-hidden">
@@ -216,7 +216,7 @@ export default function Dashboard() {
 
         <div>
             <h2 className="text-lg font-semibold mb-4">{t('todays_summary_title')}</h2>
-             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-9">
+             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-9">
                 <Card as="button" onClick={() => setDailySalesReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
                   <div className="bg-blue-100 p-3 rounded-full"><DollarSign className="h-6 w-6 text-blue-600" /></div>
                   <div>
@@ -317,11 +317,11 @@ export default function Dashboard() {
             </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-3 grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-3 grid grid-cols-1 gap-4">
                 <div>
                     <h2 className="text-lg font-semibold mb-4">{t('date_range_summary_title', { range: rangeTitle })}</h2>
-                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-9">
+                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-9">
                       <Card as="button" onClick={() => setMonthlySalesReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
                          <div className="bg-blue-100 p-3 rounded-full"><ShoppingCart className="h-6 w-6 text-blue-600" /></div>
                          <div>
@@ -425,7 +425,7 @@ export default function Dashboard() {
             </div>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Card>
               <CardHeader>
               <CardTitle>{t('daily_sales_chart_title', { range: rangeTitle })}</CardTitle>
