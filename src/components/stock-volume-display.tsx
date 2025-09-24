@@ -22,11 +22,16 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
       maximumFractionDigits: unit === 'kg' ? 2 : 0,
   });
 
+  const formattedMaxStock = maxStock.toLocaleString(undefined, {
+      minimumFractionDigits: unit === 'kg' ? 1 : 0,
+      maximumFractionDigits: unit === 'kg' ? 2 : 0,
+  });
+
   const waveColor = '#38bdf8'; // A nice, friendly blue color like the image.
 
   return (
-    <div className="relative w-24 h-32 flex items-center justify-center">
-       <style>
+    <div className="relative w-full flex flex-col items-center justify-center gap-1">
+        <style>
         {`
           @keyframes wave {
             0% { transform: translateX(0) translateZ(0) scaleY(1); }
@@ -41,8 +46,8 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
             right: 0;
             width: 100%;
             overflow: hidden;
-            border-bottom-left-radius: 0.5rem;
-            border-bottom-right-radius: 0.5rem;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
           }
           .wave {
             background: ${waveColor};
@@ -61,29 +66,48 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
           }
         `}
       </style>
-      
-      {/* Tank body - transparent glass effect */}
-      <div className={cn("w-full h-full rounded-lg border-2 border-gray-300 bg-gray-200/30 shadow-inner relative overflow-hidden")}>
-         {/* Liquid fill container */}
-        <div 
-          className="wave-container"
-          style={{ 
-            height: `${fillPercentage}%`,
-          }}
-        >
-            <div className="wave" style={{bottom: '-150%'}}></div>
-            <div className="wave two" style={{bottom: '-125%'}}></div>
+        
+        <div className="text-center text-gray-800 font-bold drop-shadow-sm pointer-events-none">
+            <div className="text-xl">{formattedStock}</div>
+            <div className="text-xs uppercase text-gray-700">{unit}</div>
         </div>
-      </div>
-      
-      {/* Tank top lid for 3D effect */}
-      <div className={cn("absolute top-0 left-1/2 w-full h-3 rounded-t-full -translate-x-1/2 bg-gray-200/70 border-2 border-b-0 border-gray-300")}></div>
-      
-      {/* Text Display */}
-      <div className="absolute z-10 text-center text-gray-800 font-bold drop-shadow-sm pointer-events-none">
-        <div className="text-xl">{formattedStock}</div>
-        <div className="text-xs uppercase text-gray-700">{unit}</div>
-      </div>
+
+        <div className="w-full flex items-center justify-center gap-2">
+            <div className="relative w-24 h-32">
+                {/* Tank body - transparent glass effect */}
+                <div className={cn(
+                    "w-full h-full rounded-b-xl border-2 border-gray-300/80 border-t-0 relative overflow-hidden",
+                    "bg-gradient-to-r from-gray-200/30 via-gray-100/10 to-gray-200/30"
+                    )}>
+                    {/* Liquid fill container */}
+                    <div 
+                    className="wave-container"
+                    style={{ 
+                        height: `${fillPercentage}%`,
+                    }}
+                    >
+                        <div className="wave" style={{bottom: '-150%'}}></div>
+                        <div className="wave two" style={{bottom: '-125%'}}></div>
+                    </div>
+                </div>
+                
+                {/* Tank top lid for 3D effect */}
+                <div className="absolute top-0 left-0 w-full h-3 rounded-t-[50%] bg-gray-200/70 border-2 border-b-0 border-gray-300/80"></div>
+
+                {/* Bottom base for 3D effect */}
+                <div className="absolute bottom-0 left-0 w-full h-2 rounded-b-[50%] bg-gray-300/60 border-2 border-t-0 border-gray-300/80"></div>
+            </div>
+
+            {/* Scale Indicator */}
+            <div className="relative h-32 flex flex-col justify-between text-xs text-muted-foreground font-medium">
+                <div>
+                    <p>Full</p>
+                    <p className="font-mono -mt-1">{formattedMaxStock}</p>
+                </div>
+                <p>Empty</p>
+            </div>
+        </div>
     </div>
   );
 };
+

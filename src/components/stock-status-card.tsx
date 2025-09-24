@@ -68,8 +68,8 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
                 <Card className="overflow-hidden">
                   <CardContent className="flex flex-col items-center justify-center p-3 gap-2">
                     <StockVolumeDisplay
-                      currentStock={product.stock} // Show REMAINING stock
-                      maxStock={product.totalEverAdded} // Max is total ever added
+                      currentStock={product.stock}
+                      maxStock={product.totalEverAdded}
                       unit={unit}
                     />
                     <div className="text-center">
