@@ -427,7 +427,7 @@ function InvoicePage() {
                                               </div>
                                           </div>
                                         </TableCell>
-                                        <TableCell className="pr-4">
+                                        <TableCell className="pr-8">
                                             {product && (
                                                 <div className="w-16">
                                                      <StockVolumeDisplay
