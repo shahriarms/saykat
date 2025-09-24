@@ -399,10 +399,10 @@ function InvoicePage() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Item</TableHead>
-                                    <TableHead className="w-24">Stock</TableHead>
-                                    <TableHead className="w-24">Qty</TableHead>
-                                    <TableHead className="w-32">Price</TableHead>
-                                    <TableHead className="text-right w-32">Total</TableHead>
+                                    <TableHead>Stock</TableHead>
+                                    <TableHead>Qty</TableHead>
+                                    <TableHead>Price</TableHead>
+                                    <TableHead className="text-right">Total</TableHead>
                                     <TableHead className="w-12"></TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -411,16 +411,14 @@ function InvoicePage() {
                                     const product = invoiceItemProducts[index];
                                     return (
                                     <TableRow key={item.id}>
-                                        <TableCell className="w-auto">
+                                        <TableCell>
                                           <div className="max-w-xs">
                                               <p className="font-medium break-words">{item.name}</p>
-                                              <div className='text-xs text-muted-foreground flex items-center gap-x-2 flex-wrap'>
+                                              <div className='text-xs text-muted-foreground flex flex-col items-start'>
                                                   <span>Sug: ৳{item.originalPrice.toFixed(2)}</span>
                                                   {showProfit && (
                                                       <>
-                                                          <Separator orientation="vertical" className="h-3" />
                                                           <span>Buy: ৳{item.buyingPrice.toFixed(2)}</span>
-                                                          <Separator orientation="vertical" className="h-3" />
                                                           <span className={cn(item.profitMargin < 0 ? 'text-red-500' : 'text-green-600')}>
                                                               Profit: {item.profitMargin.toFixed(1)}% (৳{item.profitAmount.toFixed(2)})
                                                           </span>
@@ -429,7 +427,7 @@ function InvoicePage() {
                                               </div>
                                           </div>
                                         </TableCell>
-                                        <TableCell className="w-24">
+                                        <TableCell className="pr-4">
                                             {product && (
                                                 <div className="w-16">
                                                      <StockVolumeDisplay
@@ -442,11 +440,11 @@ function InvoicePage() {
                                                 </div>
                                             )}
                                         </TableCell>
-                                        <TableCell className="w-24">
-                                            <Input type="text" inputMode="decimal" value={item.quantity} onChange={e => updateInvoiceItem(item.id, { quantity: e.target.value })} className="h-9" placeholder="0" />
+                                        <TableCell>
+                                            <Input type="text" inputMode="decimal" value={item.quantity} onChange={e => updateInvoiceItem(item.id, { quantity: e.target.value })} className="h-9 w-20" placeholder="0" />
                                         </TableCell>
-                                        <TableCell className="w-32">
-                                            <div className="relative flex items-center">
+                                        <TableCell>
+                                            <div className="relative flex items-center w-28">
                                                 <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-sm">৳</span>
                                                 <Input type="text" inputMode="decimal" value={item.price} onChange={e => updateInvoiceItem(item.id, { price: e.target.value })} className="pl-5 text-right font-medium h-9" />
                                             </div>
