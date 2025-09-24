@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 interface StockVolumeDisplayProps {
   productName: string;
   currentStock: number;
+  totalSold: number;
   maxStock: number;
   unit: string;
 }
@@ -14,6 +15,7 @@ interface StockVolumeDisplayProps {
 export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
   productName,
   currentStock,
+  totalSold,
   maxStock,
   unit,
 }) => {
