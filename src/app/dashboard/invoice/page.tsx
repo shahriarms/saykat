@@ -428,6 +428,7 @@ function InvoicePage() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Item</TableHead>
+                                    <TableHead className="w-24 hidden sm:table-cell">Stock</TableHead>
                                     <TableHead className="w-24">Qty</TableHead>
                                     <TableHead className="w-32">Price</TableHead>
                                     <TableHead className="text-right w-32">Total</TableHead>
@@ -440,35 +441,33 @@ function InvoicePage() {
                                     return (
                                     <TableRow key={item.id}>
                                         <TableCell>
-                                           <div className="flex items-center gap-4">
-                                                <div className="flex-1">
-                                                    <p className="font-medium">{item.name}</p>
-                                                    <div className='text-xs text-muted-foreground flex items-center gap-x-2 flex-wrap'>
-                                                        <span>Sug: ৳{item.originalPrice.toFixed(2)}</span>
-                                                        {showProfit && (
-                                                            <>
-                                                                <Separator orientation="vertical" className="h-3" />
-                                                                <span>Buy: ৳{item.buyingPrice.toFixed(2)}</span>
-                                                                <Separator orientation="vertical" className="h-3" />
-                                                                <span className={cn(item.profitMargin < 0 ? 'text-red-500' : 'text-green-600')}>
-                                                                    Profit: {item.profitMargin.toFixed(1)}% (৳{item.profitAmount.toFixed(2)})
-                                                                </span>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                {product && (
-                                                    <div className="hidden sm:block">
-                                                         <StockVolumeDisplay
-                                                            productName={product.name}
-                                                            currentStock={product.stock - (parseFloat(String(item.quantity)) || 0)}
-                                                            totalSold={product.totalSold}
-                                                            maxStock={product.totalEverAdded}
-                                                            unit={product.mainCategory === 'Material' ? 'kg' : 'pcs'}
-                                                        />
-                                                    </div>
+                                            <p className="font-medium">{item.name}</p>
+                                            <div className='text-xs text-muted-foreground flex items-center gap-x-2 flex-wrap'>
+                                                <span>Sug: ৳{item.originalPrice.toFixed(2)}</span>
+                                                {showProfit && (
+                                                    <>
+                                                        <Separator orientation="vertical" className="h-3" />
+                                                        <span>Buy: ৳{item.buyingPrice.toFixed(2)}</span>
+                                                        <Separator orientation="vertical" className="h-3" />
+                                                        <span className={cn(item.profitMargin < 0 ? 'text-red-500' : 'text-green-600')}>
+                                                            Profit: {item.profitMargin.toFixed(1)}% (৳{item.profitAmount.toFixed(2)})
+                                                        </span>
+                                                    </>
                                                 )}
                                             </div>
+                                        </TableCell>
+                                        <TableCell className="hidden sm:table-cell">
+                                            {product && (
+                                                <div className="w-16 mx-auto">
+                                                     <StockVolumeDisplay
+                                                        productName={product.name}
+                                                        currentStock={product.stock - (parseFloat(String(item.quantity)) || 0)}
+                                                        totalSold={product.totalSold}
+                                                        maxStock={product.totalEverAdded}
+                                                        unit={product.mainCategory === 'Material' ? 'kg' : 'pcs'}
+                                                    />
+                                                </div>
+                                            )}
                                         </TableCell>
                                         <TableCell>
                                             <Input type="text" inputMode="decimal" value={item.quantity} onChange={e => updateInvoiceItem(item.id, { quantity: e.target.value })} className="h-9" placeholder="0" />
@@ -487,7 +486,7 @@ function InvoicePage() {
                                         </TableCell>
                                     </TableRow>
                                 )}) : (
-                                    <TableRow><TableCell colSpan={5} className="text-center py-6 text-muted-foreground">No items added yet.</TableCell></TableRow>
+                                    <TableRow><TableCell colSpan={6} className="text-center py-6 text-muted-foreground">No items added yet.</TableCell></TableRow>
                                 )}
                             </TableBody>
                         </Table>
