@@ -32,6 +32,12 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
     return '#22c5e5'; // cyan-500
   }, [fillPercentage]);
 
+  const showLabel = fillPercentage > 5 && fillPercentage < 98;
+  
+  // Calculate the vertical position for the label and line
+  // The 'bottom' style will be a percentage value.
+  const labelPosition = `${fillPercentage}%`;
+
   return (
     <div className="relative w-full flex flex-col items-center justify-center gap-2 pt-4">
       <style>
@@ -75,13 +81,11 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
             {productName}
         </p>
       </div>
-
-       <div className="text-center text-xs text-muted-foreground w-full px-1">
-        <span className="font-semibold text-foreground">{formatValue(totalSold)} {unit}</span> / {formatValue(maxStock)} {unit} occupied | <span className="font-semibold text-primary">{formatValue(currentStock)} {unit} available</span>
-      </div>
-
-      <div className="w-full flex items-center justify-center gap-2 mt-2">
-          <div className="relative w-24 h-32">
+      
+      {/* Container for the tank and the dynamic label */}
+      <div className="relative w-full flex items-center justify-center gap-2 mt-2 h-48">
+          {/* Tank body */}
+          <div className="relative w-24 h-full">
               {/* Tank body - transparent glass effect */}
               <div className={cn(
                   "w-full h-full rounded-b-xl border-2 border-gray-300/80 border-t-0 relative overflow-hidden",
@@ -105,6 +109,32 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
               {/* Bottom base for 3D effect */}
               <div className="absolute bottom-0 left-0 w-full h-2 rounded-b-[50%] bg-gray-300/60 border-2 border-t-0 border-gray-300/80"></div>
           </div>
+
+          {/* Dynamic Label and Connector Line */}
+          {showLabel && (
+            <div 
+                className="absolute left-[calc(50%+4rem)] flex items-center transition-all duration-500 ease-in-out" 
+                style={{ bottom: labelPosition, transform: 'translateY(50%)' }}
+            >
+                {/* SVG Connector Line */}
+                <svg width="30" height="20" className="overflow-visible -ml-8">
+                  <path 
+                    d="M 30 10 C 20 10, 10 10, 0 10" 
+                    stroke={waveColor} 
+                    strokeWidth="1.5" 
+                    fill="none" 
+                    strokeDasharray="2 2"
+                  />
+                  <circle cx="30" cy="10" r="3" fill={waveColor} />
+                </svg>
+
+                {/* Text Label */}
+                <div className="text-xs text-muted-foreground whitespace-nowrap -ml-1">
+                    <span className="font-semibold text-foreground">{formatValue(totalSold)} {unit} / {formatValue(maxStock)} {unit}</span> occupied 
+                    <span className="font-semibold text-primary"> | {formatValue(currentStock)} {unit}</span> available
+                </div>
+            </div>
+          )}
       </div>
     </div>
   );
