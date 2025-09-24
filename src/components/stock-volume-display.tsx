@@ -29,12 +29,14 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
     const markers = [];
     const steps = [25, 50, 75]; // Percentages for markers
     for (const step of steps) {
-        if (step < (fillPercentage + 10) && step > (fillPercentage -10)) continue; // Avoid overlap with current level
-        if (step < 95 && step > 5) {
-             markers.push({
-                percentage: step,
-                value: formattedStock((maxStock * step) / 100),
-            });
+        // Avoid overlap with current level label
+        if (Math.abs(step - fillPercentage) > 8) {
+             if (step < 95 && step > 5) {
+                markers.push({
+                    percentage: step,
+                    value: formattedStock((maxStock * step) / 100),
+                });
+            }
         }
     }
     return markers;
@@ -128,7 +130,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
                 
                 {/* Current Level Floating Marker */}
                 {fillPercentage > 5 && fillPercentage < 95 && (
-                     <div className="absolute right-0 text-right w-full" style={{ bottom: `calc(${fillPercentage}% - 6px)`}}>
+                     <div className="absolute right-0 text-right w-full transition-all duration-500 ease-in-out" style={{ bottom: `calc(${fillPercentage}% - 6px)`}}>
                         <span className="font-mono font-bold text-primary bg-background/80 px-1 rounded">{formattedStock(currentStock)}</span>
                      </div>
                 )}
