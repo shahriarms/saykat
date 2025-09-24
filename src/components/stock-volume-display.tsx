@@ -39,7 +39,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
   const indicatorColor = React.useMemo(() => {
     if (fillPercentage < 20) return '#ef4444'; // red-500
     if (fillPercentage < 60) return '#eab308'; // yellow-500
-    return '#3b82f6'; // blue-500
+    return '#0ea5e9'; // sky-500
   }, [fillPercentage]);
 
   const containerHeight = 128; // Reduced from 160
