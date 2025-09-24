@@ -65,12 +65,11 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
           {productList.map(product => (
             <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/5">
               <div className="p-1">
-                <Card className="overflow-hidden">
+                <Card>
                   <CardContent className="flex flex-col items-center justify-center p-3 gap-2">
                     <StockVolumeDisplay
                       productName={product.name}
                       currentStock={product.stock}
-                      totalSold={product.totalSold}
                       maxStock={product.totalEverAdded}
                       unit={unit}
                     />
