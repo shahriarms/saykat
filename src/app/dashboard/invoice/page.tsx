@@ -411,23 +411,25 @@ function InvoicePage() {
                                     const product = invoiceItemProducts[index];
                                     return (
                                     <TableRow key={item.id}>
-                                        <TableCell>
-                                            <p className="font-medium">{item.name}</p>
-                                            <div className='text-xs text-muted-foreground flex items-center gap-x-2 flex-wrap'>
-                                                <span>Sug: ৳{item.originalPrice.toFixed(2)}</span>
-                                                {showProfit && (
-                                                    <>
-                                                        <Separator orientation="vertical" className="h-3" />
-                                                        <span>Buy: ৳{item.buyingPrice.toFixed(2)}</span>
-                                                        <Separator orientation="vertical" className="h-3" />
-                                                        <span className={cn(item.profitMargin < 0 ? 'text-red-500' : 'text-green-600')}>
-                                                            Profit: {item.profitMargin.toFixed(1)}% (৳{item.profitAmount.toFixed(2)})
-                                                        </span>
-                                                    </>
-                                                )}
-                                            </div>
+                                        <TableCell className="w-auto">
+                                          <div className="max-w-xs">
+                                              <p className="font-medium break-words">{item.name}</p>
+                                              <div className='text-xs text-muted-foreground flex items-center gap-x-2 flex-wrap'>
+                                                  <span>Sug: ৳{item.originalPrice.toFixed(2)}</span>
+                                                  {showProfit && (
+                                                      <>
+                                                          <Separator orientation="vertical" className="h-3" />
+                                                          <span>Buy: ৳{item.buyingPrice.toFixed(2)}</span>
+                                                          <Separator orientation="vertical" className="h-3" />
+                                                          <span className={cn(item.profitMargin < 0 ? 'text-red-500' : 'text-green-600')}>
+                                                              Profit: {item.profitMargin.toFixed(1)}% (৳{item.profitAmount.toFixed(2)})
+                                                          </span>
+                                                      </>
+                                                  )}
+                                              </div>
+                                          </div>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className="w-24">
                                             {product && (
                                                 <div className="w-16">
                                                      <StockVolumeDisplay
@@ -440,17 +442,17 @@ function InvoicePage() {
                                                 </div>
                                             )}
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className="w-24">
                                             <Input type="text" inputMode="decimal" value={item.quantity} onChange={e => updateInvoiceItem(item.id, { quantity: e.target.value })} className="h-9" placeholder="0" />
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className="w-32">
                                             <div className="relative flex items-center">
                                                 <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-sm">৳</span>
                                                 <Input type="text" inputMode="decimal" value={item.price} onChange={e => updateInvoiceItem(item.id, { price: e.target.value })} className="pl-5 text-right font-medium h-9" />
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-right font-semibold">৳ {(parseFloat(String(item.price)) * parseFloat(String(item.quantity))).toFixed(2)}</TableCell>
-                                        <TableCell>
+                                        <TableCell className="text-right font-semibold w-32">৳ {(parseFloat(String(item.price)) * parseFloat(String(item.quantity))).toFixed(2)}</TableCell>
+                                        <TableCell className="w-12">
                                             <Button variant="ghost" size="icon" onClick={() => removeInvoiceItem(item.id)} className="h-9 w-9">
                                                 <Trash2 className="w-4 h-4 text-destructive" />
                                             </Button>
@@ -608,3 +610,5 @@ export default function InvoicePageWrapper() {
     </InvoiceFormProvider>
   );
 }
+
+    
