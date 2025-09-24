@@ -70,7 +70,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
         `}
       </style>
         
-        <div className="text-center text-gray-800 font-bold drop-shadow-sm pointer-events-none">
+        <div className="text-center text-gray-800 font-bold drop-shadow-sm pointer-events-none mb-2">
             <div className="text-xl">{formattedStock(currentStock)}</div>
             <div className="text-xs uppercase text-gray-700">{unit}</div>
         </div>
@@ -102,18 +102,19 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
             </div>
 
             {/* Scale Indicator */}
-            <div className="relative h-32 w-16 text-xs text-muted-foreground font-medium">
-                {/* Full and Empty Labels */}
-                <div className="absolute -top-1 right-0 text-right w-full">
-                    <p className="font-semibold">Full</p>
-                    <p className="font-mono -mt-1">{formattedStock(maxStock)}</p>
-                </div>
-                <p className="absolute -bottom-1 right-0 text-right font-semibold w-full">Empty</p>
-
-                {/* Current Level Floating Marker */}
-                {fillPercentage > 5 && fillPercentage < 95 && (
-                     <div className="absolute right-0 text-right w-full transition-all duration-500 ease-in-out" style={{ bottom: `calc(${fillPercentage}% - 6px)`}}>
-                        <span className="font-mono font-bold text-primary bg-background/80 px-1 rounded">{formattedStock(currentStock)}</span>
+            <div className="relative h-32 w-20 text-xs text-muted-foreground font-medium">
+                 {/* Current Level Floating Marker with connecting line */}
+                 {fillPercentage > 5 && fillPercentage < 98 && (
+                     <div 
+                        className="absolute right-0 w-full transition-all duration-500 ease-in-out flex items-center justify-end" 
+                        style={{ bottom: `calc(${fillPercentage}% - 8px)`}}
+                     >
+                        <span 
+                            className="font-mono font-bold text-primary bg-background/80 px-1.5 py-0.5 rounded-sm shadow-md"
+                        >
+                            {formattedStock(currentStock)}
+                        </span>
+                        <div className="w-4 border-b-2 border-dotted border-primary/70 ml-1"></div>
                      </div>
                 )}
             </div>
