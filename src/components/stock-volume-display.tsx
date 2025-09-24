@@ -35,24 +35,43 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
   const containerHeight = 160; // h-40 in pixels
   const indicatorHeight = (containerHeight * fillPercentage) / 100;
   
-  // Calculate the Y position for the line and label based on the indicator height.
-  // The 'top' position will be relative to the container.
-  // When indicatorHeight is 0, lineY should be at the bottom (160).
-  // When indicatorHeight is 160, lineY should be at the top (0).
   const lineY = containerHeight - indicatorHeight;
 
   return (
     <div className="relative w-full flex flex-col items-center justify-start gap-2 pt-2 h-[260px] overflow-visible">
-        {/* Product Name */}
         <p className="text-sm font-semibold text-gray-700 text-center h-10 flex items-center">
             {productName}
         </p>
 
         {/* Main container */}
-        <div className="relative w-20 h-40 bg-gray-200 rounded-lg mt-1">
+        <div className="relative w-28 h-40 mt-1">
+            {/* SVG Glass Container */}
+            <svg width="100%" height="100%" viewBox="0 0 112 160" className="absolute top-0 left-0">
+                <defs>
+                    <linearGradient id="glassGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style={{stopColor: '#ffffff', stopOpacity: 0.5}} />
+                        <stop offset="20%" style={{stopColor: '#f0f0f0', stopOpacity: 0.2}} />
+                        <stop offset="50%" style={{stopColor: '#e0e0e0', stopOpacity: 0.1}} />
+                        <stop offset="80%" style={{stopColor: '#f0f0f0', stopOpacity: 0.2}} />
+                        <stop offset="100%" style={{stopColor: '#ffffff', stopOpacity: 0.5}} />
+                    </linearGradient>
+                </defs>
+                
+                {/* Main Body */}
+                <path d="M 6 10 C 6 10, 6 150, 6 150 C 6 157, 106 157, 106 150 C 106 150, 106 10, 106 10" fill="url(#glassGradient)" stroke="#cccccc" strokeWidth="0.5"/>
+
+                {/* Bottom Base */}
+                <ellipse cx="56" cy="150" rx="50" ry="8" fill="#d1d5db" opacity="0.6"/>
+                <ellipse cx="56" cy="150" rx="50" ry="8" stroke="#a0a0a0" fill="none" strokeWidth="1"/>
+
+                {/* Top Rim */}
+                <path d="M 56, 18 A 50 8 0 0 0 6 10 H 106 A 50 8 0 0 0 56 18 Z" fill="#e5e7eb" opacity="0.7"/>
+                <ellipse cx="56" cy="10" rx="50" ry="8" stroke="#b0b0b0" fill="none" strokeWidth="1.5"/>
+            </svg>
+
             {/* Inner colored box representing stock level */}
             <div 
-                className="absolute bottom-0 left-0 w-full rounded-lg"
+                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[100px] rounded-b-md"
                 style={{ 
                     height: `${indicatorHeight}px`,
                     backgroundColor: indicatorColor,
@@ -71,27 +90,9 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
                         zIndex: 10
                     }}
                 >
-                    {/* Horizontal part of the root sign */}
-                    <div
-                        className="absolute left-0 top-0 h-px"
-                        style={{
-                            width: '20px',
-                            backgroundColor: indicatorColor,
-                        }}
-                    />
-                    {/* Vertical part of the root sign */}
-                    <div
-                        className="absolute left-[20px] top-[-20px] w-px"
-                        style={{
-                            height: '20px',
-                            backgroundColor: indicatorColor,
-                        }}
-                    />
-                    {/* The value label */}
-                    <div 
-                        className="absolute text-sm font-semibold whitespace-nowrap"
-                        style={{ left: '25px', top: '-38px', color: indicatorColor }}
-                    >
+                    <div className="absolute left-0 top-0 h-px" style={{ width: '20px', backgroundColor: indicatorColor }} />
+                    <div className="absolute left-[20px] top-[-20px] w-px" style={{ height: '20px', backgroundColor: indicatorColor }} />
+                    <div className="absolute text-sm font-semibold whitespace-nowrap" style={{ left: '25px', top: '-38px', color: indicatorColor }}>
                         {formatValue(currentStock)}{unit}
                     </div>
                 </div>
