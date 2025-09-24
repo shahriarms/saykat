@@ -33,10 +33,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Separator } from '@/components/ui/separator';
 import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { StockVolumeDisplay } from '@/components/stock-volume-display';
 
 
 function InvoicePage() {
-  const { addInvoice, buyers } = useAppData();
+  const { addInvoice, buyers, invoices: allInvoices } = useAppData();
   const { settings } = useSettings();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -61,6 +63,29 @@ function InvoicePage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [invoiceToPrint, setInvoiceToPrint] = useState<DraftInvoice | null>(null);
   const [showProfit, setShowProfit] = useState(true);
+
+  const invoiceItemProducts = useMemo(() => {
+    if (!activeDraft) return [];
+    
+    const soldQuantities = new Map<string, number>();
+    allInvoices.forEach(invoice => {
+      invoice.items.forEach(item => {
+        const quantity = parseFloat(String(item.quantity)) || 0;
+        soldQuantities.set(item.id, (soldQuantities.get(item.id) || 0) + quantity);
+      });
+    });
+
+    return activeDraft.items.map(item => {
+        const product = products.find(p => p.id === item.id);
+        if (!product) return null;
+
+        const totalSold = soldQuantities.get(product.id) || 0;
+        const currentStock = parseFloat(String(product.stock)) || 0;
+        const totalEverAdded = currentStock + totalSold;
+
+        return { ...product, stock: currentStock, totalSold, totalEverAdded };
+    }).filter((p): p is Product & { totalSold: number; totalEverAdded: number } => p !== null);
+  }, [activeDraft, products, allInvoices]);
 
 
   useEffect(() => {
@@ -397,7 +422,30 @@ function InvoicePage() {
                         </Button>
                     </div>
                 </CardHeader>
-                <CardContent className='p-0 flex-1'>
+                <CardContent className='p-0 flex-1 flex flex-col'>
+                    {invoiceItemProducts.length > 0 && (
+                        <div className="p-4 border-b">
+                            <Carousel opts={{ align: 'start' }} className="w-full px-12">
+                                <CarouselContent className="-ml-1 h-[240px]">
+                                    {invoiceItemProducts.map(product => (
+                                        <CarouselItem key={product.id} className="basis-1/3 md:basis-1/4 lg:basis-1/5 pl-1">
+                                            <div className="p-1 h-full flex items-center justify-center">
+                                                <StockVolumeDisplay
+                                                    productName={product.name}
+                                                    currentStock={product.stock}
+                                                    totalSold={product.totalSold}
+                                                    maxStock={product.totalEverAdded}
+                                                    unit={product.mainCategory === 'Material' ? 'kg' : 'pcs'}
+                                                />
+                                            </div>
+                                        </CarouselItem>
+                                    ))}
+                                </CarouselContent>
+                                <CarouselPrevious />
+                                <CarouselNext />
+                            </Carousel>
+                        </div>
+                    )}
                     <ScrollArea className="h-full max-h-[calc(100vh-500px)]">
                         <Table>
                             <TableHeader>
