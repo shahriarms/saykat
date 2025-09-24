@@ -429,7 +429,7 @@ function InvoicePage() {
                                         </TableCell>
                                         <TableCell>
                                             {product && (
-                                                <div className="w-16 mx-auto">
+                                                <div className="w-16">
                                                      <StockVolumeDisplay
                                                         productName={product.name}
                                                         currentStock={product.stock}
