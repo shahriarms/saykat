@@ -32,26 +32,6 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
     return '#22c5e5'; // cyan-500
   }, [fillPercentage]);
 
-
-  const scaleMarkers = React.useMemo(() => {
-    if (maxStock <= 0) return [];
-    const markers = [];
-    const steps = [25, 50, 75]; // Percentages for markers
-    for (const step of steps) {
-        // Avoid overlap with current level label
-        if (Math.abs(step - fillPercentage) > 8) {
-             if (step < 95 && step > 5) {
-                markers.push({
-                    percentage: step,
-                    value: formattedStock((maxStock * step) / 100),
-                });
-            }
-        }
-    }
-    return markers;
-  }, [maxStock, fillPercentage]);
-
-
   return (
     <div className="relative w-full flex flex-col items-center justify-center gap-2 pt-4">
         <style>
@@ -130,13 +110,6 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
                 </div>
                 <p className="absolute -bottom-1 right-0 text-right font-semibold w-full">Empty</p>
 
-                {/* Dynamic Markers */}
-                {scaleMarkers.map(marker => (
-                    <div key={marker.percentage} className="absolute right-0 text-right w-full" style={{ bottom: `calc(${marker.percentage}% - 6px)`}}>
-                       <span className="font-mono">{marker.value}</span>
-                    </div>
-                ))}
-                
                 {/* Current Level Floating Marker */}
                 {fillPercentage > 5 && fillPercentage < 95 && (
                      <div className="absolute right-0 text-right w-full transition-all duration-500 ease-in-out" style={{ bottom: `calc(${fillPercentage}% - 6px)`}}>
