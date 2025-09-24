@@ -60,13 +60,11 @@ export function StockStatusCard({ products }: StockStatusCardProps) {
                     <StockVolumeDisplay
                       currentStock={product.stock}
                       maxStock={maxStock}
+                      unit={unit}
                     />
                     <div className="text-center">
                       <p className="text-sm font-semibold truncate w-32" title={product.name}>
                         {product.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {product.stock} {unit}
                       </p>
                     </div>
                   </CardContent>

@@ -7,11 +7,13 @@ import { cn } from '@/lib/utils';
 interface StockVolumeDisplayProps {
   currentStock: number;
   maxStock: number;
+  unit: string;
 }
 
 export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
   currentStock,
   maxStock,
+  unit,
 }) => {
   const fillPercentage = maxStock > 0 ? (currentStock / maxStock) * 100 : 0;
 
@@ -25,55 +27,33 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
     return 'text-green-500';
   };
 
+  const formattedStock = currentStock.toLocaleString(undefined, {
+      minimumFractionDigits: unit === 'kg' ? 1 : 0,
+      maximumFractionDigits: unit === 'kg' ? 1 : 0,
+  });
+
   return (
     <div
       className={cn(
-        'relative w-24 h-24 rounded-full border-4 flex items-center justify-center overflow-hidden bg-muted',
-        getColorClass().replace('text-', 'border-')
+        'relative w-24 h-32 bg-gray-200 rounded-lg border-2 border-gray-400 flex items-end justify-center overflow-hidden shadow-inner'
       )}
     >
-      <style jsx>{`
-        .wave-container::before,
-        .wave-container::after {
-          content: '';
-          position: absolute;
-          left: 50%;
-          bottom: var(--fill-percentage);
-          width: 200%;
-          height: 200%;
-          border-radius: 40%;
-          transform: translateX(-50%) translateY(50%);
-          animation: spin 8s linear infinite;
-        }
+        {/* 3D Top */}
+        <div className="absolute top-0 left-0 right-0 h-4 bg-gray-300 rounded-t-lg border-b-2 border-gray-400" style={{ transform: 'perspective(100px) rotateX(30deg)', top: '-8px' }}></div>
 
-        .wave-container::before {
-          background-color: currentColor;
-          opacity: 0.5;
-          animation-duration: 8s;
-        }
+        {/* Liquid */}
+        <div
+            className={cn('absolute bottom-0 left-0 right-0 w-full transition-all duration-500 ease-in-out', getColorClass())}
+            style={{ height: `calc(${fillPercentage}%)`}}
+        >
+             <div className="absolute top-0 left-0 right-0 h-4 bg-current opacity-75" style={{ transform: 'perspective(100px) rotateX(30deg)', top: '-8px' }}></div>
+        </div>
 
-        .wave-container::after {
-          background-color: currentColor;
-          opacity: 0.8;
-          animation-duration: 10s;
-        }
-
-        @keyframes spin {
-          0% {
-            transform: translateX(-50%) translateY(50%) rotate(0deg);
-          }
-          100% {
-            transform: translateX(-50%) translateY(50%) rotate(360deg);
-          }
-        }
-      `}</style>
-      <div
-        className={cn('wave-container absolute inset-0', getColorClass())}
-        style={style}
-      ></div>
-      <span className="relative z-10 text-2xl font-bold text-foreground">
-        {Math.round(fillPercentage)}%
-      </span>
+      {/* Text Display */}
+      <div className="relative z-10 text-center text-gray-800 font-bold drop-shadow-sm pb-2">
+            <div className="text-2xl">{formattedStock}</div>
+            <div className="text-xs uppercase">{unit}</div>
+      </div>
     </div>
   );
 };
