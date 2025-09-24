@@ -1,4 +1,3 @@
-
 'use client';
 import { UserProvider } from '@/hooks/use-user.tsx';
 import { SiteHeader } from '@/components/site-header';
