@@ -5,8 +5,8 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 interface StockVolumeDisplayProps {
-  currentStock: number; // This will now represent the 'sold' amount
-  maxStock: number; // This will now represent the 'total ever added' amount
+  currentStock: number;
+  maxStock: number;
   unit: string;
 }
 
@@ -15,30 +15,32 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
   maxStock,
   unit,
 }) => {
-  // The fill percentage now represents the proportion of SOLD items
   const fillPercentage = maxStock > 0 ? Math.min((currentStock / maxStock) * 100, 100) : 0;
 
-  const getColorClass = (type: 'bg' | 'border' | 'text') => {
-    if (fillPercentage > 80) return `${type}-green-500`; // Mostly sold
-    if (fillPercentage > 40) return `${type}-yellow-500`; // Partially sold
-    return `${type}-blue-500`; // Not much sold
+  const getColorClass = (type: 'bg' | 'border' | 'text' | 'wave') => {
+    if (fillPercentage < 20) return type === 'wave' ? '#ef4444' : `${type}-red-500`; // Low stock
+    if (fillPercentage < 60) return type === 'wave' ? '#f59e0b' : `${type}-amber-500`; // Medium stock
+    return type === 'wave' ? '#22c55e' : `${type}-green-500`; // Healthy stock
   };
 
   const formattedStock = currentStock.toLocaleString(undefined, {
       minimumFractionDigits: unit === 'kg' ? 1 : 0,
       maximumFractionDigits: unit === 'kg' ? 2 : 0,
   });
-  
-  const waveColor = fillPercentage > 80 ? '#22c55e' : fillPercentage > 40 ? '#eab308' : '#3b82f6';
+
+  const waveColor = getColorClass('wave');
 
   return (
     <div className="relative w-24 h-32 flex items-center justify-center">
        <style>
         {`
           @keyframes wave {
-            0% { transform: translateX(0); }
-            50% { transform: translateX(-25%); }
-            100% { transform: translateX(0); }
+            0% { transform: translateX(0) translateZ(0) scaleY(1); }
+            50% { transform: translateX(-25%) translateZ(0) scaleY(0.95); }
+            100% { transform: translateX(0) translateZ(0) scaleY(1); }
+          }
+          .wave-container {
+            transition: height 0.5s ease-in-out;
           }
           .wave {
             background: ${waveColor};
@@ -48,26 +50,22 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
             height: 200%;
             bottom: 0;
             left: -50%;
-            opacity: 0.5;
+            opacity: 0.6;
             animation: wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
           }
           .wave.two {
-            animation: wave 11s cubic-bezier(0.36, 0.45, 0.63, 0.53) -0.125s infinite,
-                       swell 7s ease -1.25s infinite;
+            animation: wave 11s cubic-bezier(0.36, 0.45, 0.63, 0.53) -0.125s infinite;
             opacity: 0.8;
-          }
-          @keyframes swell {
-            0%, 100% { transform: translate3d(0,-2px,0); }
-            50% { transform: translate3d(0,2px,0); }
+            bottom: -10%;
           }
         `}
       </style>
       
       {/* Tank body */}
-      <div className={cn("w-full h-full rounded-lg border-4 shadow-inner relative overflow-hidden", getColorClass('border'))}>
+      <div className={cn("w-full h-full rounded-lg border-4 shadow-inner relative overflow-hidden bg-gray-200/50", getColorClass('border'))}>
         {/* Liquid fill container */}
         <div 
-          className={cn("absolute bottom-0 left-0 right-0 w-full transition-all duration-500 ease-in-out")}
+          className={cn("wave-container absolute bottom-0 left-0 right-0 w-full")}
           style={{ 
             height: `${fillPercentage}%`,
           }}
@@ -86,7 +84,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
       {/* Text Display */}
       <div className="relative z-10 text-center text-gray-800 font-bold drop-shadow-sm">
         <div className="text-xl">{formattedStock}</div>
-        <div className="text-xs uppercase">Sold</div>
+        <div className="text-xs uppercase">{unit}</div>
       </div>
     </div>
   );
