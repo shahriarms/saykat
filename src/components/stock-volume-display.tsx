@@ -3,6 +3,8 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { ArrowRight } from 'lucide-react';
+
 
 interface StockVolumeDisplayProps {
   productName: string;
@@ -36,12 +38,11 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
   const indicatorHeight = (containerHeight * fillPercentage) / 100;
   
   // Adjust lineY if the indicator is near the top to prevent clipping
-  const adjustedFillPercentage = Math.min(fillPercentage, 95);
-  const lineY = containerHeight - (containerHeight * adjustedFillPercentage / 100);
+  const lineAndLabelY = fillPercentage > 50 ? indicatorHeight - 30 : indicatorHeight + 10;
   
 
   return (
-    <div className="relative w-full flex flex-col items-center justify-end gap-2 pt-2 h-[260px] overflow-visible">
+    <div className="relative w-full flex flex-col items-center justify-end gap-2 pt-2 h-full overflow-visible">
         
         {/* Main container */}
         <div 
@@ -58,13 +59,35 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
             
             {/* Inner colored box representing stock level */}
             <div 
-                className="absolute bottom-0 left-0 w-full"
+                className="absolute bottom-0 left-0 w-full overflow-hidden"
                 style={{ 
                     height: `${indicatorHeight}px`,
                     backgroundColor: indicatorColor,
                     transition: 'height 0.5s ease-in-out, background-color 0.5s ease-in-out',
                 }}
-            ></div>
+            >
+                 {/* Animated Waves */}
+                <div className="absolute -bottom-1 left-0 w-full h-4">
+                    <div 
+                        className="absolute w-[200%] h-full bg-white/20 rounded-[45%] "
+                        style={{
+                            animation: 'wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite',
+                            transform: 'translate3d(0, 0, 0)',
+                            left: '-100%',
+                            bottom: 0,
+                        }}
+                    />
+                    <div 
+                        className="absolute w-[200%] h-full bg-white/10 rounded-[40%] "
+                        style={{
+                            animation: 'wave 11s cubic-bezier(0.36, 0.45, 0.63, 0.53) -.125s infinite, swell 7s ease -1.25s infinite',
+                            transform: 'translate3d(0, 0, 0)',
+                             left: '-100%',
+                            bottom: 0,
+                        }}
+                    />
+                </div>
+            </div>
             
             {/* Bottom Base */}
             <div 
@@ -79,21 +102,33 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
              <div 
                 className="absolute left-full top-0 w-px h-px"
                 style={{
-                    transform: `translateY(${lineY}px)`,
+                    transform: `translateY(${lineAndLabelY}px)`,
                     transition: 'transform 0.5s ease-in-out',
                     overflow: 'visible',
                     zIndex: 10
                 }}
             >
-                <div className="absolute left-0 top-0 h-px" style={{ width: '20px', backgroundColor: indicatorColor }} />
-                <div className="absolute left-[20px] top-[-20px] w-px" style={{ height: '20px', backgroundColor: indicatorColor }} />
-                <div className="absolute text-sm font-semibold whitespace-nowrap" style={{ left: '25px', top: '-38px', color: indicatorColor }}>
+                <svg width="60" height="40" viewBox="0 0 60 40" className="absolute -top-5 -left-px overflow-visible">
+                   <path 
+                     d="M 0,20 Q 20,20 30,10"
+                     stroke={indicatorColor}
+                     fill="none"
+                     strokeWidth="2"
+                     markerEnd="url(#arrowhead)"
+                   />
+                    <defs>
+                        <marker id="arrowhead" markerWidth="5" markerHeight="3.5" refX="5" refY="1.75" orient="auto">
+                            <polygon points="0 0, 5 1.75, 0 3.5" fill={indicatorColor} />
+                        </marker>
+                    </defs>
+                </svg>
+                <div className="absolute text-sm font-semibold whitespace-nowrap" style={{ left: '35px', top: '-18px', color: indicatorColor }}>
                     {formatValue(currentStock)}{unit}
                 </div>
             </div>
         </div>
         
-        {/* Flat paper-like shadow */}
+        {/* Base Platform */}
         <div className="w-28 h-2 bg-gray-300/60 rounded-full blur-sm" />
         
         {/* Labels: Total Size and Product Name */}
