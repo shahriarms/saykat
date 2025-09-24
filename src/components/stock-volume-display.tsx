@@ -122,7 +122,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
                      markerEnd="url(#arrowhead)"
                    />
                 </svg>
-                <div className="absolute text-sm font-semibold whitespace-nowrap" style={{ left: '35px', top: '-18px', color: '#000000' }}>
+                <div className="absolute text-sm font-semibold whitespace-nowrap" style={{ left: '35px', top: '-18px', color: indicatorColor }}>
                     {formatValue(currentStock)}{unit}
                 </div>
             </div>
