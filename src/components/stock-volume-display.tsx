@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 interface StockVolumeDisplayProps {
   productName: string;
   currentStock: number;
+  totalSold: number;
   maxStock: number;
   unit: string;
 }
@@ -14,23 +15,20 @@ interface StockVolumeDisplayProps {
 export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
   productName,
   currentStock,
+  totalSold,
   maxStock,
   unit,
 }) => {
   const fillPercentage = maxStock > 0 ? (currentStock / maxStock) * 100 : 0;
   
-  const formattedStock = (value: number) => value.toLocaleString(undefined, {
-      minimumFractionDigits: 0,
+  const formatValue = (value: number) => value.toLocaleString(undefined, {
+      minimumFractionDigits: 1,
       maximumFractionDigits: 1,
   });
 
   const waveColor = React.useMemo(() => {
-    if (fillPercentage < 20) {
-      return '#ef4444'; // red-500
-    }
-    if (fillPercentage < 60) {
-      return '#f59e0b'; // amber-500
-    }
+    if (fillPercentage < 20) return '#ef4444'; // red-500
+    if (fillPercentage < 60) return '#f59e0b'; // amber-500
     return '#22c5e5'; // cyan-500
   }, [fillPercentage]);
 
@@ -78,7 +76,11 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
         </p>
       </div>
 
-      <div className="w-full flex items-center justify-center gap-2">
+       <div className="text-center text-xs text-muted-foreground w-full px-1">
+        <span className="font-semibold text-foreground">{formatValue(totalSold)} {unit}</span> / {formatValue(maxStock)} {unit} occupied | <span className="font-semibold text-primary">{formatValue(currentStock)} {unit} available</span>
+      </div>
+
+      <div className="w-full flex items-center justify-center gap-2 mt-2">
           <div className="relative w-24 h-32">
               {/* Tank body - transparent glass effect */}
               <div className={cn(
@@ -102,24 +104,6 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
 
               {/* Bottom base for 3D effect */}
               <div className="absolute bottom-0 left-0 w-full h-2 rounded-b-[50%] bg-gray-300/60 border-2 border-t-0 border-gray-300/80"></div>
-          </div>
-
-          {/* Scale Indicator */}
-          <div className="relative h-32 w-20 text-xs text-muted-foreground font-medium">
-               {/* Current Level Floating Marker with connecting line */}
-               {fillPercentage > 5 && fillPercentage < 98 && (
-                   <div 
-                      className="absolute right-0 w-full transition-all duration-500 ease-in-out flex items-center justify-end" 
-                      style={{ bottom: `calc(${fillPercentage}% - 8px)`}}
-                   >
-                      <span 
-                          className="font-mono font-bold text-primary bg-background/80 px-1.5 py-0.5 rounded-sm shadow-md"
-                      >
-                          {formattedStock(currentStock)}
-                      </span>
-                      <div className="w-4 border-b-2 border-dotted border-primary/70 ml-1"></div>
-                   </div>
-              )}
           </div>
       </div>
     </div>

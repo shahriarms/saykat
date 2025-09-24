@@ -70,6 +70,7 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
                     <StockVolumeDisplay
                       productName={product.name}
                       currentStock={product.stock}
+                      totalSold={product.totalSold}
                       maxStock={product.totalEverAdded}
                       unit={unit}
                     />
