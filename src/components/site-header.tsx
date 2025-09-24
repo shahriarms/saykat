@@ -62,7 +62,7 @@ export function SiteHeader() {
   
   if (!user) {
     return (
-       <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-center gap-4 border-b bg-card px-4 sm:px-6">
+       <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-center gap-4 border-b bg-muted/30 px-4 sm:px-6">
         <div className="flex items-center gap-2">
             <StockPilotLogo className="w-14 h-14" />
             <h1 className="text-xl font-semibold">
@@ -75,7 +75,7 @@ export function SiteHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-b bg-card px-4 sm:px-6">
+      <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-b bg-muted/30 px-4 sm:px-6">
         {/* Left Section: Logo and Title */}
         <div className="flex items-center gap-2 min-w-0">
             <Link href="/dashboard" className="flex flex-shrink-0 items-center gap-2">
