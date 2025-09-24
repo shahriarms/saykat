@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils';
 interface StockVolumeDisplayProps {
   productName: string;
   currentStock: number;
-  totalSold: number;
   maxStock: number;
   unit: string;
 }
@@ -15,7 +14,6 @@ interface StockVolumeDisplayProps {
 export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
   productName,
   currentStock,
-  totalSold,
   maxStock,
   unit,
 }) => {
@@ -26,116 +24,67 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
       maximumFractionDigits: 1,
   });
 
-  const waveColor = React.useMemo(() => {
+  const indicatorColor = React.useMemo(() => {
     if (fillPercentage < 20) return '#ef4444'; // red-500
     if (fillPercentage < 60) return '#f59e0b'; // amber-500
-    return '#22c5e5'; // cyan-500
+    return '#22c55e'; // green-500
   }, [fillPercentage]);
 
-  const showLabel = fillPercentage > 5 && fillPercentage < 98;
-  
-  // Calculate the vertical position for the label and line
-  // The 'bottom' style will be a percentage value.
-  const labelPosition = `${fillPercentage}%`;
+  // SVG path calculation
+  const startY = 160 - (160 * fillPercentage / 100); // 160 is the height of the container
+  const pathD = `M 40 ${startY} C 60 ${startY}, 80 ${startY - 20}, 120 ${startY - 20}`;
+
 
   return (
-    <div className="relative w-full flex flex-col items-center justify-center gap-2 pt-4">
-      <style>
-        {`
-          @keyframes wave {
-            0% { transform: translateX(0) translateZ(0) scaleY(1); }
-            50% { transform: translateX(-25%) translateZ(0) scaleY(0.95); }
-            100% { transform: translateX(0) translateZ(0) scaleY(1); }
-          }
-          .wave-container {
-            transition: height 0.5s ease-in-out;
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            width: 100%;
-            overflow: hidden;
-            border-bottom-left-radius: 12px;
-            border-bottom-right-radius: 12px;
-          }
-          .wave-shape {
-            background: ${waveColor};
-            border-radius: 40%;
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            left: -50%;
-            opacity: 0.6;
-            animation: wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
-          }
-          .wave-shape.two {
-            animation: wave 11s cubic-bezier(0.36, 0.45, 0.63, 0.53) -0.125s infinite;
-            opacity: 0.9;
-            bottom: -10%;
-          }
-        `}
-      </style>
-      
-      <div className="text-center h-10 mb-2">
-        <p className="text-sm font-semibold truncate w-32" title={productName}>
+    <div className="relative w-full flex flex-col items-center justify-center gap-2 pt-2 h-[260px]">
+        {/* Product Name */}
+        <p className="text-sm font-semibold text-gray-700 absolute top-0 left-1/2 -translate-x-1/2">
             {productName}
         </p>
-      </div>
-      
-      {/* Container for the tank and the dynamic label */}
-      <div className="relative w-full flex items-center justify-center gap-2 mt-2 h-48">
-          {/* Tank body */}
-          <div className="relative w-24 h-full">
-              {/* Tank body - transparent glass effect */}
-              <div className={cn(
-                  "w-full h-full rounded-b-xl border-2 border-gray-300/80 border-t-0 relative overflow-hidden",
-                  "bg-gradient-to-r from-gray-200/30 via-gray-100/10 to-gray-200/30"
-                  )}>
-                  {/* Liquid fill container */}
-                  <div 
-                  className="wave-container"
-                  style={{ 
-                      height: `${fillPercentage}%`,
-                  }}
-                  >
-                      <div className="wave-shape" style={{bottom: '-150%'}}></div>
-                      <div className="wave-shape two" style={{bottom: '-125%'}}></div>
-                  </div>
-              </div>
-              
-              {/* Tank top lid for 3D effect */}
-              <div className="absolute top-0 left-0 w-full h-3 rounded-t-[50%] bg-gray-200/70 border-2 border-b-0 border-gray-300/80"></div>
 
-              {/* Bottom base for 3D effect */}
-              <div className="absolute bottom-0 left-0 w-full h-2 rounded-b-[50%] bg-gray-300/60 border-2 border-t-0 border-gray-300/80"></div>
-          </div>
-
-          {/* Dynamic Label and Connector Line */}
-          {showLabel && (
+        {/* Main container */}
+        <div className="relative w-20 h-40 bg-gray-200 rounded-lg mt-6">
+            {/* Inner colored box representing stock level */}
             <div 
-                className="absolute left-[calc(50%+4rem)] flex items-center transition-all duration-500 ease-in-out" 
-                style={{ bottom: labelPosition, transform: 'translateY(50%)' }}
-            >
-                {/* SVG Connector Line */}
-                <svg width="30" height="20" className="overflow-visible -ml-8">
-                  <path 
-                    d="M 30 10 C 20 10, 10 10, 0 10" 
-                    stroke={waveColor} 
-                    strokeWidth="1.5" 
-                    fill="none" 
-                    strokeDasharray="2 2"
-                  />
-                  <circle cx="30" cy="10" r="3" fill={waveColor} />
-                </svg>
+                className="absolute bottom-0 left-0 w-full rounded-lg"
+                style={{ 
+                    height: `${fillPercentage}%`,
+                    backgroundColor: indicatorColor,
+                    transition: 'height 0.5s ease-in-out, background-color 0.5s ease-in-out',
+                }}
+            ></div>
+        </div>
+        
+        {/* Total Stock Size Label */}
+        <p className="text-xs text-gray-500 mt-1">
+            stock size: {formatValue(maxStock)} {unit}
+        </p>
 
-                {/* Text Label */}
-                <div className="text-xs text-muted-foreground whitespace-nowrap -ml-1">
-                    <span className="font-semibold text-foreground">{formatValue(totalSold)} {unit} / {formatValue(maxStock)} {unit}</span> occupied 
-                    <span className="font-semibold text-primary"> | {formatValue(currentStock)} {unit}</span> available
+        {/* Floating label and connecting line */}
+        {fillPercentage > 1 && (
+             <div 
+                className="absolute top-[88px] left-1/2" // Position relative to the container's top
+                style={{ 
+                    transform: `translateY(${startY - 160}px)`, // Move the whole group up
+                    transition: 'transform 0.5s ease-in-out',
+                }}
+            >
+                <svg width="150" height="40" className="absolute" style={{ overflow: 'visible', left: '-10px', top: '-25px' }}>
+                    <path 
+                        d={pathD}
+                        stroke={indicatorColor} 
+                        strokeWidth="2" 
+                        fill="none" 
+                    />
+                </svg>
+                <div 
+                    className="absolute text-sm font-semibold"
+                    style={{ left: '115px', top: `${startY - 35}px`, color: indicatorColor }}
+                >
+                    {formatValue(currentStock)}{unit}
                 </div>
             </div>
-          )}
-      </div>
+        )}
     </div>
   );
 };
