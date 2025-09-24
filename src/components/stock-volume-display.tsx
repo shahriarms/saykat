@@ -22,7 +22,16 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
       maximumFractionDigits: 1,
   });
 
-  const waveColor = '#22c5e5'; // cyan-500
+  const waveColor = React.useMemo(() => {
+    if (fillPercentage < 20) {
+      return '#ef4444'; // red-500
+    }
+    if (fillPercentage < 60) {
+      return '#f59e0b'; // amber-500
+    }
+    return '#22c5e5'; // cyan-500
+  }, [fillPercentage]);
+
 
   const scaleMarkers = React.useMemo(() => {
     if (maxStock <= 0) return [];
