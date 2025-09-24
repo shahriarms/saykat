@@ -322,8 +322,64 @@ function InvoicePage() {
         {/* Main Content Area */}
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-4 flex-1 min-h-0">
           
-          {/* Left Column: Invoice Items & Product Adder */}
+          {/* Left Column: Product Adder & Invoice Items */}
           <div className="xl:col-span-3 flex flex-col gap-4">
+              <Card className="flex-1 flex flex-col">
+                <CardHeader className="flex-shrink-0">
+                    <CardTitle>{t('add_products_label')}</CardTitle>
+                    <RadioGroup
+                        value={mainCategoryFilter}
+                        onValueChange={(value) => setMainCategoryFilter(value as 'Material' | 'Hardware')}
+                        className="flex space-x-4 pt-2"
+                    >
+                        <div className="flex items-center space-x-2"><RadioGroupItem value="Material" id="r-material" /><Label htmlFor="r-material">{t('material_tab')}</Label></div>
+                        <div className="flex items-center space-x-2"><RadioGroupItem value="Hardware" id="r-hardware" /><Label htmlFor="r-hardware">{t('hardware_tab')}</Label></div>
+                    </RadioGroup>
+                </CardHeader>
+                <CardContent className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-4 min-h-0">
+                        {/* Category List */}
+                        <div className="flex flex-col gap-2 min-h-0">
+                           <Label>{t('category_header')}</Label>
+                            <div className="relative">
+                               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                               <Input placeholder="Search..." className="pl-8 h-9" value={categorySearch} onChange={e => setCategorySearch(e.target.value)} />
+                            </div>
+                           <ScrollArea className="flex-1 border rounded-md force-show-scrollbar">
+                               <div className="p-2 space-y-1">
+                                    <Button variant={!categoryFilter ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setCategoryFilter('')}>{t('all_categories')}</Button>
+                                    {categories.map(c => <Button key={c} variant={categoryFilter === c ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setCategoryFilter(c)}>{c}</Button>)}
+                               </div>
+                           </ScrollArea>
+                        </div>
+                        {/* Sub-Category List */}
+                        <div className="flex flex-col gap-2 min-h-0">
+                            <Label>{t('subcategory_header')}</Label>
+                            <div className="relative">
+                               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                               <Input placeholder="Search..." className="pl-8 h-9" value={subCategorySearch} onChange={e => setSubCategorySearch(e.target.value)} disabled={!categoryFilter}/>
+                            </div>
+                           <ScrollArea className="flex-1 border rounded-md force-show-scrollbar">
+                                <div className="p-2 space-y-1">
+                                     <Button variant={!subCategoryFilter ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setSubCategoryFilter('')} disabled={!categoryFilter}>{t('all_subcategories')}</Button>
+                                     {categoryFilter && subCategories.map(sc => <Button key={sc} variant={subCategoryFilter === sc ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setSubCategoryFilter(sc)}>{sc}</Button>)}
+                                </div>
+                           </ScrollArea>
+                        </div>
+                        {/* Product List */}
+                         <div className="flex flex-col gap-2 min-h-0">
+                            <Label>{t('products_sidebar')}</Label>
+                            <div className="relative">
+                               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                               <Input placeholder="Search..." className="pl-8 h-9" value={productSearch} onChange={e => setProductSearch(e.target.value)} />
+                            </div>
+                           <ScrollArea className="flex-1 border rounded-md force-show-scrollbar">
+                                <div className="p-2 space-y-1">
+                                     {filteredProducts.map(p => <Button key={p.id} variant="ghost" className="w-full justify-start h-8 text-xs" onClick={() => handleAddProduct(p)}>{p.name}</Button>)}
+                                </div>
+                           </ScrollArea>
+                        </div>
+                </CardContent>
+              </Card>
               <Card className="flex-1 flex flex-col">
                 <CardHeader className="flex-row items-center justify-between">
                     <CardTitle>Invoice Items</CardTitle>
@@ -343,7 +399,7 @@ function InvoicePage() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Item</TableHead>
-                                    <TableHead className="w-24 hidden sm:table-cell">Stock</TableHead>
+                                    <TableHead className="w-24">Stock</TableHead>
                                     <TableHead className="w-24">Qty</TableHead>
                                     <TableHead className="w-32">Price</TableHead>
                                     <TableHead className="text-right w-32">Total</TableHead>
@@ -371,7 +427,7 @@ function InvoicePage() {
                                                 )}
                                             </div>
                                         </TableCell>
-                                        <TableCell className="hidden sm:table-cell">
+                                        <TableCell>
                                             {product && (
                                                 <div className="w-16 mx-auto">
                                                      <StockVolumeDisplay
@@ -448,62 +504,6 @@ function InvoicePage() {
                     </div>
                     </div>
                 </CardFooter>
-              </Card>
-              <Card className="flex-1 flex flex-col">
-                <CardHeader className="flex-shrink-0">
-                    <CardTitle>{t('add_products_label')}</CardTitle>
-                    <RadioGroup
-                        value={mainCategoryFilter}
-                        onValueChange={(value) => setMainCategoryFilter(value as 'Material' | 'Hardware')}
-                        className="flex space-x-4 pt-2"
-                    >
-                        <div className="flex items-center space-x-2"><RadioGroupItem value="Material" id="r-material" /><Label htmlFor="r-material">{t('material_tab')}</Label></div>
-                        <div className="flex items-center space-x-2"><RadioGroupItem value="Hardware" id="r-hardware" /><Label htmlFor="r-hardware">{t('hardware_tab')}</Label></div>
-                    </RadioGroup>
-                </CardHeader>
-                <CardContent className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-4 min-h-0">
-                        {/* Category List */}
-                        <div className="flex flex-col gap-2 min-h-0">
-                           <Label>{t('category_header')}</Label>
-                            <div className="relative">
-                               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                               <Input placeholder="Search..." className="pl-8 h-9" value={categorySearch} onChange={e => setCategorySearch(e.target.value)} />
-                            </div>
-                           <ScrollArea className="flex-1 border rounded-md force-show-scrollbar">
-                               <div className="p-2 space-y-1">
-                                    <Button variant={!categoryFilter ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setCategoryFilter('')}>{t('all_categories')}</Button>
-                                    {categories.map(c => <Button key={c} variant={categoryFilter === c ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setCategoryFilter(c)}>{c}</Button>)}
-                               </div>
-                           </ScrollArea>
-                        </div>
-                        {/* Sub-Category List */}
-                        <div className="flex flex-col gap-2 min-h-0">
-                            <Label>{t('subcategory_header')}</Label>
-                            <div className="relative">
-                               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                               <Input placeholder="Search..." className="pl-8 h-9" value={subCategorySearch} onChange={e => setSubCategorySearch(e.target.value)} disabled={!categoryFilter}/>
-                            </div>
-                           <ScrollArea className="flex-1 border rounded-md force-show-scrollbar">
-                                <div className="p-2 space-y-1">
-                                     <Button variant={!subCategoryFilter ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setSubCategoryFilter('')} disabled={!categoryFilter}>{t('all_subcategories')}</Button>
-                                     {categoryFilter && subCategories.map(sc => <Button key={sc} variant={subCategoryFilter === sc ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setSubCategoryFilter(sc)}>{sc}</Button>)}
-                                </div>
-                           </ScrollArea>
-                        </div>
-                        {/* Product List */}
-                         <div className="flex flex-col gap-2 min-h-0">
-                            <Label>{t('products_sidebar')}</Label>
-                            <div className="relative">
-                               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                               <Input placeholder="Search..." className="pl-8 h-9" value={productSearch} onChange={e => setProductSearch(e.target.value)} />
-                            </div>
-                           <ScrollArea className="flex-1 border rounded-md force-show-scrollbar">
-                                <div className="p-2 space-y-1">
-                                     {filteredProducts.map(p => <Button key={p.id} variant="ghost" className="w-full justify-start h-8 text-xs" onClick={() => handleAddProduct(p)}>{p.name}</Button>)}
-                                </div>
-                           </ScrollArea>
-                        </div>
-                </CardContent>
               </Card>
           </div>
 
