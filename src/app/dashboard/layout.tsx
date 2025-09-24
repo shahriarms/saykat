@@ -24,7 +24,7 @@ export default function DashboardLayout({
                 <SiteHeader />
                 <TopNavBar />
                 <main className="flex-1 overflow-y-auto bg-muted/30">
-                  <div className="w-full max-w-screen-2xl mx-auto p-4 sm:p-6 lg:p-8">
+                  <div className="w-full p-4 sm:p-6 lg:p-8">
                     {children}
                   </div>
                 </main>
