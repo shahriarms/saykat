@@ -96,21 +96,18 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
             )}
         </div>
         
-        {/* Platform and Shadow */}
-        <div className="flex flex-col items-center">
-            <div className="w-28 h-2 bg-gray-200 rounded-full border border-gray-300"></div>
-            <div className="w-24 h-2 bg-gray-300/50 rounded-full blur-md" />
-        </div>
+        {/* Flat paper-like shadow */}
+        <div className="w-28 h-2 bg-gray-300/60 rounded-full blur-sm" />
         
-        {/* Product Name Label */}
-        <p className="text-sm font-semibold text-gray-700 text-center h-10 flex items-center pt-1">
-            {productName}
-        </p>
-
-        {/* Total Stock Size Label - hidden but kept for structure */}
-        <p className="text-xs text-gray-500 mt-1 hidden">
-            Stock Size: {formatValue(maxStock)} {unit}
-        </p>
+        {/* Labels: Total Size and Product Name */}
+        <div className="text-center pt-1">
+             <p className="text-xs text-gray-500">
+                Stock Size: {formatValue(maxStock)} {unit}
+            </p>
+            <p className="text-sm font-semibold text-gray-700 h-10 flex items-start pt-1">
+                {productName}
+            </p>
+        </div>
     </div>
   );
 };
