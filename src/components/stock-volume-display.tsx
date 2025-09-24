@@ -44,7 +44,18 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
     <div className="relative w-full flex flex-col items-center justify-end gap-2 pt-2 h-[260px] overflow-visible">
         
         {/* Main container */}
-        <div className="relative w-full h-40 rounded-lg bg-gray-200/70">
+        <div 
+            className="relative w-24 h-40 rounded-t-lg bg-gray-200/50 border-2 border-gray-300/70"
+            style={{
+                boxShadow: 'inset 0 0 10px rgba(0,0,0,0.1)',
+            }}
+        >
+            {/* Top Rim */}
+            <div 
+                className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-[105%] h-3 rounded-[50%] border-2 border-gray-400/60 bg-gray-300/50"
+                style={{ content: '""' }}
+            ></div>
+            
             {/* Inner colored box representing stock level */}
             <div 
                 className="absolute bottom-0 left-0 w-full"
@@ -54,6 +65,15 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
                     transition: 'height 0.5s ease-in-out, background-color 0.5s ease-in-out',
                 }}
             ></div>
+            
+            {/* Bottom Base */}
+            <div 
+                className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[105%] h-2 rounded-[50%] bg-gray-300/70 border-2 border-gray-400/50"
+                style={{ content: '""' }}
+            ></div>
+
+            {/* Glare effect */}
+            <div className="absolute top-0 left-2 w-4 h-full rounded-full bg-white/20 -skew-x-12"></div>
             
             {/* Floating label and connecting line */}
              <div 
