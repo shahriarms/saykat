@@ -76,7 +76,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
                         <stop offset="100%" style={{stopColor: 'white', stopOpacity: 0.3}} />
                     </linearGradient>
                     <marker id="arrowhead" markerWidth="5" markerHeight="3.5" refX="5" refY="1.75" orient="auto">
-                        <polygon points="0 0, 5 1.75, 0 3.5" fill={indicatorColor} />
+                        <polygon points="0 0, 5 1.75, 0 3.5" fill="#000000" />
                     </marker>
                 </defs>
 
@@ -116,13 +116,13 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
                 <svg width="60" height="40" viewBox="0 0 60 40" className="absolute -top-5 -left-px overflow-visible">
                    <path 
                      d="M 0,20 Q 20,20 30,10"
-                     stroke={indicatorColor}
+                     stroke="#000000"
                      fill="none"
                      strokeWidth="2"
                      markerEnd="url(#arrowhead)"
                    />
                 </svg>
-                <div className="absolute text-sm font-semibold whitespace-nowrap" style={{ left: '35px', top: '-18px', color: indicatorColor }}>
+                <div className="absolute text-sm font-semibold whitespace-nowrap" style={{ left: '35px', top: '-18px', color: '#000000' }}>
                     {formatValue(currentStock)}{unit}
                 </div>
             </div>
