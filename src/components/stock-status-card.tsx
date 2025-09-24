@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Carousel,
@@ -14,6 +14,10 @@ import {
 import { Product, Invoice } from '@/lib/types';
 import { StockVolumeDisplay } from './stock-volume-display';
 import { Weight, ThumbsUp } from 'lucide-react';
+import { Input } from './ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Search } from 'lucide-react';
+import { Button } from './ui/button';
 
 interface StockStatusCardProps {
   products: Product[];
@@ -21,7 +25,12 @@ interface StockStatusCardProps {
 }
 
 export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
-  const { materialProducts, hardwareProducts } = React.useMemo(() => {
+  const [activeTab, setActiveTab] = React.useState<'Material' | 'Hardware'>('Material');
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [categoryFilter, setCategoryFilter] = React.useState('');
+  const [subCategoryFilter, setSubCategoryFilter] = React.useState('');
+
+  const { filteredProducts, categories, subCategories } = React.useMemo(() => {
     const soldQuantities = new Map<string, number>();
     invoices.forEach(invoice => {
       invoice.items.forEach(item => {
@@ -37,32 +46,46 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
       return { ...p, stock: currentStock, totalSold, totalEverAdded };
     });
 
-    const materialProducts = enrichedProducts.filter(p => p.mainCategory === 'Material');
-    const hardwareProducts = enrichedProducts.filter(p => p.mainCategory === 'Hardware');
+    const productsForTab = enrichedProducts.filter(p => p.mainCategory === activeTab);
+    const uniqueCategories = [...new Set(productsForTab.map(p => p.category).filter(Boolean))];
+    const productsAfterCategoryFilter = categoryFilter ? productsForTab.filter(p => p.category === categoryFilter) : productsForTab;
+    const uniqueSubCategories = [...new Set(productsAfterCategoryFilter.map(p => p.subCategory).filter(Boolean))];
 
-    return { materialProducts, hardwareProducts };
-  }, [products, invoices]);
+    const finalFiltered = productsForTab
+      .filter(p => searchTerm ? p.name.toLowerCase().includes(searchTerm.toLowerCase()) : true)
+      .filter(p => categoryFilter ? p.category === categoryFilter : true)
+      .filter(p => subCategoryFilter ? p.subCategory === subCategoryFilter : true);
+
+    return {
+      filteredProducts: finalFiltered,
+      categories: uniqueCategories,
+      subCategories: uniqueSubCategories,
+    };
+  }, [products, invoices, activeTab, searchTerm, categoryFilter, subCategoryFilter]);
+  
+  const resetFilters = () => {
+      setSearchTerm('');
+      setCategoryFilter('');
+      setSubCategoryFilter('');
+  }
 
   const renderCarousel = (
-    productList: (Product & { totalSold: number, totalEverAdded: number })[],
-    unit: string
+    productList: (Product & { totalSold: number, totalEverAdded: number })[]
   ) => {
     if (productList.length === 0) {
       return (
         <div className="flex items-center justify-center h-48 text-muted-foreground">
-          No products in this category.
+          No products match your filters.
         </div>
       );
     }
 
     return (
       <Carousel
-        opts={{
-          align: 'start',
-        }}
+        opts={{ align: 'start' }}
         className="w-full px-12"
       >
-        <CarouselContent className="-ml-1 flex-wrap h-[400px]">
+        <CarouselContent className="-ml-1 flex flex-wrap h-[450px]">
           {productList.map(product => (
             <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/5 pl-1">
               <div className="p-1 h-[200px] flex items-center justify-center">
@@ -71,7 +94,6 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
                     currentStock={product.stock}
                     totalSold={product.totalSold}
                     maxStock={product.totalEverAdded}
-                    unit={unit}
                   />
               </div>
             </CarouselItem>
@@ -87,9 +109,10 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
     <Card>
       <CardHeader>
         <CardTitle>Live Stock Status</CardTitle>
+        <CardDescription>Search, filter, and view the real-time stock levels of your products.</CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="material">
+        <Tabs value={activeTab} onValueChange={value => setActiveTab(value as 'Material' | 'Hardware')}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="material">
               <Weight className="mr-2 h-4 w-4" /> Material
@@ -98,11 +121,44 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
               <ThumbsUp className="mr-2 h-4 w-4" /> Hardware
             </TabsTrigger>
           </TabsList>
+          
+          <div className="flex flex-col md:flex-row gap-2 py-4 border-b">
+              <div className="relative flex-1">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                      type="search" 
+                      placeholder="Search by product name..."
+                      className="pl-8" 
+                      value={searchTerm}
+                      onChange={e => setSearchTerm(e.target.value)}
+                  />
+              </div>
+              <Select value={categoryFilter} onValueChange={(value) => {setCategoryFilter(value === 'all' ? '' : value); setSubCategoryFilter('')}}>
+                  <SelectTrigger className="w-full md:w-48">
+                      <SelectValue placeholder="Filter by Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                      {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  </SelectContent>
+              </Select>
+              <Select value={subCategoryFilter} onValueChange={(value) => setSubCategoryFilter(value === 'all' ? '' : value)} disabled={!categoryFilter}>
+                  <SelectTrigger className="w-full md:w-48">
+                      <SelectValue placeholder="Filter by Sub-Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                        <SelectItem value="all">All Sub-Categories</SelectItem>
+                      {subCategories.map(sc => <SelectItem key={sc} value={sc}>{sc}</SelectItem>)}
+                  </SelectContent>
+              </Select>
+              <Button variant="outline" onClick={resetFilters}>Reset</Button>
+          </div>
+
           <TabsContent value="material" className="pt-4">
-            {renderCarousel(materialProducts, 'kg')}
+            {renderCarousel(filteredProducts)}
           </TabsContent>
           <TabsContent value="hardware" className="pt-4">
-            {renderCarousel(hardwareProducts, 'pcs')}
+            {renderCarousel(filteredProducts)}
           </TabsContent>
         </Tabs>
       </CardContent>
