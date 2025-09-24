@@ -94,21 +94,25 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
                      {/* Animated Waves */}
                     <div className="absolute -bottom-1 left-0 w-full h-4">
                         <div 
-                            className="absolute w-[200%] h-full bg-white/20 rounded-[45%] "
+                            className="absolute w-[200%] h-full rounded-[45%]"
                             style={{
                                 animation: 'wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite',
                                 transform: 'translate3d(0, 0, 0)',
                                 left: '-100%',
                                 bottom: 0,
+                                background: 'inherit',
+                                opacity: 0.4
                             }}
                         />
                         <div 
-                            className="absolute w-[200%] h-full bg-white/10 rounded-[40%] "
+                            className="absolute w-[200%] h-full rounded-[40%]"
                             style={{
                                 animation: 'wave 11s cubic-bezier(0.36, 0.45, 0.63, 0.53) -.125s infinite, swell 7s ease -1.25s infinite',
                                 transform: 'translate3d(0, 0, 0)',
                                  left: '-100%',
                                 bottom: 0,
+                                background: 'inherit',
+                                opacity: 0.2
                             }}
                         />
                     </div>
