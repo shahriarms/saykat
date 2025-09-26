@@ -229,51 +229,51 @@ export default function Dashboard() {
         
         <div>
             <h2 className="text-lg font-semibold mb-4">{t('todays_summary_title')}</h2>
-             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-9">
+             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 <Card as="button" onClick={() => setDailySalesReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
-                  <div className="bg-blue-100 p-3 rounded-full"><DollarSign className="h-6 w-6 text-blue-600" /></div>
-                  <div>
-                      <p className="text-sm text-muted-foreground">{t('todays_sales_card_title')}</p>
-                      <p className="text-xl font-bold">৳ {todayStats.totalSales.toFixed(2)}</p>
+                  <div className="bg-blue-100 p-3 rounded-full flex-shrink-0"><DollarSign className="h-6 w-6 text-blue-600" /></div>
+                  <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground truncate">{t('todays_sales_card_title')}</p>
+                      <p className="text-xl font-bold truncate">৳ {todayStats.totalSales.toFixed(2)}</p>
                   </div>
                 </Card>
                 <Card as="button" onClick={() => setDailyExpensesReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
-                  <div className="bg-orange-100 p-3 rounded-full"><Receipt className="h-6 w-6 text-orange-600" /></div>
-                  <div>
-                      <p className="text-sm text-muted-foreground">{t('todays_expenses_card_title')}</p>
-                      <p className="text-xl font-bold">৳ {todayStats.totalExpenses.toFixed(2)}</p>
+                  <div className="bg-orange-100 p-3 rounded-full flex-shrink-0"><Receipt className="h-6 w-6 text-orange-600" /></div>
+                   <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground truncate">{t('todays_expenses_card_title')}</p>
+                      <p className="text-xl font-bold truncate">৳ {todayStats.totalExpenses.toFixed(2)}</p>
                   </div>
                 </Card>
                 <Card as="button" onClick={() => setDailyDueReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4" disabled={todayStats.totalDue <= 0}>
-                  <div className="bg-red-100 p-3 rounded-full"><HandCoins className="h-6 w-6 text-red-600" /></div>
-                  <div>
-                      <p className="text-sm text-muted-foreground">{t('todays_due_card_title')}</p>
-                      <p className="text-xl font-bold">৳ {todayStats.totalDue.toFixed(2)}</p>
+                  <div className="bg-red-100 p-3 rounded-full flex-shrink-0"><HandCoins className="h-6 w-6 text-red-600" /></div>
+                   <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground truncate">{t('todays_due_card_title')}</p>
+                      <p className="text-xl font-bold truncate">৳ {todayStats.totalDue.toFixed(2)}</p>
                   </div>
                 </Card>
                 <Card as="button" onClick={() => setDailyUnitsSoldReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
-                  <div className="bg-purple-100 p-3 rounded-full"><Package className="h-6 w-6 text-purple-600" /></div>
-                  <div>
-                      <p className="text-sm text-muted-foreground">{t('units_sold_today_card_title')}</p>
-                      <p className="text-base font-bold">{`${(todayStats.materialSoldKg).toFixed(1)}kg, ${todayStats.hardwareSoldPcs}pcs`}</p>
+                  <div className="bg-purple-100 p-3 rounded-full flex-shrink-0"><Package className="h-6 w-6 text-purple-600" /></div>
+                   <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground truncate">{t('units_sold_today_card_title')}</p>
+                      <p className="text-base font-bold truncate">{`${(todayStats.materialSoldKg).toFixed(1)}kg, ${todayStats.hardwareSoldPcs}pcs`}</p>
                   </div>
                 </Card>
                  <Card as="button" onClick={() => setDailyAttendanceReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
-                  <div className="bg-indigo-100 p-3 rounded-full"><Users className="h-6 w-6 text-indigo-600" /></div>
-                  <div>
-                      <p className="text-sm text-muted-foreground">{t('todays_attendance_card_title')}</p>
-                      <p className="text-xl font-bold">{todayStats.presentToday} <span className="text-sm text-muted-foreground">/ {employees.length}</span></p>
+                  <div className="bg-indigo-100 p-3 rounded-full flex-shrink-0"><Users className="h-6 w-6 text-indigo-600" /></div>
+                   <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground truncate">{t('todays_attendance_card_title')}</p>
+                      <p className="text-xl font-bold truncate">{todayStats.presentToday} <span className="text-sm text-muted-foreground">/ {employees.length}</span></p>
                   </div>
                 </Card>
                  <Tooltip>
                     <TooltipTrigger asChild>
                         <Card as="button" onClick={() => setGrossProfitReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
-                            <div className={`p-3 rounded-full ${todayStats.profit >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+                            <div className={`p-3 rounded-full flex-shrink-0 ${todayStats.profit >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
                                 <TrendingUp className={`h-6 w-6 ${todayStats.profit >= 0 ? 'text-green-600' : 'text-red-600'}`} />
                             </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground">Net Profit</p>
-                                <p className={`text-xl font-bold ${todayStats.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>৳ {todayStats.profit.toFixed(2)}</p>
+                             <div className="min-w-0">
+                                <p className="text-sm text-muted-foreground truncate">Net Profit</p>
+                                <p className={`text-xl font-bold truncate ${todayStats.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>৳ {todayStats.profit.toFixed(2)}</p>
                             </div>
                         </Card>
                     </TooltipTrigger>
@@ -285,10 +285,10 @@ export default function Dashboard() {
                  <Tooltip>
                     <TooltipTrigger asChild>
                         <Card as="button" onClick={() => setGrossProfitReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
-                            <div className="bg-teal-100 p-3 rounded-full"><ThumbsUp className="h-6 w-6 text-teal-600" /></div>
-                            <div>
-                                <p className="text-sm text-muted-foreground">Today's Gross Profit</p>
-                                <p className="text-xl font-bold">৳ {todayStats.grossProfit.toFixed(2)}</p>
+                            <div className="bg-teal-100 p-3 rounded-full flex-shrink-0"><ThumbsUp className="h-6 w-6 text-teal-600" /></div>
+                             <div className="min-w-0">
+                                <p className="text-sm text-muted-foreground truncate">Today's Gross Profit</p>
+                                <p className="text-xl font-bold truncate">৳ {todayStats.grossProfit.toFixed(2)}</p>
                             </div>
                         </Card>
                     </TooltipTrigger>
@@ -299,10 +299,10 @@ export default function Dashboard() {
                   <Tooltip>
                     <TooltipTrigger asChild>
                         <Card className="text-left flex items-center p-4 gap-4">
-                            <div className="bg-cyan-100 p-3 rounded-full"><Weight className="h-6 w-6 text-cyan-600" /></div>
-                            <div>
-                                <p className="text-sm text-muted-foreground">Today's COGS</p>
-                                <p className="text-xl font-bold">৳ {todayStats.cogs.toFixed(2)}</p>
+                            <div className="bg-cyan-100 p-3 rounded-full flex-shrink-0"><Weight className="h-6 w-6 text-cyan-600" /></div>
+                             <div className="min-w-0">
+                                <p className="text-sm text-muted-foreground truncate">Today's COGS</p>
+                                <p className="text-xl font-bold truncate">৳ {todayStats.cogs.toFixed(2)}</p>
                             </div>
                         </Card>
                     </TooltipTrigger>
@@ -313,12 +313,12 @@ export default function Dashboard() {
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Card className="text-left flex items-center p-4 gap-4">
-                            <div className={`p-3 rounded-full ${todayStats.cashInHand >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+                            <div className={`p-3 rounded-full flex-shrink-0 ${todayStats.cashInHand >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
                                 <Wallet className={`h-6 w-6 ${todayStats.cashInHand >= 0 ? 'text-green-600' : 'text-red-600'}`} />
                             </div>
-                            <div>
-                            <p className="text-sm text-muted-foreground">Today's Cash in Hand</p>
-                            <p className={`text-xl font-bold ${todayStats.cashInHand >= 0 ? 'text-green-600' : 'text-red-600'}`}>৳ {todayStats.cashInHand.toFixed(2)}</p>
+                             <div className="min-w-0">
+                            <p className="text-sm text-muted-foreground truncate">Today's Cash in Hand</p>
+                            <p className={`text-xl font-bold truncate ${todayStats.cashInHand >= 0 ? 'text-green-600' : 'text-red-600'}`}>৳ {todayStats.cashInHand.toFixed(2)}</p>
                             </div>
                         </Card>
                     </TooltipTrigger>
@@ -334,51 +334,51 @@ export default function Dashboard() {
             <div className="lg:col-span-3 grid grid-cols-1 gap-4">
                 <div>
                     <h2 className="text-lg font-semibold mb-4">{t('date_range_summary_title', { range: rangeTitle })}</h2>
-                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-9">
+                     <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
                       <Card as="button" onClick={() => setMonthlySalesReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
-                         <div className="bg-blue-100 p-3 rounded-full"><ShoppingCart className="h-6 w-6 text-blue-600" /></div>
-                         <div>
-                          <p className="text-sm text-muted-foreground">{t('monthly_sales_card_title')}</p>
-                          <p className="text-xl font-bold">৳ {rangeStats.totalSales.toFixed(2)}</p>
+                         <div className="bg-blue-100 p-3 rounded-full flex-shrink-0"><ShoppingCart className="h-6 w-6 text-blue-600" /></div>
+                          <div className="min-w-0">
+                          <p className="text-sm text-muted-foreground truncate">{t('monthly_sales_card_title')}</p>
+                          <p className="text-xl font-bold truncate">৳ {rangeStats.totalSales.toFixed(2)}</p>
                          </div>
                       </Card>
                       <Card as="button" onClick={() => setMonthlyExpensesReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
-                        <div className="bg-orange-100 p-3 rounded-full"><TrendingDown className="h-6 w-6 text-orange-600" /></div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">{t('monthly_expenses_card_title')}</p>
-                          <p className="text-xl font-bold">৳ {rangeStats.totalExpenses.toFixed(2)}</p>
+                        <div className="bg-orange-100 p-3 rounded-full flex-shrink-0"><TrendingDown className="h-6 w-6 text-orange-600" /></div>
+                         <div className="min-w-0">
+                          <p className="text-sm text-muted-foreground truncate">{t('monthly_expenses_card_title')}</p>
+                          <p className="text-xl font-bold truncate">৳ {rangeStats.totalExpenses.toFixed(2)}</p>
                         </div>
                       </Card>
                        <Card as="button" onClick={() => setMonthlySalaryReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
-                        <div className="bg-teal-100 p-3 rounded-full"><Wallet className="h-6 w-6 text-teal-600" /></div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">{t('salary_paid_card_title')}</p>
-                          <p className="text-xl font-bold">৳ {rangeStats.totalSalaryPaid.toFixed(2)}</p>
+                        <div className="bg-teal-100 p-3 rounded-full flex-shrink-0"><Wallet className="h-6 w-6 text-teal-600" /></div>
+                         <div className="min-w-0">
+                          <p className="text-sm text-muted-foreground truncate">{t('salary_paid_card_title')}</p>
+                          <p className="text-xl font-bold truncate">৳ {rangeStats.totalSalaryPaid.toFixed(2)}</p>
                         </div>
                       </Card>
                        <Card as="button" onClick={() => setMonthlyDueReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4" disabled={rangeStats.totalDue <= 0}>
-                        <div className="bg-red-100 p-3 rounded-full"><BadgeIndianRupee className="h-6 w-6 text-red-600" /></div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">{t('total_due_card_title')}</p>
-                          <p className="text-xl font-bold">৳ {rangeStats.totalDue.toFixed(2)}</p>
+                        <div className="bg-red-100 p-3 rounded-full flex-shrink-0"><BadgeIndianRupee className="h-6 w-6 text-red-600" /></div>
+                         <div className="min-w-0">
+                          <p className="text-sm text-muted-foreground truncate">{t('total_due_card_title')}</p>
+                          <p className="text-xl font-bold truncate">৳ {rangeStats.totalDue.toFixed(2)}</p>
                         </div>
                       </Card>
                        <Card as="button" onClick={() => setMonthlyUnitsSoldReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
-                        <div className="bg-purple-100 p-3 rounded-full"><Container className="h-6 w-6 text-purple-600" /></div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">{t('total_units_sold_card_title')}</p>
-                          <p className="text-base font-bold">{`${rangeStats.materialSoldKg.toFixed(1)}kg, ${rangeStats.hardwareSoldPcs}pcs`}</p>
+                        <div className="bg-purple-100 p-3 rounded-full flex-shrink-0"><Container className="h-6 w-6 text-purple-600" /></div>
+                         <div className="min-w-0">
+                          <p className="text-sm text-muted-foreground truncate">{t('total_units_sold_card_title')}</p>
+                          <p className="text-base font-bold truncate">{`${rangeStats.materialSoldKg.toFixed(1)}kg, ${rangeStats.hardwareSoldPcs}pcs`}</p>
                         </div>
                       </Card>
                       <Tooltip>
                         <TooltipTrigger asChild>
                            <Card as="button" onClick={() => setRangeGrossProfitReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
-                              <div className={`p-3 rounded-full ${rangeStats.profit >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+                              <div className={`p-3 rounded-full flex-shrink-0 ${rangeStats.profit >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
                                   <TrendingUp className={`h-6 w-6 ${rangeStats.profit >= 0 ? 'text-green-600' : 'text-red-600'}`} />
                               </div>
-                              <div>
-                                <p className="text-sm text-muted-foreground">{t('profit_card_title')}</p>
-                                <p className={`text-xl font-bold ${rangeStats.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>৳ {rangeStats.profit.toFixed(2)}</p>
+                               <div className="min-w-0">
+                                <p className="text-sm text-muted-foreground truncate">{t('profit_card_title')}</p>
+                                <p className={`text-xl font-bold truncate ${rangeStats.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>৳ {rangeStats.profit.toFixed(2)}</p>
                               </div>
                             </Card>
                         </TooltipTrigger>
@@ -390,10 +390,10 @@ export default function Dashboard() {
                       <Tooltip>
                         <TooltipTrigger asChild>
                            <Card as="button" onClick={() => setRangeGrossProfitReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
-                              <div className="bg-emerald-100 p-3 rounded-full"><ThumbsUp className="h-6 w-6 text-emerald-600" /></div>
-                              <div>
-                                <p className="text-sm text-muted-foreground">Total Gross Profit</p>
-                                <p className="text-xl font-bold">৳ {rangeStats.grossProfit.toFixed(2)}</p>
+                              <div className="bg-emerald-100 p-3 rounded-full flex-shrink-0"><ThumbsUp className="h-6 w-6 text-emerald-600" /></div>
+                               <div className="min-w-0">
+                                <p className="text-sm text-muted-foreground truncate">Total Gross Profit</p>
+                                <p className="text-xl font-bold truncate">৳ {rangeStats.grossProfit.toFixed(2)}</p>
                               </div>
                             </Card>
                         </TooltipTrigger>
@@ -405,10 +405,10 @@ export default function Dashboard() {
                        <Tooltip>
                         <TooltipTrigger asChild>
                             <Card className="text-left flex items-center p-4 gap-4">
-                                <div className="bg-cyan-100 p-3 rounded-full"><Weight className="h-6 w-6 text-cyan-600" /></div>
-                                <div>
-                                    <p className="text-sm text-muted-foreground">Total COGS</p>
-                                    <p className="text-xl font-bold">৳ {rangeStats.cogs.toFixed(2)}</p>
+                                <div className="bg-cyan-100 p-3 rounded-full flex-shrink-0"><Weight className="h-6 w-6 text-cyan-600" /></div>
+                                 <div className="min-w-0">
+                                    <p className="text-sm text-muted-foreground truncate">Total COGS</p>
+                                    <p className="text-xl font-bold truncate">৳ {rangeStats.cogs.toFixed(2)}</p>
                                 </div>
                             </Card>
                         </TooltipTrigger>
@@ -419,12 +419,12 @@ export default function Dashboard() {
                       <Tooltip>
                         <TooltipTrigger asChild>
                             <Card className="text-left flex items-center p-4 gap-4">
-                                <div className={`p-3 rounded-full ${rangeStats.cashInHand >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+                                <div className={`p-3 rounded-full flex-shrink-0 ${rangeStats.cashInHand >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
                                     <Wallet className={`h-6 w-6 ${rangeStats.cashInHand >= 0 ? 'text-green-600' : 'text-red-600'}`} />
                                 </div>
-                                <div>
-                                <p className="text-sm text-muted-foreground">Total Cash in Hand</p>
-                                <p className={`text-xl font-bold ${rangeStats.cashInHand >= 0 ? 'text-green-600' : 'text-red-600'}`}>৳ {rangeStats.cashInHand.toFixed(2)}</p>
+                                 <div className="min-w-0">
+                                <p className="text-sm text-muted-foreground truncate">Total Cash in Hand</p>
+                                <p className={`text-xl font-bold truncate ${rangeStats.cashInHand >= 0 ? 'text-green-600' : 'text-red-600'}`}>৳ {rangeStats.cashInHand.toFixed(2)}</p>
                                 </div>
                             </Card>
                         </TooltipTrigger>
@@ -563,5 +563,3 @@ export default function Dashboard() {
     </>
   );
 }
-
-    
