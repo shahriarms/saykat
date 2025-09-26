@@ -209,7 +209,7 @@ export function EditProductDialog({ open, onOpenChange, product }: EditProductDi
                       <Input type="number" min="0" inputMode="decimal" placeholder="0" {...field} value={field.value ?? ''}/>
                     </FormControl>
                     <FormDescription>
-                      Current Remaining Stock: {product.stock}
+                      Current Stock: {product.stock}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
