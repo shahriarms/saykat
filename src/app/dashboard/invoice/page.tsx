@@ -641,7 +641,7 @@ function InvoicePage() {
       <AlertDialog open={!!draftToDelete} onOpenChange={() => setDraftToDelete(null)}>
           <AlertDialogContent>
               <AlertDialogHeader>
-                  <DialogTitle>{t('are_you_sure_title')}</DialogTitle>
+                  <AlertDialogTitle>{t('are_you_sure_title')}</AlertDialogTitle>
                   <AlertDialogDescription>
                      Are you sure you want to delete this memo? This action cannot be undone.
                   </AlertDialogDescription>
@@ -664,5 +664,3 @@ export default function InvoicePageWrapper() {
     </InvoiceFormProvider>
   );
 }
-
-    
