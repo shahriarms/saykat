@@ -367,7 +367,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                 quantity: item.quantity,
                 price: item.price,
                 originalPrice: product?.sellingPrice || item.price,
-                buyingPrice: item.buyingPrice,
+                buyingPrice: product?.buyingPrice || item.buyingPrice,
                 profitMargin: product?.profitMargin || 0,
                 profitAmount: item.profitAmount,
             }
