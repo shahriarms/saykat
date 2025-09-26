@@ -19,7 +19,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAppData } from '@/hooks/use-app-data';
 import { Plus, Trash2, Printer, X, Loader2, Search, Eye, EyeOff, ChevronsUpDown, Save } from 'lucide-react';
-import { useInvoiceForm, InvoiceFormProvider } from '@/hooks/use-invoice-form';
+import { useInvoiceForm } from '@/hooks/use-invoice-form';
 import { useToast } from '@/hooks/use-toast';
 import { InvoicePrintLayout } from '@/components/invoice-print-layout';
 import { useSettings } from '@/hooks/use-settings';
@@ -36,7 +36,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { StockVolumeDisplay } from '@/components/stock-volume-display';
 
 
-function InvoicePage() {
+export default function InvoicePage() {
   const { addInvoice, updateInvoice, buyers, invoices: allInvoices } = useAppData();
   const { settings } = useSettings();
   const { toast } = useToast();
@@ -654,13 +654,5 @@ function InvoicePage() {
       </AlertDialog>
 
     </>
-  );
-}
-
-export default function InvoicePageWrapper() {
-  return (
-    <InvoiceFormProvider>
-      <InvoicePage />
-    </InvoiceFormProvider>
   );
 }

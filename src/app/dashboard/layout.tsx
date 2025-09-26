@@ -1,3 +1,4 @@
+
 'use client';
 import { UserProvider } from '@/hooks/use-user.tsx';
 import { SiteHeader } from '@/components/site-header';
@@ -7,6 +8,7 @@ import { DataProvider } from '@/hooks/use-app-data';
 import { TopNavBar } from '@/components/top-nav-bar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import 'react-dom';
+import { InvoiceFormProvider } from '@/hooks/use-invoice-form';
 
 export default function DashboardLayout({
   children,
@@ -18,17 +20,19 @@ export default function DashboardLayout({
       <SettingsProvider>
         <TranslationProvider>
           <DataProvider>
-            <TooltipProvider>
-              <div className="flex flex-col h-svh">
-                <SiteHeader />
-                <TopNavBar />
-                <main className="flex-1 overflow-y-auto bg-muted/30">
-                  <div className="w-full p-4 sm:p-6 lg:p-8">
-                    {children}
-                  </div>
-                </main>
-              </div>
-            </TooltipProvider>
+            <InvoiceFormProvider>
+              <TooltipProvider>
+                <div className="flex flex-col h-svh">
+                  <SiteHeader />
+                  <TopNavBar />
+                  <main className="flex-1 overflow-y-auto bg-muted/30">
+                    <div className="w-full p-4 sm:p-6 lg:p-8">
+                      {children}
+                    </div>
+                  </main>
+                </div>
+              </TooltipProvider>
+            </InvoiceFormProvider>
           </DataProvider>
         </TranslationProvider>
       </SettingsProvider>
