@@ -20,15 +20,15 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 
 const navItems = [
-  { href: '/dashboard', icon: LayoutDashboard, labelKey: 'dashboard_sidebar' },
-  { href: '/dashboard/products', icon: Package, labelKey: 'products_sidebar' },
-  { href: '/dashboard/invoice', icon: FileText, labelKey: 'invoice_sidebar' },
-  { href: '/dashboard/buyers', icon: Users, labelKey: 'buyer_purchases_sidebar' },
-  { href: '/dashboard/buyers-due', icon: HandCoins, labelKey: 'buyers_due_sidebar' },
-  { href: '/dashboard/expenses', icon: Receipt, labelKey: 'expenses_sidebar' },
-  { href: '/dashboard/employees', icon: UserCog, labelKey: 'employee_attendance_sidebar' },
-  { href: '/dashboard/salaries', icon: Wallet, labelKey: 'salaries_sidebar' },
-  { href: '/dashboard/settings', icon: Settings, labelKey: 'settings_sidebar' },
+  { href: '/dashboard', icon: LayoutDashboard, labelKey: 'dashboard_sidebar', color: 'bg-blue-100', iconColor: 'text-blue-600' },
+  { href: '/dashboard/products', icon: Package, labelKey: 'products_sidebar', color: 'bg-amber-100', iconColor: 'text-amber-600' },
+  { href: '/dashboard/invoice', icon: FileText, labelKey: 'invoice_sidebar', color: 'bg-green-100', iconColor: 'text-green-600' },
+  { href: '/dashboard/buyers', icon: Users, labelKey: 'buyer_purchases_sidebar', color: 'bg-cyan-100', iconColor: 'text-cyan-600' },
+  { href: '/dashboard/buyers-due', icon: HandCoins, labelKey: 'buyers_due_sidebar', color: 'bg-red-100', iconColor: 'text-red-600' },
+  { href: '/dashboard/expenses', icon: Receipt, labelKey: 'expenses_sidebar', color: 'bg-orange-100', iconColor: 'text-orange-600' },
+  { href: '/dashboard/employees', icon: UserCog, labelKey: 'employee_attendance_sidebar', color: 'bg-indigo-100', iconColor: 'text-indigo-600' },
+  { href: '/dashboard/salaries', icon: Wallet, labelKey: 'salaries_sidebar', color: 'bg-teal-100', iconColor: 'text-teal-600' },
+  { href: '/dashboard/settings', icon: Settings, labelKey: 'settings_sidebar', color: 'bg-slate-200', iconColor: 'text-slate-600' },
 ] as const;
 
 export function TopNavBar() {
@@ -43,19 +43,34 @@ export function TopNavBar() {
           const isActive = pathname === item.href;
           const Icon = item.icon;
           return (
-            <Tooltip key={item.href} delayDuration={0}>
+            <Tooltip key={item.href} delayDuration={isMobile ? 500 : 0}>
               <TooltipTrigger asChild>
                 <Link
                   href={item.href}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-1.5 rounded-lg p-2 text-center transition-colors",
-                    "shrink-0 px-3 py-3",
+                    "flex flex-col items-center justify-center gap-1.5 rounded-lg p-2 text-center transition-all duration-200 ease-in-out transform",
+                    "group w-24 h-24", // Set a fixed size for the container
                     isActive
-                      ? "bg-primary/10 text-primary"
+                      ? "bg-primary/10"
                       : "text-muted-foreground hover:bg-muted/50"
                   )}
                 >
-                  <Icon className="h-6 w-6" />
+                  <div className={cn(
+                    "flex items-center justify-center rounded-full w-14 h-14 transition-all duration-200 ease-in-out",
+                    "shadow-md border border-white/50",
+                    "group-hover:-translate-y-1",
+                    "group-active:translate-y-px group-active:shadow-inner",
+                    item.color,
+                    isActive && "ring-2 ring-offset-2 ring-primary"
+                  )}>
+                    <Icon className={cn("h-6 w-6 transition-all", item.iconColor)} />
+                  </div>
+                  <span className={cn(
+                    "text-xs font-medium w-full truncate px-1",
+                     isActive ? "text-primary font-semibold" : "text-muted-foreground"
+                  )}>
+                    {t(item.labelKey)}
+                  </span>
                 </Link>
               </TooltipTrigger>
               <TooltipContent>
