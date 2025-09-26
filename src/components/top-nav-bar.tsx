@@ -59,7 +59,7 @@ export function TopNavBar() {
                     item.color,
                     isActive && "ring-2 ring-offset-2 ring-primary"
                   )}>
-                    <Icon className={cn("h-7 w-7 text-white transition-all", isActive ? 'text-white' : item.iconColor)} />
+                    <Icon className={cn("h-7 w-7 text-white transition-all", isActive ? 'text-slate-800' : item.iconColor)} />
                   </div>
                 </Link>
               </TooltipTrigger>
