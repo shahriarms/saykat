@@ -118,7 +118,7 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
   };
 
   return (
-    <Card>
+    <Card className="bg-transparent shadow-none border-0">
       <CardHeader>
         <CardTitle>Live Stock Status</CardTitle>
         <CardDescription>Search, filter, and view the real-time stock levels of your products.</CardDescription>
