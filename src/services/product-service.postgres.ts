@@ -47,7 +47,7 @@ class PostgresProductService {
 
     static async getAllProducts(): Promise<Product[]> {
         const db = getPool();
-        const { rows } = await db.query('SELECT *, COALESCE("initialStock", stock) AS "initialStock", COALESCE("containerSize", stock) AS "containerSize" FROM products ORDER BY name ASC');
+        const { rows } = await db.query('SELECT * FROM products ORDER BY name ASC');
         return rows.map(formatProduct);
     }
 
@@ -107,13 +107,16 @@ class PostgresProductService {
         const db = getPool();
         
         if (isAdditive) {
+            // New logic: When adding stock, update stock, initialStock, and containerSize
             const stockToAdd = updatedData.stock || 0;
+            const newTotalStock = updatedData.initialStock; // This is pre-calculated in the hook
             const result = await db.query(
-                'UPDATE products SET stock = stock + $1 WHERE id = $2 RETURNING *',
-                [stockToAdd, productId]
+                'UPDATE products SET stock = $1, "initialStock" = $2, "containerSize" = $2 WHERE id = $3 RETURNING *',
+                [newTotalStock, newTotalStock, productId]
             );
             return formatProduct(result.rows[0]);
         } else {
+            // This handles general edits (name, price, etc.) from the dialog, not additive stock updates
             const { name, sku, buyingPrice, profitMargin, sellingPrice, stock, containerSize, initialStock, mainCategory, category, subCategory } = updatedData;
             const result = await db.query(
                 `UPDATE products SET 
