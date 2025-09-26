@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
@@ -19,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAppData } from '@/hooks/use-app-data';
-import { Plus, Trash2, Printer, X, Loader2, Search, Eye, EyeOff, ChevronsUpDown } from 'lucide-react';
+import { Plus, Trash2, Printer, X, Loader2, Search, Eye, EyeOff, ChevronsUpDown, Save } from 'lucide-react';
 import { useInvoiceForm, InvoiceFormProvider } from '@/hooks/use-invoice-form';
 import { useToast } from '@/hooks/use-toast';
 import { InvoicePrintLayout } from '@/components/invoice-print-layout';
@@ -38,7 +37,7 @@ import { StockVolumeDisplay } from '@/components/stock-volume-display';
 
 
 function InvoicePage() {
-  const { addInvoice, buyers, invoices: allInvoices } = useAppData();
+  const { addInvoice, updateInvoice, buyers, invoices: allInvoices } = useAppData();
   const { settings } = useSettings();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -102,11 +101,17 @@ function InvoicePage() {
       document.title = 'StockPilot'; // Reset title after print
       setIsProcessing(true);
       try {
-        const newInvoiceId = await addInvoice(invoiceToPrint);
+        let newInvoiceId: number | null;
+        if(invoiceToPrint.originalInvoiceId) {
+          newInvoiceId = await updateInvoice(invoiceToPrint.originalInvoiceId, invoiceToPrint);
+        } else {
+          newInvoiceId = await addInvoice(invoiceToPrint);
+        }
+
         if (newInvoiceId) {
           toast({
-            title: t('invoice_saved_toast_title'),
-            description: t('invoice_saved_toast_description', { invoiceId: newInvoiceId }),
+            title: `Invoice #${newInvoiceId} Saved`,
+            description: `The invoice has been successfully ${invoiceToPrint.originalInvoiceId ? 'updated' : 'saved'}.`,
           });
         }
       } catch (error: any) {
@@ -131,9 +136,9 @@ function InvoicePage() {
     return () => {
       window.removeEventListener('afterprint', handleAfterPrint);
     };
-  }, [invoiceToPrint, addInvoice, resetActiveDraft, toast, t]);
+  }, [invoiceToPrint, addInvoice, updateInvoice, resetActiveDraft, toast, t]);
   
-  const { id: draftId, customerName, customerAddress, customerPhone, paidAmount, subtotal, items, cashReceived, changeAmount, dueAmount } = activeDraft || {};
+  const { id: draftId, customerName, customerAddress, customerPhone, paidAmount, subtotal, items, cashReceived, changeAmount, dueAmount, originalInvoiceId } = activeDraft || {};
 
   const handleCustomerNameChange = (name: string) => {
       updateActiveDraft({ customerName: name, buyerId: undefined, customerAddress: '', customerPhone: '' });
@@ -273,6 +278,7 @@ function InvoicePage() {
   }
 
   const isFullyPaid = subtotal > 0 && Math.abs(subtotal - (paidAmount || 0)) < 0.001;
+  const isEditing = !!originalInvoiceId;
 
   return (
     <>
@@ -408,8 +414,14 @@ function InvoicePage() {
                             {showProfit ? <EyeOff /> : <Eye />}
                         </Button>
                         <Button onClick={handlePrintConfirm} disabled={!items || items.length === 0 || isProcessing}>
-                            {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>} 
-                            {isProcessing ? 'Processing...' : 'Print & Save'}
+                           {isProcessing 
+                                ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
+                                : (isEditing ? <Save className="mr-2 h-4 w-4"/> : <Printer className="mr-2 h-4 w-4"/>)
+                            }
+                            {isProcessing 
+                                ? 'Processing...' 
+                                : (isEditing ? 'Update & Save' : 'Print & Save')
+                            }
                         </Button>
                     </div>
                 </CardHeader>
@@ -629,7 +641,7 @@ function InvoicePage() {
       <AlertDialog open={!!draftToDelete} onOpenChange={() => setDraftToDelete(null)}>
           <AlertDialogContent>
               <AlertDialogHeader>
-                  <AlertDialogTitle>{t('are_you_sure_title')}</AlertDialogTitle>
+                  <DialogTitle>{t('are_you_sure_title')}</DialogTitle>
                   <AlertDialogDescription>
                      Are you sure you want to delete this memo? This action cannot be undone.
                   </AlertDialogDescription>
@@ -652,3 +664,5 @@ export default function InvoicePageWrapper() {
     </InvoiceFormProvider>
   );
 }
+
+    

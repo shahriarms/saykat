@@ -49,6 +49,7 @@ interface AppDataContextType {
 
     // Invoice & Buyer Functions
     addInvoice: (draftInvoice: DraftInvoice) => Promise<number | null>;
+    updateInvoice: (invoiceId: number, draftInvoice: DraftInvoice) => Promise<number | null>;
     deleteInvoice: (invoiceId: number) => Promise<void>;
     printInvoice: (invoice: Invoice) => Promise<void>;
     getBuyerById: (buyerId: string) => Buyer | undefined;
@@ -283,9 +284,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }, [isDbConnected, toast, loadAllData, products, saveDataToLocalStorage]);
 
     const getProductById = useCallback((productId: string) => products.find(p => p.id === productId), [products]);
-
-    const addInvoice = useCallback(async (draftInvoice: DraftInvoice): Promise<number | null> => {
-        
+    
+    const getFinalInvoiceData = (draftInvoice: DraftInvoice, date: string): Omit<Invoice, 'id'> => {
         const finalItems: InvoiceItem[] = draftInvoice.items.map(item => ({
             id: item.id,
             name: item.name,
@@ -294,19 +294,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
             buyingPrice: item.buyingPrice,
             profitAmount: item.profitAmount,
         }));
-        
-        const invoiceToSave: Omit<Invoice, 'id'> = {
-          buyerId: draftInvoice.buyerId,
-          customerName: draftInvoice.customerName,
-          customerAddress: draftInvoice.customerAddress,
-          customerPhone: draftInvoice.customerPhone,
-          items: finalItems,
-          subtotal: draftInvoice.subtotal,
-          paidAmount: draftInvoice.paidAmount || 0,
-          dueAmount: draftInvoice.dueAmount,
-          date: new Date().toISOString(),
-          totalProfit: draftInvoice.totalProfit,
+
+        return {
+            buyerId: draftInvoice.buyerId,
+            customerName: draftInvoice.customerName,
+            customerAddress: draftInvoice.customerAddress,
+            customerPhone: draftInvoice.customerPhone,
+            items: finalItems,
+            subtotal: draftInvoice.subtotal,
+            paidAmount: draftInvoice.paidAmount || 0,
+            dueAmount: draftInvoice.dueAmount,
+            date,
+            totalProfit: draftInvoice.totalProfit,
         };
+    }
+
+    const addInvoice = useCallback(async (draftInvoice: DraftInvoice): Promise<number | null> => {
+        const invoiceToSave = getFinalInvoiceData(draftInvoice, new Date().toISOString());
         
         if (isDbConnected) {
             try {
@@ -378,6 +382,63 @@ export function DataProvider({ children }: { children: ReactNode }) {
             return newId;
         }
     }, [isDbConnected, lastInvoiceId, invoices, products, buyers, loadAllData, settings, printInvoice, toast, saveDataToLocalStorage]);
+
+    const updateInvoice = useCallback(async (invoiceId: number, draftInvoice: DraftInvoice): Promise<number | null> => {
+        const originalInvoice = invoices.find(inv => inv.id === invoiceId);
+        if (!originalInvoice) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Original invoice not found for update.' });
+            return null;
+        }
+
+        const invoiceToSave = getFinalInvoiceData(draftInvoice, originalInvoice.date);
+
+        if (isDbConnected) {
+            try {
+                const updatedInvoice = await dataActions.updateInvoice(invoiceId, invoiceToSave);
+                await loadAllData();
+                if (settings.printFormat === 'pos' && settings.posPrinterType !== 'disabled') {
+                    await printInvoice(updatedInvoice);
+                }
+                return updatedInvoice.id;
+            } catch (error) {
+                 console.error("Failed to update invoice:", error);
+                throw error;
+            }
+        } else {
+            // Local storage update logic
+            const newInvoices = invoices.map(inv => inv.id === invoiceId ? { ...invoiceToSave, id: invoiceId } : inv);
+            setInvoices(newInvoices);
+            saveDataToLocalStorage('invoices', newInvoices);
+            
+            // Adjust stock
+            const originalItems = originalInvoice.items;
+            const newItems = invoiceToSave.items;
+            const stockChanges = new Map<string, number>();
+
+            originalItems.forEach(item => {
+                stockChanges.set(item.id, (stockChanges.get(item.id) || 0) + item.quantity);
+            });
+            newItems.forEach(item => {
+                stockChanges.set(item.id, (stockChanges.get(item.id) || 0) - item.quantity);
+            });
+
+            const newProducts = products.map(p => {
+                if (stockChanges.has(p.id)) {
+                    return { ...p, stock: p.stock + (stockChanges.get(p.id) || 0) };
+                }
+                return p;
+            });
+            setProducts(newProducts);
+            saveDataToLocalStorage('products', newProducts);
+            
+            toast({ title: "Invoice Updated (Local)", description: `Invoice #${invoiceId} updated locally.` });
+
+            if (settings.printFormat === 'pos' && settings.posPrinterType !== 'disabled') {
+                await printInvoice({ ...invoiceToSave, id: invoiceId });
+            }
+            return invoiceId;
+        }
+    }, [isDbConnected, invoices, products, loadAllData, settings, printInvoice, toast, saveDataToLocalStorage]);
     
     const deleteInvoice = useCallback(async (invoiceId: number) => {
         if (isDbConnected) {
@@ -700,7 +761,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const value = useMemo(() => ({
         products, invoices, buyers, expenses, employees, attendance, salaryPayments, payments, isAppDataLoading, isDbConnected, lastInvoiceId, centralDateRange, setCentralDateRange,
         addProduct, addMultipleProducts, updateProduct, deleteProduct, getProductById,
-        addInvoice, deleteInvoice, printInvoice, getBuyerById, getInvoicesForBuyer, getInvoicesForDateRange, getGrossProfitForDateRange,
+        addInvoice, updateInvoice, deleteInvoice, printInvoice, getBuyerById, getInvoicesForBuyer, getInvoicesForDateRange, getGrossProfitForDateRange,
         addPayment, getPaymentsForInvoice,
         addExpense, updateExpense, deleteExpense, getExpensesForDateRange,
         addEmployee, updateEmployee, deleteEmployee, markAttendance, getAttendanceForDate,
@@ -708,7 +769,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }), [
         products, invoices, buyers, expenses, employees, attendance, salaryPayments, payments, isAppDataLoading, isDbConnected, lastInvoiceId, centralDateRange, setCentralDateRange,
         addProduct, addMultipleProducts, updateProduct, deleteProduct, getProductById,
-        addInvoice, deleteInvoice, printInvoice, getBuyerById, getInvoicesForBuyer, getInvoicesForDateRange, getGrossProfitForDateRange,
+        addInvoice, updateInvoice, deleteInvoice, printInvoice, getBuyerById, getInvoicesForBuyer, getInvoicesForDateRange, getGrossProfitForDateRange,
         addPayment, getPaymentsForInvoice,
         addExpense, updateExpense, deleteExpense, getExpensesForDateRange,
         addEmployee, updateEmployee, deleteEmployee, markAttendance, getAttendanceForDate,
@@ -738,3 +799,5 @@ export function useAppData() {
     }
     return context;
 }
+
+    

@@ -31,10 +31,12 @@ import { InvoicePrintLayout } from '@/components/invoice-print-layout';
 import { useTranslation } from '@/hooks/use-translation';
 import { cn } from '@/lib/utils';
 import { format, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
-import { Users, FileText, ChevronRight, Calendar, DollarSign, Search, Printer, Loader2, Trash2 } from 'lucide-react';
+import { Users, FileText, ChevronRight, Calendar, DollarSign, Search, Printer, Loader2, Trash2, Pencil } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
 import type { DateRange } from 'react-day-picker';
 import { DateRangePicker } from '@/components/date-range-picker';
+import { useInvoiceForm } from '@/hooks/use-invoice-form';
+import { useRouter } from 'next/navigation';
 
 
 export default function BuyersPage() {
@@ -42,6 +44,8 @@ export default function BuyersPage() {
   const { buyers, invoices, getInvoicesForBuyer, printInvoice: appPrintInvoice, getPaymentsForInvoice, deleteInvoice, centralDateRange } = useAppData();
   const { settings } = useSettings();
   const { t } = useTranslation();
+  const { loadInvoiceForEditing } = useInvoiceForm();
+  const router = useRouter();
 
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -129,6 +133,13 @@ export default function BuyersPage() {
       setInvoiceToDelete(selectedInvoice);
     }
   };
+
+  const handleEditClick = () => {
+    if (selectedInvoice && user?.role === 'admin') {
+      loadInvoiceForEditing(selectedInvoice);
+      router.push('/dashboard/invoice');
+    }
+  }
 
   const confirmDelete = async () => {
     if (invoiceToDelete) {
@@ -319,10 +330,15 @@ export default function BuyersPage() {
                   <CardTitle>{t('invoice_details_title')}</CardTitle>
                   <div className="flex items-center gap-2">
                       {user?.role === 'admin' && (
-                        <Button variant="destructive" onClick={handleDeleteClick} disabled={!selectedInvoice || isDeleting}>
-                          {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Trash2 className="mr-2 h-4 w-4"/>}
-                          Delete
-                        </Button>
+                        <>
+                          <Button variant="outline" onClick={handleEditClick} disabled={!selectedInvoice}>
+                            <Pencil className="mr-2 h-4 w-4"/> Edit
+                          </Button>
+                          <Button variant="destructive" onClick={handleDeleteClick} disabled={!selectedInvoice || isDeleting}>
+                            {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Trash2 className="mr-2 h-4 w-4"/>}
+                            Delete
+                          </Button>
+                        </>
                       )}
                       <Button onClick={handlePrint} disabled={!selectedInvoice || isPrinting}>
                           {isPrinting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>}
@@ -398,3 +414,5 @@ export default function BuyersPage() {
     </>
   );
 }
+
+    

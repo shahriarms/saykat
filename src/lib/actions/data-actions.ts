@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import { Pool } from 'pg';
@@ -31,6 +30,13 @@ export async function addInvoice(invoiceData: Omit<Invoice, 'id'>): Promise<Invo
         throw new Error("Database not connected.");
     }
     return PostgresDataService.addInvoice(invoiceData);
+}
+
+export async function updateInvoice(invoiceId: number, invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> {
+    if (!usePostgres) {
+        throw new Error("Database not connected.");
+    }
+    return PostgresDataService.updateInvoice(invoiceId, invoiceData);
 }
 
 export async function deleteInvoice(invoiceId: number): Promise<{ success: boolean }> {
@@ -142,3 +148,5 @@ export async function importAllData(data: BackupData): Promise<{ success: boolea
     
     return PostgresDataService.importAllData(data);
 }
+
+    

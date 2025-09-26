@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import { Pool } from 'pg';
@@ -129,6 +128,55 @@ class PostgresDataService {
             
             await client.query('COMMIT');
             return formatRow(finalInvoiceData) as Invoice;
+
+        } catch (e) {
+            await client.query('ROLLBACK');
+            throw e;
+        } finally {
+            client.release();
+        }
+    }
+
+    static async updateInvoice(invoiceId: number, invoiceData: Omit<Invoice, 'id'>): Promise<Invoice> {
+        const db = getPool();
+        const client = await db.connect();
+        try {
+            await client.query('BEGIN');
+            
+            const originalInvoiceResult = await client.query('SELECT items FROM invoices WHERE id = $1', [invoiceId]);
+            if (originalInvoiceResult.rows.length === 0) {
+                throw new Error("Invoice to update not found.");
+            }
+            const originalItems: InvoiceItem[] = originalInvoiceResult.rows[0].items;
+
+            // Calculate stock changes
+            const stockChanges = new Map<string, number>();
+            originalItems.forEach(item => {
+                stockChanges.set(item.id, (stockChanges.get(item.id) || 0) + item.quantity);
+            });
+            invoiceData.items.forEach(item => {
+                stockChanges.set(item.id, (stockChanges.get(item.id) || 0) - item.quantity);
+            });
+            
+            const stockUpdates = Array.from(stockChanges.entries()).map(([id, stockChange]) => ({ id, stockChange }));
+            if (stockUpdates.length > 0) {
+                await PostgresProductService.updateMultipleStocks(stockUpdates, client);
+            }
+
+            const updatedResult = await client.query(
+                `UPDATE invoices SET 
+                    customer_name = $1, customer_address = $2, customer_phone = $3, 
+                    items = $4, subtotal = $5, paid_amount = $6, due_amount = $7, total_profit = $8
+                 WHERE id = $9 RETURNING *`,
+                [
+                    invoiceData.customerName, invoiceData.customerAddress, invoiceData.customerPhone,
+                    JSON.stringify(invoiceData.items), invoiceData.subtotal, invoiceData.paidAmount,
+                    invoiceData.dueAmount, invoiceData.totalProfit, invoiceId
+                ]
+            );
+
+            await client.query('COMMIT');
+            return formatRow(updatedResult.rows[0]) as Invoice;
 
         } catch (e) {
             await client.query('ROLLBACK');
@@ -356,3 +404,5 @@ class PostgresDataService {
 }
 
 export default PostgresDataService;
+
+    

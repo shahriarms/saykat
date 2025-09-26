@@ -31,6 +31,7 @@ export interface DraftInvoice {
     cashReceived?: number;
     changeAmount?: number;
     buyerId?: string;
+    originalInvoiceId?: number; // To track if we are editing an existing invoice
 }
 
 interface InvoiceFormContextType {
@@ -45,6 +46,7 @@ interface InvoiceFormContextType {
     updateInvoiceItem: (itemId: string, itemUpdate: { [key: string]: any }) => void;
     removeInvoiceItem: (itemId: string) => void;
     resetActiveDraft: () => void;
+    loadInvoiceForEditing: (invoice: Invoice) => void;
     isFormLoading: boolean;
     products: Product[];
 }
@@ -77,6 +79,7 @@ const createNewDraft = (index: number, lastInvoiceId: number, isLoading: boolean
         cashReceived: undefined,
         changeAmount: 0,
         buyerId: undefined,
+        originalInvoiceId: undefined,
     }
 };
 
@@ -150,8 +153,10 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
             // This runs on subsequent loads (e.g., after an invoice is created)
             // It ensures draft IDs are correct if lastInvoiceId has changed.
             const correctedDrafts = drafts.map((draft, index) => {
+                if (draft.originalInvoiceId) {
+                    return draft; // Don't change ID of an invoice being edited
+                }
                 const newId = lastInvoiceId + index + 1;
-                // Only update if it's a new session or the ID is clearly a placeholder
                  if (draft.label === `Memo #${draft.id}` || draft.label.startsWith('New Memo')) {
                      return { ...draft, id: newId, label: `Memo #${newId}` };
                  }
@@ -228,7 +233,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                         newVersion.dueAmount = dueAmount;
                         newVersion.totalProfit = totalProfit;
 
-                        if(typeof newVersion.id === 'string' || (typeof newVersion.id === 'number' && update.customerName && newVersion.label.startsWith('Memo'))) {
+                        if(!newVersion.originalInvoiceId && (typeof newVersion.id === 'string' || (update.customerName && newVersion.label.startsWith('Memo')))) {
                             newVersion.label = update.customerName || `Memo #${newVersion.id}`;
                         }
                         resolvedDraft = newVersion;
@@ -336,6 +341,36 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
         }));
     }, [activeDraftIndex, lastInvoiceId, isAppDataLoading]);
 
+    const loadInvoiceForEditing = useCallback((invoiceToEdit: Invoice) => {
+        const draftItems: DraftInvoiceItem[] = invoiceToEdit.items.map(item => {
+            const product = products.find(p => p.id === item.id);
+            return {
+                id: item.id,
+                name: item.name,
+                quantity: item.quantity,
+                price: item.price,
+                originalPrice: product?.sellingPrice || item.price,
+                buyingPrice: item.buyingPrice,
+                profitMargin: product?.profitMargin || 0,
+                profitAmount: item.profitAmount,
+            }
+        });
+
+        const draftToEdit: DraftInvoice = {
+            ...invoiceToEdit,
+            label: `Editing #${invoiceToEdit.id}`,
+            items: draftItems,
+            originalInvoiceId: invoiceToEdit.id,
+        };
+
+        setDrafts(prev => {
+            const newDrafts = [...prev];
+            newDrafts[activeDraftIndex] = draftToEdit;
+            return newDrafts;
+        });
+
+    }, [activeDraftIndex, products]);
+
 
     return useMemo(() => ({
         drafts,
@@ -349,9 +384,10 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
         updateInvoiceItem,
         removeInvoiceItem,
         resetActiveDraft,
+        loadInvoiceForEditing,
         isFormLoading: isAppDataLoading,
         products,
-    }), [drafts, activeDraftIndex, activeDraft, addNewDraft, removeDraft, setActiveDraftIndex, updateActiveDraft, addInvoiceItem, updateInvoiceItem, removeInvoiceItem, resetActiveDraft, isAppDataLoading, products]);
+    }), [drafts, activeDraftIndex, activeDraft, addNewDraft, removeDraft, setActiveDraftIndex, updateActiveDraft, addInvoiceItem, updateInvoiceItem, removeInvoiceItem, resetActiveDraft, loadInvoiceForEditing, isAppDataLoading, products]);
 }
 
 export function InvoiceFormProvider({ children }: { children: ReactNode }) {
