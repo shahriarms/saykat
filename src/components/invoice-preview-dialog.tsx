@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Dialog,
   DialogContent,
@@ -12,11 +13,13 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, Printer } from 'lucide-react';
+import { Loader2, Printer, Pencil } from 'lucide-react';
 import { InvoicePrintLayout } from './invoice-print-layout';
 import type { Invoice } from '@/lib/types';
 import { useSettings } from '@/hooks/use-settings';
 import { useAppData } from '@/hooks/use-app-data';
+import { useUser } from '@/hooks/use-user';
+import { useInvoiceForm } from '@/hooks/use-invoice-form';
 
 interface InvoicePreviewDialogProps {
   open: boolean;
@@ -27,6 +30,10 @@ interface InvoicePreviewDialogProps {
 export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePreviewDialogProps) {
     const { settings } = useSettings();
     const { printInvoice: appPrintInvoice } = useAppData();
+    const { user } = useUser();
+    const { loadInvoiceForEditing } = useInvoiceForm();
+    const router = useRouter();
+
     const [isPrinting, setIsPrinting] = useState(false);
     const [invoiceToPrint, setInvoiceToPrint] = useState<Invoice | null>(null);
 
@@ -46,6 +53,14 @@ export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePre
             setInvoiceToPrint(invoice);
         }
     };
+
+    const handleEdit = () => {
+        if (user?.role === 'admin') {
+            loadInvoiceForEditing(invoice);
+            onOpenChange(false); // Close the dialog first
+            router.push('/dashboard/invoice');
+        }
+    }
   
     useEffect(() => {
         if (invoiceToPrint) {
@@ -123,14 +138,23 @@ export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePre
                 </div>
             </ScrollArea>
 
-            <DialogFooter>
-            <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
-                Close
-            </Button>
-            <Button onClick={handlePrint} disabled={isPrinting}>
-                {isPrinting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>}
-                Print
-            </Button>
+            <DialogFooter className="sm:justify-between">
+                <div>
+                     {user?.role === 'admin' && (
+                        <Button variant="outline" onClick={handleEdit}>
+                            <Pencil className="mr-2 h-4 w-4" /> Edit Invoice
+                        </Button>
+                    )}
+                </div>
+                <div className="flex gap-2">
+                    <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
+                        Close
+                    </Button>
+                    <Button onClick={handlePrint} disabled={isPrinting}>
+                        {isPrinting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>}
+                        Print
+                    </Button>
+                </div>
             </DialogFooter>
         </DialogContent>
         </Dialog>
