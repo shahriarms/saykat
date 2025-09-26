@@ -34,8 +34,8 @@ const productSchema = z.object({
   category: z.string().min(2, { message: 'Category must be at least 2 characters.' }),
   subCategory: z.string().min(1, { message: 'Sub-category is required.' }),
   buyingPrice: z.coerce.number().optional().default(0),
-  profitMargin: z.coerce.number().optional().default(0),
-  sellingPrice: z.coerce.number(),
+  profitMargin: z.coerce.number().positive({ message: 'Profit margin must be a positive number.'}),
+  sellingPrice: z.coerce.number().positive({ message: 'Selling price must be a positive number.'}),
   stock: z.coerce.number().nonnegative({ message: 'Stock must be a non-negative number.' }),
 });
 
