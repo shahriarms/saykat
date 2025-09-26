@@ -82,9 +82,9 @@ export default function SignupPage() {
   
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-sm border-white/20 bg-card/60 shadow-2xl backdrop-blur-lg transition-transform duration-300 ease-in-out hover:scale-102 hover:shadow-xl">
+      <Card className="w-full max-w-sm border-white/20 bg-card/60 shadow-lg backdrop-blur-lg transition-transform duration-300 ease-in-out hover:scale-102 hover:shadow-xl">
         <CardHeader className="text-center">
-          <StockPilotLogo />
+          <StockPilotLogo className="mx-auto" />
           <CardTitle className="text-3xl font-bold tracking-tight">
             <span className="text-foreground">Mahmud Engineering Shop</span>
           </CardTitle>
