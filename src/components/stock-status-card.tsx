@@ -18,17 +18,26 @@ import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Search } from 'lucide-react';
 import { Button } from './ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface StockStatusCardProps {
   products: Product[];
   invoices: Invoice[];
 }
 
+// Helper to chunk array
+const chunk = <T,>(arr: T[], size: number): T[][] =>
+  Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
+    arr.slice(i * size, i * size + size)
+  );
+
+
 export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
   const [activeTab, setActiveTab] = React.useState<'Material' | 'Hardware'>('Material');
   const [searchTerm, setSearchTerm] = React.useState('');
   const [categoryFilter, setCategoryFilter] = React.useState('');
   const [subCategoryFilter, setSubCategoryFilter] = React.useState('');
+  const isMobile = useIsMobile();
 
   const { filteredProducts, categories, subCategories } = React.useMemo(() => {
     const soldQuantities = new Map<string, number>();
@@ -90,6 +99,10 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
         </div>
       );
     }
+    
+    // Determine chunk size based on screen size for a 2-row layout
+    const chunkSize = isMobile ? 4 : 8;
+    const chunkedProducts = chunk(productList, chunkSize);
 
     return (
       <Carousel
@@ -98,16 +111,22 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
         }}
         className="w-full px-12"
       >
-        <CarouselContent className="flex flex-wrap -ml-2">
-          {productList.map(product => (
-            <CarouselItem key={product.id} className="basis-full md:basis-1/2 lg:basis-1/4 p-2 flex flex-col items-center justify-center">
-                <StockVolumeDisplay
-                  productName={product.name}
-                  currentStock={product.stock}
-                  totalSold={product.totalSold}
-                  maxStock={product.totalEverAdded}
-                  unit={product.mainCategory === 'Material' ? 'kg' : 'pcs'}
-                />
+        <CarouselContent>
+          {chunkedProducts.map((chunk, index) => (
+            <CarouselItem key={index}>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-x-2 gap-y-4">
+                {chunk.map(product => (
+                   <div key={product.id} className="flex flex-col items-center justify-start h-full">
+                      <StockVolumeDisplay
+                        productName={product.name}
+                        currentStock={product.stock}
+                        totalSold={product.totalSold}
+                        maxStock={product.totalEverAdded}
+                        unit={product.mainCategory === 'Material' ? 'kg' : 'pcs'}
+                      />
+                   </div>
+                ))}
+              </div>
             </CarouselItem>
           ))}
         </CarouselContent>
