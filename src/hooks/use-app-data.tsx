@@ -216,7 +216,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
             }
         } else {
             const sellingPrice = productData.buyingPrice + (productData.buyingPrice * productData.profitMargin / 100);
-            const newProduct = { ...productData, sellingPrice, id: `prod-${Date.now()}`, stock: productData.stock, containerSize: productData.stock };
+            const newProduct: Product = { 
+                ...productData, 
+                sellingPrice, 
+                id: `prod-${Date.now()}`,
+                containerSize: productData.stock, // Set containerSize to initial stock
+            };
             const newProducts = [...products, newProduct];
             setProducts(newProducts);
             saveDataToLocalStorage('products', newProducts);
@@ -238,8 +243,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
                 ...p,
                 sellingPrice: p.buyingPrice + (p.buyingPrice * p.profitMargin / 100),
                 id: `prod-${Date.now()}-${Math.random()}`,
-                stock: p.stock,
-                containerSize: p.stock
+                containerSize: p.stock,
             }));
             const updatedProducts = [...products, ...newProducts];
             setProducts(updatedProducts);
@@ -254,21 +258,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
             toast({ variant: 'destructive', title: 'Error', description: 'Product not found for update.' });
             return;
         }
-
+    
         const stockToAdd = updatedData.stock || 0;
         let finalStock;
         
         if (isAdditive) {
-            finalStock = (productToUpdate.stock || 0) + stockToAdd;
+            finalStock = productToUpdate.stock + stockToAdd;
         } else {
+            // This is for full updates where stock value is absolute
             finalStock = stockToAdd;
         }
-
+    
         const completeUpdateData = {
             ...productToUpdate,
             ...updatedData,
             stock: finalStock,
-            containerSize: productToUpdate.containerSize, // Keep container size unchanged
+            // When adding stock via `isAdditive`, containerSize remains unchanged.
+            containerSize: isAdditive ? productToUpdate.containerSize : (updatedData.containerSize ?? productToUpdate.containerSize),
         };
         
         if (isDbConnected) {
@@ -823,5 +829,3 @@ export function useAppData() {
     }
     return context;
 }
-
-    
