@@ -29,6 +29,7 @@ function formatProduct(row: any): Product {
         profitMargin: parseFloat(row.profitMargin) || 0,
         sellingPrice: parseFloat(row.sellingPrice) || 0,
         stock: parseInt(row.stock, 10) || 0,
+        totalEverAdded: parseInt(row.totalEverAdded, 10) || 0,
         mainCategory: row.mainCategory,
         category: row.category,
         subCategory: row.subCategory,
@@ -57,11 +58,11 @@ class PostgresProductService {
     static async addProduct(productData: Omit<Product, 'id'>): Promise<Product> {
         const db = getPool();
         const newId = `prod-${Date.now()}`;
-        const newProduct: Product = { ...productData, id: newId };
+        const newProduct: Product = { ...productData, id: newId, totalEverAdded: productData.stock };
 
         await db.query(
-            'INSERT INTO products (id, name, sku, "buyingPrice", "profitMargin", "sellingPrice", stock, "mainCategory", category, "subCategory") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
-            [newProduct.id, newProduct.name, newProduct.sku, newProduct.buyingPrice, newProduct.profitMargin, newProduct.sellingPrice, newProduct.stock, newProduct.mainCategory, newProduct.category, newProduct.subCategory]
+            'INSERT INTO products (id, name, sku, "buyingPrice", "profitMargin", "sellingPrice", stock, "totalEverAdded", "mainCategory", category, "subCategory") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)',
+            [newProduct.id, newProduct.name, newProduct.sku, newProduct.buyingPrice, newProduct.profitMargin, newProduct.sellingPrice, newProduct.stock, newProduct.totalEverAdded, newProduct.mainCategory, newProduct.category, newProduct.subCategory]
         );
         return newProduct;
     }
@@ -73,10 +74,10 @@ class PostgresProductService {
             await client.query('BEGIN');
             const newProducts = await Promise.all(productsData.map(async p => {
                 const newId = `prod-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-                const newProduct: Product = { ...p, id: newId };
+                const newProduct: Product = { ...p, id: newId, totalEverAdded: p.stock };
                 await client.query(
-                    'INSERT INTO products (id, name, sku, "buyingPrice", "profitMargin", "sellingPrice", stock, "mainCategory", category, "subCategory") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
-                    [newProduct.id, newProduct.name, newProduct.sku, newProduct.buyingPrice, newProduct.profitMargin, newProduct.sellingPrice, newProduct.stock, newProduct.mainCategory, newProduct.category, newProduct.subCategory]
+                    'INSERT INTO products (id, name, sku, "buyingPrice", "profitMargin", "sellingPrice", stock, "totalEverAdded", "mainCategory", category, "subCategory") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)',
+                    [newProduct.id, newProduct.name, newProduct.sku, newProduct.buyingPrice, newProduct.profitMargin, newProduct.sellingPrice, newProduct.stock, newProduct.totalEverAdded, newProduct.mainCategory, newProduct.category, newProduct.subCategory]
                 );
                 return newProduct;
             }));
@@ -92,10 +93,10 @@ class PostgresProductService {
 
     static async updateProduct(productId: string, updatedData: Omit<Product, 'id'>): Promise<Product | null> {
         const db = getPool();
-        const { name, sku, buyingPrice, profitMargin, sellingPrice, stock, mainCategory, category, subCategory } = updatedData;
+        const { name, sku, buyingPrice, profitMargin, sellingPrice, stock, totalEverAdded, mainCategory, category, subCategory } = updatedData;
         const result = await db.query(
-            'UPDATE products SET name = $1, sku = $2, "buyingPrice" = $3, "profitMargin" = $4, "sellingPrice" = $5, stock = $6, "mainCategory" = $7, category = $8, "subCategory" = $9 WHERE id = $10 RETURNING *',
-            [name, sku, buyingPrice, profitMargin, sellingPrice, stock, mainCategory, category, subCategory, productId]
+            'UPDATE products SET name = $1, sku = $2, "buyingPrice" = $3, "profitMargin" = $4, "sellingPrice" = $5, stock = $6, "totalEverAdded" = $7, "mainCategory" = $8, category = $9, "subCategory" = $10 WHERE id = $11 RETURNING *',
+            [name, sku, buyingPrice, profitMargin, sellingPrice, stock, totalEverAdded, mainCategory, category, subCategory, productId]
         );
         return formatProduct(result.rows[0]);
     }

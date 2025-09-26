@@ -41,9 +41,9 @@ interface AppDataContextType {
     setCentralDateRange: (dateRange: DateRange | undefined) => void;
     
     // Product Functions
-    addProduct: (product: Omit<Product, 'id' | 'sellingPrice'>) => Promise<void>;
-    addMultipleProducts: (products: Omit<Product, 'id'|'sellingPrice'>[]) => Promise<void>;
-    updateProduct: (productId: string, updatedData: Omit<Product, 'id' | 'sellingPrice'>) => Promise<void>;
+    addProduct: (product: Omit<Product, 'id' | 'sellingPrice' | 'totalEverAdded'>) => Promise<void>;
+    addMultipleProducts: (products: Omit<Product, 'id'|'sellingPrice' | 'totalEverAdded'>[]) => Promise<void>;
+    updateProduct: (productId: string, updatedData: Partial<Omit<Product, 'id' | 'sellingPrice'>>, isAdditive: boolean) => Promise<void>;
     deleteProduct: (productId: string) => Promise<void>;
     getProductById: (productId: string) => Product | undefined;
 
@@ -204,7 +204,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }, [settings, toast]);
 
 
-    const addProduct = useCallback(async (productData: Omit<Product, 'id' | 'sellingPrice'>) => {
+    const addProduct = useCallback(async (productData: Omit<Product, 'id' | 'sellingPrice' | 'totalEverAdded'>) => {
         if (isDbConnected) {
             try {
                 await productActions.addProduct(productData);
@@ -216,7 +216,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
             }
         } else {
             const sellingPrice = productData.buyingPrice + (productData.buyingPrice * productData.profitMargin / 100);
-            const newProduct = { ...productData, sellingPrice, id: `prod-${Date.now()}` };
+            const newProduct = { ...productData, sellingPrice, totalEverAdded: productData.stock, id: `prod-${Date.now()}` };
             const newProducts = [...products, newProduct];
             setProducts(newProducts);
             saveDataToLocalStorage('products', newProducts);
@@ -224,7 +224,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         }
     }, [isDbConnected, toast, loadAllData, products, saveDataToLocalStorage]);
 
-    const addMultipleProducts = useCallback(async (productsData: Omit<Product, 'id' | 'sellingPrice'>[]) => {
+    const addMultipleProducts = useCallback(async (productsData: Omit<Product, 'id' | 'sellingPrice' | 'totalEverAdded'>[]) => {
         if (isDbConnected) {
             try {
                 await productActions.addMultipleProducts(productsData);
@@ -237,6 +237,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
             const newProducts = productsData.map(p => ({
                 ...p,
                 sellingPrice: p.buyingPrice + (p.buyingPrice * p.profitMargin / 100),
+                totalEverAdded: p.stock,
                 id: `prod-${Date.now()}-${Math.random()}`
             }));
             const updatedProducts = [...products, ...newProducts];
@@ -246,22 +247,44 @@ export function DataProvider({ children }: { children: ReactNode }) {
         }
     }, [isDbConnected, toast, loadAllData, products, saveDataToLocalStorage]);
 
-    const updateProduct = useCallback(async (productId: string, updatedData: Omit<Product, 'id' | 'sellingPrice'>) => {
+    const updateProduct = useCallback(async (productId: string, updatedData: Partial<Omit<Product, 'id' | 'sellingPrice'>>, isAdditive: boolean) => {
+        const productToUpdate = products.find(p => p.id === productId);
+        if (!productToUpdate) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Product not found for update.' });
+            return;
+        }
+
+        const newStockAmount = updatedData.stock || 0;
+        let finalStock = newStockAmount;
+        let finalTotalEverAdded = productToUpdate.totalEverAdded;
+
+        if (isAdditive) {
+            finalStock = productToUpdate.stock + newStockAmount;
+            finalTotalEverAdded = newStockAmount; // The size is the last added amount
+        }
+
+        const completeUpdateData = {
+            ...productToUpdate,
+            ...updatedData,
+            stock: finalStock,
+            totalEverAdded: finalTotalEverAdded
+        };
+        
         if (isDbConnected) {
             try {
-                await productActions.updateProduct(productId, updatedData);
+                await productActions.updateProduct(productId, completeUpdateData);
                 await loadAllData();
-                toast({ title: "Product Updated", description: `Details for ${updatedData.name} have been updated.` });
+                toast({ title: "Product Updated", description: `Details for ${completeUpdateData.name} have been updated.` });
             } catch (error) {
                 console.error("Failed to update product:", error);
                 toast({ variant: 'destructive', title: 'Error', description: 'Failed to update product. Check DB connection.' });
             }
         } else {
-            const sellingPrice = updatedData.buyingPrice + (updatedData.buyingPrice * updatedData.profitMargin / 100);
-            const newProducts = products.map(p => p.id === productId ? { ...p, ...updatedData, sellingPrice } : p);
+            const sellingPrice = completeUpdateData.buyingPrice + (completeUpdateData.buyingPrice * completeUpdateData.profitMargin / 100);
+            const newProducts = products.map(p => p.id === productId ? { ...completeUpdateData, sellingPrice } : p);
             setProducts(newProducts);
             saveDataToLocalStorage('products', newProducts);
-            toast({ title: "Product Updated (Local)", description: `Details for ${updatedData.name} updated locally.` });
+            toast({ title: "Product Updated (Local)", description: `Details for ${completeUpdateData.name} updated locally.` });
         }
     }, [isDbConnected, toast, loadAllData, products, saveDataToLocalStorage]);
 
@@ -799,5 +822,3 @@ export function useAppData() {
     }
     return context;
 }
-
-    
