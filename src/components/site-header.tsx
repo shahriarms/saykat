@@ -75,21 +75,26 @@ export function SiteHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 bg-muted/30 px-4 sm:px-6">
-        {/* Left Section: Logo and Title */}
-        <div className="flex items-center justify-start gap-2 min-w-0">
-            <Link href="/dashboard" className="flex flex-shrink-0 items-center gap-2">
-                <StockPilotLogo className="w-14 h-14 flex-shrink-0" />
-            </Link>
-            <h1
-              className="text-3xl font-bold tracking-tight"
-              style={{
-                textShadow:
-                  '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff',
-              }}
-            >
-              <span className="text-foreground">Mahmud Engineering Shop</span>
-            </h1>
+      <header className="sticky top-0 z-20 h-16 grid grid-cols-3 items-center gap-4 bg-muted/30 px-4 sm:px-6">
+        {/* Left Section: Empty for spacing */}
+        <div className="flex items-center justify-start">
+          {/* Can add elements here if needed in the future */}
+        </div>
+
+        {/* Center Section: Logo and Title */}
+        <div className="flex items-center justify-center gap-2 min-w-0">
+          <Link href="/dashboard" className="flex flex-shrink-0 items-center gap-2">
+              <StockPilotLogo className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0" />
+          </Link>
+          <h1
+            className="text-lg sm:text-2xl font-bold tracking-tight whitespace-nowrap"
+            style={{
+              textShadow:
+                '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff',
+            }}
+          >
+            <span className="text-foreground">Mahmud Engineering Shop</span>
+          </h1>
         </div>
         
         {/* Right Section: Clock and User Menu */}
