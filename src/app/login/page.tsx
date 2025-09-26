@@ -17,12 +17,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from "@/hooks/use-toast";
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import app from '@/lib/firebase/firebase';
-import dynamic from 'next/dynamic';
-
-const ForgotPasswordDialog = dynamic(() => import('@/components/forgot-password-dialog').then(mod => mod.ForgotPasswordDialog), {
-    ssr: false,
-    loading: () => <Loader2 className="h-5 w-5 animate-spin" />
-});
+import { ForgotPasswordDialog } from '@/components/forgot-password-dialog';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -164,3 +159,5 @@ export default function LoginPage() {
     </>
   );
 }
+
+    

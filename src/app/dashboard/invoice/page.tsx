@@ -30,11 +30,9 @@ import type { Product, Buyer } from '@/lib/types';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
-import dynamic from 'next/dynamic';
-import { cn } from '@/lib/utils';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { StockVolumeDisplay } from '@/components/stock-volume-display';
-
+import { cn } from '@/lib/utils';
 
 export default function InvoicePage() {
   const { addInvoice, updateInvoice, buyers, invoices: allInvoices } = useAppData();
@@ -656,3 +654,5 @@ export default function InvoicePage() {
     </>
   );
 }
+
+    

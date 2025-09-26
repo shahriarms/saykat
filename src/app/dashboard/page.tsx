@@ -20,23 +20,19 @@ import dynamic from 'next/dynamic';
 import { DateRangePicker } from '@/components/date-range-picker';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-
-
-const DailySalesDialog = dynamic(() => import('@/components/daily-sales-report-dialog').then(mod => mod.DailySalesDialog), { ssr: false });
-const DailyExpensesReportDialog = dynamic(() => import('@/components/daily-expenses-report-dialog').then(mod => mod.DailyExpensesReportDialog), { ssr: false });
-const DailyDueReportDialog = dynamic(() => import('@/components/daily-due-report-dialog').then(mod => mod.DailyDueReportDialog), { ssr: false });
-const DailyUnitsSoldReportDialog = dynamic(() => import('@/components/daily-units-sold-report-dialog').then(mod => mod.DailyUnitsSoldReportDialog), { ssr: false });
-const DailyAttendanceReportDialog = dynamic(() => import('@/components/daily-attendance-report-dialog').then(mod => mod.DailyAttendanceReportDialog), { ssr: false });
-const GrossProfitReportDialog = dynamic(() => import('@/components/gross-profit-report-dialog').then(mod => mod.GrossProfitReportDialog), { ssr: false });
-
-const MonthlySalesDialog = dynamic(() => import('@/components/monthly-sales-report-dialog').then(mod => mod.MonthlySalesDialog), { ssr: false });
-const MonthlyExpensesDialog = dynamic(() => import('@/components/monthly-expenses-report-dialog').then(mod => mod.MonthlyExpensesDialog), { ssr: false });
-const MonthlyDueDialog = dynamic(() => import('@/components/monthly-due-report-dialog').then(mod => mod.MonthlyDueDialog), { ssr: false });
-const MonthlyUnitsSoldDialog = dynamic(() => import('@/components/monthly-units-sold-report-dialog').then(mod => mod.MonthlyUnitsSoldDialog), { ssr: false });
-const MonthlySalaryReportDialog = dynamic(() => import('@/components/monthly-salary-report-dialog').then(mod => mod.MonthlySalaryReportDialog), { ssr: false });
-const InvoicePreviewDialog = dynamic(() => import('@/components/invoice-preview-dialog').then(mod => mod.InvoicePreviewDialog), { ssr: false });
-const StockStatusCard = dynamic(() => import('@/components/stock-status-card').then(mod => mod.StockStatusCard), { ssr: false });
-
+import { DailySalesDialog } from '@/components/daily-sales-report-dialog';
+import { DailyExpensesReportDialog } from '@/components/daily-expenses-report-dialog';
+import { DailyDueReportDialog } from '@/components/daily-due-report-dialog';
+import { DailyUnitsSoldReportDialog } from '@/components/daily-units-sold-report-dialog';
+import { DailyAttendanceReportDialog } from '@/components/daily-attendance-report-dialog';
+import { GrossProfitReportDialog } from '@/components/gross-profit-report-dialog';
+import { MonthlySalesDialog } from '@/components/monthly-sales-report-dialog';
+import { MonthlyExpensesDialog } from '@/components/monthly-expenses-report-dialog';
+import { MonthlyDueDialog } from '@/components/monthly-due-report-dialog';
+import { MonthlyUnitsSoldDialog } from '@/components/monthly-units-sold-report-dialog';
+import { MonthlySalaryReportDialog } from '@/components/monthly-salary-report-dialog';
+import { InvoicePreviewDialog } from '@/components/invoice-preview-dialog';
+import { StockStatusCard } from '@/components/stock-status-card';
 
 export default function Dashboard() {
   const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, invoices: allInvoices, getAttendanceForDate, centralDateRange, setCentralDateRange } = useAppData();
@@ -563,3 +559,5 @@ export default function Dashboard() {
     </>
   );
 }
+
+    
