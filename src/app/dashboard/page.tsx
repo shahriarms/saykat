@@ -19,6 +19,7 @@ import type { DateRange, Invoice, Expense, SalaryPayment, Attendance, Product } 
 import dynamic from 'next/dynamic';
 import { DateRangePicker } from '@/components/date-range-picker';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
 
 const DailySalesDialog = dynamic(() => import('@/components/daily-sales-report-dialog').then(mod => mod.DailySalesDialog), { ssr: false });
@@ -194,17 +195,26 @@ export default function Dashboard() {
              {recentMemos.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                     {recentMemos.map(invoice => (
-                        <button key={invoice.id} onClick={() => setSelectedInvoice(invoice)} className="group bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 overflow-hidden">
+                        <button 
+                            key={invoice.id} 
+                            onClick={() => setSelectedInvoice(invoice)} 
+                            className="group bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 overflow-hidden"
+                        >
                            <div className="p-4 bg-white relative overflow-hidden">
                                 <div className="absolute top-0 right-0 h-8 w-8 bg-gray-100" style={{clipPath: 'polygon(100% 0, 0 0, 100% 100%)'}}></div>
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="font-bold text-base text-gray-700">Inv #{invoice.id}</span>
-                                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${invoice.dueAmount > 0 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{invoice.dueAmount > 0 ? 'DUE' : 'PAID'}</span>
+                                <div className="flex justify-between items-center mb-2 flex-wrap gap-x-2">
+                                    <span className="font-bold text-base sm:text-lg text-gray-700">Inv #{invoice.id}</span>
+                                    <span className={cn(
+                                        "text-xs font-bold px-2 py-1 rounded-full",
+                                        invoice.dueAmount > 0 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                                    )}>
+                                        {invoice.dueAmount > 0 ? 'DUE' : 'PAID'}
+                                    </span>
                                 </div>
                                 <p className="text-left text-sm text-gray-600 truncate">{invoice.customerName}</p>
                             </div>
                             <div className="p-4 bg-gray-50/50 border-t border-dashed">
-                                <p className="text-left text-2xl font-bold font-mono text-gray-800">৳ {invoice.subtotal.toFixed(2)}</p>
+                                <p className="text-left text-2xl sm:text-3xl font-bold font-mono text-gray-800">৳ {invoice.subtotal.toFixed(2)}</p>
                             </div>
                             <div className="bg-gray-100 px-4 py-1.5">
                                 <p className="text-xs text-gray-500 text-center">{format(new Date(invoice.date), 'PP')}</p>
@@ -484,7 +494,7 @@ export default function Dashboard() {
       /> }
       { isDailyDueReportOpen && <DailyDueReportDialog
         open={isDailyDueReportOpen}
-        onOpenChange={setDailyDueReportOpen}
+        onOpen-Change={setDailyDueReportOpen}
         invoices={todayInvoices}
       /> }
       { isDailyUnitsSoldReportOpen && <DailyUnitsSoldReportDialog
