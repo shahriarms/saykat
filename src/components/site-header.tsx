@@ -75,26 +75,26 @@ export function SiteHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 bg-muted/30 px-4 sm:px-6 relative">
+      <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 bg-muted/30 px-4 sm:px-6">
         
         {/* Left Section: Logo and Title */}
         <div className="flex items-center gap-2 sm:absolute sm:left-1/2 sm:-translate-x-1/2">
             <Link href="/dashboard" className="flex flex-shrink-0 items-center gap-2">
                 <StockPilotLogo className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0" />
+                 <h1
+                    className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold tracking-tight whitespace-nowrap"
+                    style={{
+                    textShadow:
+                        '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff',
+                    }}
+                >
+                    <span className="text-foreground">Mahmud Engineering Shop</span>
+                </h1>
             </Link>
-            <h1
-                className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold tracking-tight whitespace-nowrap"
-                style={{
-                textShadow:
-                    '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff',
-                }}
-            >
-                <span className="text-foreground">Mahmud Engineering Shop</span>
-            </h1>
         </div>
         
         {/* Right Section: Clock and User Menu */}
-        <div className="flex flex-shrink-0 items-center justify-end gap-4 ml-auto">
+        <div className="ml-auto flex flex-shrink-0 items-center justify-end gap-2 sm:gap-4">
             <div className="hidden sm:flex"><LiveClock /></div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
