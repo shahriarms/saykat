@@ -34,6 +34,11 @@ export interface DraftInvoice {
     originalInvoiceId?: number; // To track if we are editing an existing invoice
 }
 
+interface EnrichedProduct extends Product {
+    totalSold: number;
+    totalEverAdded: number;
+}
+
 interface InvoiceFormContextType {
     drafts: DraftInvoice[];
     activeDraftIndex: number;
@@ -49,6 +54,7 @@ interface InvoiceFormContextType {
     loadInvoiceForEditing: (invoice: Invoice) => void;
     isFormLoading: boolean;
     products: Product[];
+    invoiceItemProducts: EnrichedProduct[];
 }
 
 const InvoiceFormContext = createContext<InvoiceFormContextType | undefined>(undefined);
@@ -112,11 +118,12 @@ const STORAGE_KEYS = {
 };
 
 const useInvoiceFormData = (): InvoiceFormContextType => {
-    const { isAppDataLoading, products, lastInvoiceId, buyers } = useAppData();
+    const { isAppDataLoading, products: dbProducts, lastInvoiceId, invoices: allInvoices } = useAppData();
     const { toast } = useToast();
     
     const [drafts, setDrafts] = useState<DraftInvoice[]>([]);
     const [activeDraftIndex, setActiveDraftIndex] = useState(0);
+    const [stockError, setStockError] = useState<string | null>(null);
 
     // Initialize state from localStorage ONCE on mount
     useEffect(() => {
@@ -180,8 +187,64 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
             }
         }
     }, [drafts, activeDraftIndex, isAppDataLoading]);
+
+     useEffect(() => {
+        if (stockError) {
+            toast({
+                variant: 'destructive',
+                title: 'Stock Limit Exceeded',
+                description: stockError,
+            });
+            setStockError(null); // Reset error after showing
+        }
+    }, [stockError, toast]);
     
     const activeDraft = useMemo(() => drafts[activeDraftIndex] || null, [drafts, activeDraftIndex]);
+    
+    // Memoize the available products by adding a live-calculated stock quantity
+    const products = useMemo(() => {
+        if (isAppDataLoading) return [];
+
+        const quantitiesInAllDrafts = new Map<string, number>();
+        drafts.forEach(draft => {
+            draft.items.forEach(item => {
+                const quantity = parseFloat(String(item.quantity)) || 0;
+                quantitiesInAllDrafts.set(item.id, (quantitiesInAllDrafts.get(item.id) || 0) + quantity);
+            });
+        });
+
+        return dbProducts.map(p => {
+            const liveStock = p.stock - (quantitiesInAllDrafts.get(p.id) || 0);
+            return {
+                ...p,
+                stock: liveStock < 0 ? 0 : liveStock, // Prevent negative stock in display
+            };
+        });
+    }, [dbProducts, drafts, isAppDataLoading]);
+
+    const invoiceItemProducts = useMemo(() => {
+        if (!activeDraft) return [];
+    
+        const soldQuantities = new Map<string, number>();
+        allInvoices.forEach(invoice => {
+          invoice.items.forEach(item => {
+            const quantity = parseFloat(String(item.quantity)) || 0;
+            soldQuantities.set(item.id, (soldQuantities.get(item.id) || 0) + quantity);
+          });
+        });
+      
+        return activeDraft.items.map(item => {
+            const product = dbProducts.find(p => p.id === item.id);
+            if (!product) return null;
+      
+            const totalCommittedSold = soldQuantities.get(product.id) || 0;
+            const dbStock = parseFloat(String(product.stock)) || 0;
+            const totalEverAdded = dbStock + totalCommittedSold;
+    
+            return { ...product, stock: dbStock, totalSold: totalCommittedSold, totalEverAdded };
+        }).filter((p): p is EnrichedProduct => p !== null);
+    }, [activeDraft, dbProducts, allInvoices]);
+
     
     const addNewDraft = useCallback(() => {
         if (drafts.length >= 10) {
@@ -254,12 +317,10 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
         const currentDraft = drafts[activeDraftIndex];
         if (!currentDraft) return;
 
-        if (product.stock <= 0) {
-            toast({
-                variant: 'destructive',
-                title: "Out of Stock",
-                description: `"${product.name}" is out of stock and cannot be added.`,
-            });
+        const liveAvailableStock = product.stock;
+
+        if (liveAvailableStock <= 0) {
+            setStockError(`"${product.name}" is out of stock and cannot be added.`);
             return;
         }
 
@@ -292,27 +353,29 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
             const { subtotal, changeAmount, paidAmount, dueAmount, totalProfit } = calculateTotals(newItems, draft.paidAmount, draft.cashReceived);
             return { ...draft, items: newItems, subtotal, changeAmount, paidAmount, dueAmount, totalProfit };
         }));
-    }, [activeDraftIndex, toast, drafts]);
+    }, [activeDraftIndex, toast, drafts, products]);
     
     const updateInvoiceItem = useCallback((itemId: string, itemUpdate: { [key: string]: any }) => {
         setDrafts(prev => prev.map((draft, index) => {
             if (index !== activeDraftIndex) return draft;
-
+    
+            const itemToUpdate = draft.items.find(i => i.id === itemId);
+            if (!itemToUpdate) return draft;
+    
             const product = products.find(p => p.id === itemId);
             if (!product) return draft;
-
-            const availableStock = product.stock;
+    
+            // Live available stock is the product's current stock (which already accounts for other drafts)
+            // plus the quantity of this item *already in this specific draft*.
+            const currentQuantityInDraft = parseFloat(String(itemToUpdate.quantity)) || 0;
+            const liveAvailableStock = product.stock + currentQuantityInDraft;
+    
             const newQuantity = parseFloat(String(itemUpdate.quantity));
-
-            if (itemUpdate.quantity !== undefined && newQuantity > availableStock) {
+    
+            if (itemUpdate.quantity !== undefined && newQuantity > liveAvailableStock) {
                 const unit = product.mainCategory === 'Material' ? 'kg' : 'pcs';
-                toast({
-                    variant: 'destructive',
-                    title: 'Stock Limit Exceeded',
-                    description: `Cannot add more than available stock: ${availableStock} ${unit}`
-                });
-                // We don't update and return the draft as is.
-                return draft;
+                setStockError(`Cannot add more than available stock: ${liveAvailableStock.toFixed(2)} ${unit}`);
+                return draft; // Don't update
             }
     
             const newItems = draft.items.map(item => {
@@ -325,7 +388,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                     const profitAmount = (price - updatedItem.buyingPrice) * quantity;
                     const profitMargin = updatedItem.buyingPrice > 0 ? ((price - updatedItem.buyingPrice) / updatedItem.buyingPrice) * 100 : 0;
                     
-                    updatedItem.quantity = String(updatedItem.quantity); // Keep as string for input field
+                    updatedItem.quantity = String(updatedItem.quantity);
                     updatedItem.price = String(updatedItem.price);
                     updatedItem.profitAmount = profitAmount;
                     updatedItem.profitMargin = profitMargin;
@@ -338,7 +401,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
             const { subtotal, changeAmount, paidAmount, dueAmount, totalProfit } = calculateTotals(newItems, draft.paidAmount, draft.cashReceived);
             return { ...draft, items: newItems, subtotal, changeAmount, paidAmount, dueAmount, totalProfit };
         }));
-    }, [activeDraftIndex, products, toast]);
+    }, [activeDraftIndex, products]);
 
     const removeInvoiceItem = useCallback((itemId: string) => {
         setDrafts(prev => prev.map((draft, index) => {
@@ -360,7 +423,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
 
     const loadInvoiceForEditing = useCallback((invoiceToEdit: Invoice) => {
         const draftItems: DraftInvoiceItem[] = invoiceToEdit.items.map(item => {
-            const product = products.find(p => p.id === item.id);
+            const product = dbProducts.find(p => p.id === item.id);
             return {
                 id: item.id,
                 name: item.name,
@@ -386,7 +449,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
             return newDrafts;
         });
 
-    }, [activeDraftIndex, products]);
+    }, [activeDraftIndex, dbProducts]);
 
 
     return useMemo(() => ({
@@ -404,7 +467,8 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
         loadInvoiceForEditing,
         isFormLoading: isAppDataLoading,
         products,
-    }), [drafts, activeDraftIndex, activeDraft, addNewDraft, removeDraft, setActiveDraftIndex, updateActiveDraft, addInvoiceItem, updateInvoiceItem, removeInvoiceItem, resetActiveDraft, loadInvoiceForEditing, isAppDataLoading, products]);
+        invoiceItemProducts,
+    }), [drafts, activeDraftIndex, activeDraft, addNewDraft, removeDraft, setActiveDraftIndex, updateActiveDraft, addInvoiceItem, updateInvoiceItem, removeInvoiceItem, resetActiveDraft, loadInvoiceForEditing, isAppDataLoading, products, invoiceItemProducts]);
 }
 
 export function InvoiceFormProvider({ children }: { children: ReactNode }) {

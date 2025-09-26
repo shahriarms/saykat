@@ -42,7 +42,7 @@ const CarouselPrevious = dynamic(() => import('@/components/ui/carousel').then(c
 
 
 export default function InvoicePage() {
-  const { addInvoice, updateInvoice, buyers, invoices: allInvoices } = useAppData();
+  const { addInvoice, updateInvoice, buyers } = useAppData();
   const { settings } = useSettings();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -60,7 +60,8 @@ export default function InvoicePage() {
     addInvoiceItem,
     resetActiveDraft,
     isFormLoading,
-    products
+    products,
+    invoiceItemProducts
   } = useInvoiceForm();
   
   const [draftToDelete, setDraftToDelete] = useState<DraftInvoice | null>(null);
@@ -73,78 +74,81 @@ export default function InvoicePage() {
   const [isBuyerPopoverOpen, setBuyerPopoverOpen] = useState(false);
   const buyerInputRef = useRef<HTMLInputElement>(null);
   
-  const invoiceItemProducts = useMemo(() => {
-    if (!activeDraft) return [];
-    
-    // Calculate total sold quantities from *committed* invoices
-    const soldQuantities = new Map<string, number>();
-    allInvoices.forEach(invoice => {
-      invoice.items.forEach(item => {
-        const quantity = parseFloat(String(item.quantity)) || 0;
-        soldQuantities.set(item.id, (soldQuantities.get(item.id) || 0) + quantity);
-      });
-    });
-  
-    // Map through the items in the current draft to get their corresponding product data
-    return activeDraft.items.map(item => {
-        const product = products.find(p => p.id === item.id);
-        if (!product) return null;
-  
-        const totalCommittedSold = soldQuantities.get(product.id) || 0;
-        const dbStock = parseFloat(String(product.stock)) || 0;
-        // TotalEverAdded is a more stable base than trying to calculate from current stock
-        const totalEverAdded = dbStock + totalCommittedSold;
-
-        // The live available stock for this item, CONSIDERING what's already in the cart
-        const quantityInCart = parseFloat(String(item.quantity)) || 0;
-        // The real-time stock is the database stock, not including what's in the current cart
-        const liveStock = dbStock;
-
-        return { ...product, stock: liveStock, totalSold: totalCommittedSold, totalEverAdded };
-    }).filter((p): p is Product & { totalSold: number; totalEverAdded: number } => p !== null);
-  }, [activeDraft, products, allInvoices]);
-
-
   useEffect(() => {
     const handleAfterPrint = async () => {
       if (!invoiceToPrint) return;
-      document.title = 'StockPilot'; // Reset title after print
-      setIsProcessing(true);
-      try {
-        let newInvoiceId: number | null;
-        if(invoiceToPrint.originalInvoiceId) {
-          newInvoiceId = await updateInvoice(invoiceToPrint.originalInvoiceId, invoiceToPrint);
-        } else {
-          newInvoiceId = await addInvoice(invoiceToPrint);
-        }
-
-        if (newInvoiceId) {
+      
+      const originalTitle = document.title;
+      document.title = 'StockPilot'; // Reset title
+      
+      const afterPrintAction = async () => {
+        try {
+          let newInvoiceId: number | null;
+          if(invoiceToPrint.originalInvoiceId) {
+            newInvoiceId = await updateInvoice(invoiceToPrint.originalInvoiceId, invoiceToPrint);
+          } else {
+            newInvoiceId = await addInvoice(invoiceToPrint);
+          }
+  
+          if (newInvoiceId) {
+            toast({
+              title: `Invoice #${newInvoiceId} Saved`,
+              description: `The invoice has been successfully ${invoiceToPrint.originalInvoiceId ? 'updated' : 'saved'}.`,
+            });
+          }
+        } catch (error: any) {
+          console.error("Failed to save invoice after printing:", error);
           toast({
-            title: `Invoice #${newInvoiceId} Saved`,
-            description: `The invoice has been successfully ${invoiceToPrint.originalInvoiceId ? 'updated' : 'saved'}.`,
+            variant: 'destructive',
+            title: 'Error Saving Invoice',
+            description: error.message || 'The invoice was printed, but failed to save.',
+          });
+        } finally {
+          setInvoiceToPrint(null);
+          setIsProcessing(false);
+          resetActiveDraft();
+          toast({
+            title: "Memo Ready",
+            description: "A new, empty memo is ready for you.",
           });
         }
-      } catch (error: any) {
-        console.error("Failed to save invoice after printing:", error);
-        toast({
-          variant: 'destructive',
-          title: 'Error Saving Invoice',
-          description: error.message || 'The invoice was printed, but failed to save.',
-        });
-      } finally {
-        setInvoiceToPrint(null);
-        resetActiveDraft();
-        setIsProcessing(false);
-        toast({
-          title: "Memo Ready",
-          description: "A new, empty memo is ready for you.",
-        });
       }
+      
+      setIsProcessing(true);
+      await afterPrintAction();
     };
 
-    window.addEventListener('afterprint', handleAfterPrint);
+    const handlePrintCancel = () => {
+        if (invoiceToPrint) {
+            setIsProcessing(false);
+            setInvoiceToPrint(null);
+            document.title = 'StockPilot';
+        }
+    };
+    
+    // Some browsers (like Chrome) fire 'afterprint' on cancel, some don't.
+    // This is a fallback timer.
+    let printCancelTimer: NodeJS.Timeout;
+
+    const onBeforePrint = () => {
+        clearTimeout(printCancelTimer); // Clear any existing timer
+    }
+
+    const onAfterPrint = () => {
+        handleAfterPrint();
+    };
+
+    window.addEventListener('beforeprint', onBeforePrint);
+    window.addEventListener('afterprint', onAfterPrint);
+    
+    if(invoiceToPrint) {
+        printCancelTimer = setTimeout(handlePrintCancel, 3000); // 3-second fallback
+    }
+
     return () => {
-      window.removeEventListener('afterprint', handleAfterPrint);
+      window.removeEventListener('beforeprint', onBeforePrint);
+      window.removeEventListener('afterprint', onAfterPrint);
+      clearTimeout(printCancelTimer);
     };
   }, [invoiceToPrint, addInvoice, updateInvoice, resetActiveDraft, toast, t]);
   
@@ -197,13 +201,10 @@ export default function InvoicePage() {
      const originalTitle = document.title;
      document.title = `invoice-${activeDraft.id}`;
 
-     // Prepare the data for printing.
      setInvoiceToPrint(activeDraft);
 
-     // Use a timeout to ensure the state update has rendered before printing.
      setTimeout(() => {
         window.print();
-        document.title = originalTitle; // Restore title in case 'afterprint' doesn't fire (e.g., user cancels print)
      }, 100);
   };
 
@@ -223,9 +224,10 @@ export default function InvoicePage() {
     subCategorySearch && setSubCategorySearch('');
   };
   
-  useEffect(() => {
+  const handleMainCategoryChange = (value: 'Material' | 'Hardware') => {
+    setMainCategoryFilter(value);
     resetFilters();
-  }, [mainCategoryFilter]);
+  }
   
   useEffect(() => {
     setSubCategoryFilter('');
@@ -365,7 +367,7 @@ export default function InvoicePage() {
                     <CardTitle>{t('add_products_label')}</CardTitle>
                     <RadioGroup
                         value={mainCategoryFilter}
-                        onValueChange={(value) => setMainCategoryFilter(value as 'Material' | 'Hardware')}
+                        onValueChange={(value) => handleMainCategoryChange(value as 'Material' | 'Hardware')}
                         className="flex space-x-4 pt-2"
                     >
                         <div className="flex items-center space-x-2"><RadioGroupItem value="Material" id="r-material" /><Label htmlFor="r-material">{t('material_tab')}</Label></div>
@@ -380,7 +382,7 @@ export default function InvoicePage() {
                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                <Input placeholder="Search..." className="pl-8 h-9" value={categorySearch} onChange={e => setCategorySearch(e.target.value)} />
                             </div>
-                           <ScrollArea className="flex-1 border rounded-md force-show-scrollbar">
+                           <ScrollArea className="flex-1 border rounded-md">
                                <div className="p-2 space-y-1">
                                     <Button variant={!categoryFilter ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setCategoryFilter('')}>{t('all_categories')}</Button>
                                     {categories.map(c => <Button key={c} variant={categoryFilter === c ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setCategoryFilter(c)}>{c}</Button>)}
@@ -394,7 +396,7 @@ export default function InvoicePage() {
                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                <Input placeholder="Search..." className="pl-8 h-9" value={subCategorySearch} onChange={e => setSubCategorySearch(e.target.value)} disabled={!categoryFilter}/>
                             </div>
-                           <ScrollArea className="flex-1 border rounded-md force-show-scrollbar">
+                           <ScrollArea className="flex-1 border rounded-md">
                                 <div className="p-2 space-y-1">
                                      <Button variant={!subCategoryFilter ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setSubCategoryFilter('')} disabled={!categoryFilter}>{t('all_subcategories')}</Button>
                                      {categoryFilter && subCategories.map(sc => <Button key={sc} variant={subCategoryFilter === sc ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setSubCategoryFilter(sc)}>{sc}</Button>)}
@@ -408,32 +410,20 @@ export default function InvoicePage() {
                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                <Input placeholder="Search..." className="pl-8 h-9" value={productSearch} onChange={e => setProductSearch(e.target.value)} />
                             </div>
-                           <ScrollArea className="flex-1 border rounded-md force-show-scrollbar">
+                           <ScrollArea className="flex-1 border rounded-md">
                                 <div className="p-2 space-y-1">
-                                     {filteredProducts.map(p => <Button key={p.id} variant="ghost" className="w-full justify-start h-8 text-xs" onClick={() => handleAddProduct(p)}>{p.name}</Button>)}
+                                     {filteredProducts.map(p => <Button key={p.id} variant="ghost" className="w-full justify-start py-2 h-auto text-xs" onClick={() => handleAddProduct(p)}>{p.name}</Button>)}
                                 </div>
                            </ScrollArea>
                         </div>
                 </CardContent>
               </Card>
               <Card className="flex-1 flex flex-col">
-                <CardHeader className="flex-row items-center justify-between">
+                <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Invoice Items</CardTitle>
-                    <div className="flex gap-2">
-                        <Button variant="outline" size="icon" onClick={() => setShowProfit(prev => !prev)}>
-                            {showProfit ? <EyeOff /> : <Eye />}
-                        </Button>
-                        <Button onClick={handlePrintConfirm} disabled={!items || items.length === 0 || isProcessing}>
-                           {isProcessing 
-                                ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
-                                : (isEditing ? <Save className="mr-2 h-4 w-4"/> : <Printer className="mr-2 h-4 w-4"/>)
-                            }
-                            {isProcessing 
-                                ? 'Processing...' 
-                                : (isEditing ? 'Update & Save' : 'Print & Save')
-                            }
-                        </Button>
-                    </div>
+                    <Button variant="outline" size="icon" onClick={() => setShowProfit(prev => !prev)}>
+                        {showProfit ? <EyeOff /> : <Eye />}
+                    </Button>
                 </CardHeader>
                 <CardContent className='p-0 flex-1 flex flex-col'>
                     <ScrollArea className="flex-1">
@@ -454,7 +444,7 @@ export default function InvoicePage() {
                                     return (
                                     <TableRow key={item.id}>
                                         <TableCell>
-                                          <div className="max-w-xs">
+                                          <div className="max-w-[200px] overflow-x-auto whitespace-nowrap no-scrollbar py-1">
                                               <p className="font-medium break-words">{item.name}</p>
                                               <div className='text-xs text-muted-foreground flex flex-col items-start'>
                                                   <span>Sug: ৳{item.originalPrice.toFixed(2)}</span>
@@ -604,8 +594,18 @@ export default function InvoicePage() {
                 </CardContent>
             </Card>
             <Card className="flex-1">
-                  <CardHeader>
+                  <CardHeader className="flex flex-row items-center justify-between">
                       <CardTitle>{t('live_print_preview_title')}</CardTitle>
+                      <Button onClick={handlePrintConfirm} disabled={!items || items.length === 0 || isProcessing}>
+                           {isProcessing 
+                                ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
+                                : (isEditing ? <Save className="mr-2 h-4 w-4"/> : <Printer className="mr-2 h-4 w-4"/>)
+                            }
+                            {isProcessing 
+                                ? 'Processing...' 
+                                : (isEditing ? 'Update & Save' : 'Print & Save')
+                            }
+                        </Button>
                   </CardHeader>
                   <CardContent className="h-full min-h-[500px] flex items-center justify-center bg-muted/50 rounded-lg p-4">
                       <div className="w-full h-full overflow-x-auto flex justify-center items-center">
