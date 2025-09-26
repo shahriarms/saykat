@@ -126,12 +126,10 @@ export default function InvoicePage() {
         }
     };
     
-    // Some browsers (like Chrome) fire 'afterprint' on cancel, some don't.
-    // This is a fallback timer.
-    let printCancelTimer: NodeJS.Timeout;
+    let printCancelTimer: NodeJS.Timeout | null = null;
 
     const onBeforePrint = () => {
-        clearTimeout(printCancelTimer); // Clear any existing timer
+        if(printCancelTimer) clearTimeout(printCancelTimer);
     }
 
     const onAfterPrint = () => {
@@ -142,13 +140,13 @@ export default function InvoicePage() {
     window.addEventListener('afterprint', onAfterPrint);
     
     if(invoiceToPrint) {
-        printCancelTimer = setTimeout(handlePrintCancel, 3000); // 3-second fallback
+        printCancelTimer = setTimeout(handlePrintCancel, 3000);
     }
 
     return () => {
       window.removeEventListener('beforeprint', onBeforePrint);
       window.removeEventListener('afterprint', onAfterPrint);
-      clearTimeout(printCancelTimer);
+      if(printCancelTimer) clearTimeout(printCancelTimer);
     };
   }, [invoiceToPrint, addInvoice, updateInvoice, resetActiveDraft, toast, t]);
   
@@ -228,11 +226,6 @@ export default function InvoicePage() {
     setMainCategoryFilter(value);
     resetFilters();
   }
-  
-  useEffect(() => {
-    setSubCategoryFilter('');
-    setSubCategorySearch('');
-  }, [categoryFilter]);
 
   const categories = useMemo(() => {
     const allCategories = [...new Set(products.filter(p => p.mainCategory === mainCategoryFilter).map(p => p.category))];
@@ -374,15 +367,15 @@ export default function InvoicePage() {
                         <div className="flex items-center space-x-2"><RadioGroupItem value="Hardware" id="r-hardware" /><Label htmlFor="r-hardware">{t('hardware_tab')}</Label></div>
                     </RadioGroup>
                 </CardHeader>
-                <CardContent className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-4 min-h-0">
+                <CardContent className="flex-1 flex flex-col gap-4 min-h-0">
+                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-2 border rounded-md flex-1 min-h-0">
                         {/* Category List */}
                         <div className="flex flex-col gap-2 min-h-0">
-                           <Label>{t('category_header')}</Label>
-                            <div className="relative">
+                           <div className="relative">
                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                               <Input placeholder="Search..." className="pl-8 h-9" value={categorySearch} onChange={e => setCategorySearch(e.target.value)} />
+                               <Input placeholder="Category..." className="pl-8 h-9" value={categorySearch} onChange={e => setCategorySearch(e.target.value)} />
                             </div>
-                           <ScrollArea className="flex-1 border rounded-md">
+                           <ScrollArea className="flex-1">
                                <div className="p-2 space-y-1">
                                     <Button variant={!categoryFilter ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setCategoryFilter('')}>{t('all_categories')}</Button>
                                     {categories.map(c => <Button key={c} variant={categoryFilter === c ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setCategoryFilter(c)}>{c}</Button>)}
@@ -390,13 +383,12 @@ export default function InvoicePage() {
                            </ScrollArea>
                         </div>
                         {/* Sub-Category List */}
-                        <div className="flex flex-col gap-2 min-h-0">
-                            <Label>{t('subcategory_header')}</Label>
+                        <div className="flex flex-col gap-2 min-h-0 border-x">
                             <div className="relative">
                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                               <Input placeholder="Search..." className="pl-8 h-9" value={subCategorySearch} onChange={e => setSubCategorySearch(e.target.value)} disabled={!categoryFilter}/>
+                               <Input placeholder="Sub-category..." className="pl-8 h-9" value={subCategorySearch} onChange={e => setSubCategorySearch(e.target.value)} disabled={!categoryFilter}/>
                             </div>
-                           <ScrollArea className="flex-1 border rounded-md">
+                           <ScrollArea className="flex-1">
                                 <div className="p-2 space-y-1">
                                      <Button variant={!subCategoryFilter ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setSubCategoryFilter('')} disabled={!categoryFilter}>{t('all_subcategories')}</Button>
                                      {categoryFilter && subCategories.map(sc => <Button key={sc} variant={subCategoryFilter === sc ? 'secondary' : 'ghost'} className="w-full justify-start h-8 text-xs" onClick={() => setSubCategoryFilter(sc)}>{sc}</Button>)}
@@ -405,17 +397,17 @@ export default function InvoicePage() {
                         </div>
                         {/* Product List */}
                          <div className="flex flex-col gap-2 min-h-0">
-                            <Label>{t('products_sidebar')}</Label>
                             <div className="relative">
                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                               <Input placeholder="Search..." className="pl-8 h-9" value={productSearch} onChange={e => setProductSearch(e.target.value)} />
+                               <Input placeholder="Product..." className="pl-8 h-9" value={productSearch} onChange={e => setProductSearch(e.target.value)} />
                             </div>
-                           <ScrollArea className="flex-1 border rounded-md">
+                           <ScrollArea className="flex-1">
                                 <div className="p-2 space-y-1">
-                                     {filteredProducts.map(p => <Button key={p.id} variant="ghost" className="w-full justify-start py-2 h-auto text-xs" onClick={() => handleAddProduct(p)}>{p.name}</Button>)}
+                                     {filteredProducts.map(p => <Button key={p.id} variant="ghost" className="w-full justify-start h-auto py-2 text-xs" onClick={() => handleAddProduct(p)}>{p.name}</Button>)}
                                 </div>
                            </ScrollArea>
                         </div>
+                     </div>
                 </CardContent>
               </Card>
               <Card className="flex-1 flex flex-col">
@@ -441,6 +433,8 @@ export default function InvoicePage() {
                             <TableBody>
                                 {items && items.length > 0 ? items.map((item, index) => {
                                     const product = invoiceItemProducts[index];
+                                    const quantityInCart = parseFloat(String(item.quantity)) || 0;
+                                    
                                     return (
                                     <TableRow key={item.id}>
                                         <TableCell>
@@ -464,10 +458,10 @@ export default function InvoicePage() {
                                                 <div className="w-16">
                                                      <StockVolumeDisplay
                                                         productName={product.name}
-                                                        currentStock={product.stock}
+                                                        dbStock={product.stock}
+                                                        quantityInCart={quantityInCart}
                                                         totalSold={product.totalSold}
                                                         maxStock={product.totalEverAdded}
-                                                        unit={product.mainCategory === 'Material' ? 'kg' : 'pcs'}
                                                     />
                                                 </div>
                                             )}

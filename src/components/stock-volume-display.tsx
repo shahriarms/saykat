@@ -8,19 +8,24 @@ import { ArrowRight } from 'lucide-react';
 
 interface StockVolumeDisplayProps {
   productName: string;
-  currentStock: number;
+  dbStock: number;
+  quantityInCart: number;
   totalSold: number;
   maxStock: number;
-  unit: string;
 }
 
 export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
   productName,
-  currentStock,
+  dbStock,
+  quantityInCart,
   totalSold,
   maxStock,
 }) => {
   const unit = React.useMemo(() => (productName.toLowerCase().includes('kg') ? 'kg' : 'pcs'), [productName]);
+  
+  // The current available stock displayed to the user
+  const currentStock = dbStock - quantityInCart;
+  
   const fillPercentage = maxStock > 0 ? (currentStock / maxStock) * 100 : 0;
   
   const formatValue = (value: number) => {
