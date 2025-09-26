@@ -49,16 +49,13 @@ export function TopNavBar() {
                   href={item.href}
                   className={cn(
                     "flex flex-col items-center justify-center gap-1.5 rounded-lg p-2 text-center transition-colors",
-                    "shrink-0 px-3",
+                    "shrink-0 px-3 py-3",
                     isActive
-                      ? "text-primary"
+                      ? "bg-primary/10 text-primary"
                       : "text-muted-foreground hover:bg-muted/50"
                   )}
                 >
                   <Icon className="h-6 w-6" />
-                  <span className="text-[11px] font-semibold whitespace-nowrap">
-                      {t(item.labelKey)}
-                  </span>
                 </Link>
               </TooltipTrigger>
               <TooltipContent>
