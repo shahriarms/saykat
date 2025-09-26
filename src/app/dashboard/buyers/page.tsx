@@ -326,9 +326,9 @@ export default function BuyersPage() {
 
           {/* Invoice Preview */}
           <Card className="lg:col-span-2">
-              <CardHeader className="flex-col md:flex-row items-start md:items-center justify-between gap-2">
+              <CardHeader className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <CardTitle>{t('invoice_details_title')}</CardTitle>
-                  <div className="flex items-center gap-2 w-full md:w-auto">
+                  <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
                       {user?.role === 'admin' && (
                         <>
                           <Button variant="outline" onClick={handleEditClick} disabled={!selectedInvoice} className="flex-1">
