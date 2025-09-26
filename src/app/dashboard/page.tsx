@@ -203,7 +203,7 @@ export default function Dashboard() {
                            <div className="p-4 bg-white relative overflow-hidden flex-grow">
                                 <div className="absolute top-0 right-0 h-8 w-8 bg-gray-100" style={{clipPath: 'polygon(100% 0, 0 0, 100% 100%)'}}></div>
                                 <div className="flex justify-between items-start gap-2 mb-2">
-                                    <span className="font-bold text-lg text-gray-700">Inv #{invoice.id}</span>
+                                    <span className="font-bold text-lg sm:text-xl text-gray-700">Inv #{invoice.id}</span>
                                     <span className={cn(
                                         "text-xs font-bold px-2 py-1 rounded-full flex-shrink-0",
                                         invoice.dueAmount > 0 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
@@ -211,10 +211,10 @@ export default function Dashboard() {
                                         {invoice.dueAmount > 0 ? 'DUE' : 'PAID'}
                                     </span>
                                 </div>
-                                <p className="text-left text-sm text-gray-600 min-h-[40px]">{invoice.customerName}</p>
+                                <p className="text-left text-sm text-gray-600 truncate min-h-[40px]">{invoice.customerName}</p>
                             </div>
                             <div className="p-4 bg-gray-50/50 border-t border-dashed mt-auto">
-                                <p className="text-left text-3xl font-bold font-mono text-gray-800">৳ {invoice.subtotal.toFixed(2)}</p>
+                                <p className="text-left text-2xl sm:text-3xl font-bold font-mono text-gray-800">৳ {invoice.subtotal.toFixed(2)}</p>
                             </div>
                             <div className="bg-gray-100 px-4 py-1.5">
                                 <p className="text-xs text-gray-500 text-center">{format(new Date(invoice.date), 'PP')}</p>
@@ -363,7 +363,7 @@ export default function Dashboard() {
                           <p className="text-xl font-bold">৳ {rangeStats.totalDue.toFixed(2)}</p>
                         </div>
                       </Card>
-                       <Card as="button" onClick={() => setMonthlyUnitsSoldReportOpen(true)} className="text-left hover:bg-muted/so transition-colors flex items-center p-4 gap-4">
+                       <Card as="button" onClick={() => setMonthlyUnitsSoldReportOpen(true)} className="text-left hover:bg-muted/50 transition-colors flex items-center p-4 gap-4">
                         <div className="bg-purple-100 p-3 rounded-full"><Container className="h-6 w-6 text-purple-600" /></div>
                         <div>
                           <p className="text-sm text-muted-foreground">{t('total_units_sold_card_title')}</p>
@@ -563,3 +563,5 @@ export default function Dashboard() {
     </>
   );
 }
+
+    
