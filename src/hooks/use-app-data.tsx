@@ -265,8 +265,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         if (isAdditive) {
             finalStock = productToUpdate.stock + stockToAdd;
         } else {
-            // This is for full updates where stock value is absolute
-            finalStock = stockToAdd;
+            // This is for full updates where stock value is absolute, like editing details without adding stock
+            finalStock = updatedData.stock ?? productToUpdate.stock;
         }
     
         const completeUpdateData = {
@@ -274,12 +274,27 @@ export function DataProvider({ children }: { children: ReactNode }) {
             ...updatedData,
             stock: finalStock,
             // When adding stock via `isAdditive`, containerSize remains unchanged.
+            // For other updates, use the new containerSize if provided, otherwise keep the old one.
             containerSize: isAdditive ? productToUpdate.containerSize : (updatedData.containerSize ?? productToUpdate.containerSize),
         };
         
         if (isDbConnected) {
             try {
-                await productActions.updateProduct(productId, completeUpdateData);
+                // We only pass the fields that can actually be updated in the DB
+                const dataForDb: Omit<Product, 'id'> = {
+                    name: completeUpdateData.name,
+                    sku: completeUpdateData.sku,
+                    buyingPrice: completeUpdateData.buyingPrice,
+                    profitMargin: completeUpdateData.profitMargin,
+                    sellingPrice: completeUpdateData.sellingPrice,
+                    stock: completeUpdateData.stock,
+                    containerSize: completeUpdateData.containerSize,
+                    mainCategory: completeUpdateData.mainCategory,
+                    category: completeUpdateData.category,
+                    subCategory: completeUpdateData.subCategory
+                };
+
+                await productActions.updateProduct(productId, dataForDb);
                 await loadAllData();
                 toast({ title: "Product Updated", description: `Details for ${completeUpdateData.name} have been updated.` });
             } catch (error) {
@@ -829,3 +844,5 @@ export function useAppData() {
     }
     return context;
 }
+
+    
