@@ -48,8 +48,8 @@ export function TopNavBar() {
                 <Link
                   href={item.href}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-1.5 rounded-lg p-2 text-center transition-all duration-200 ease-in-out transform",
-                    "group w-24 h-24", // Set a fixed size for the container
+                    "flex flex-col items-center justify-center rounded-lg p-2 text-center transition-all duration-200 ease-in-out transform",
+                    "group w-20 h-20", // Set a fixed size for the container
                     isActive
                       ? "bg-primary/10"
                       : "text-muted-foreground hover:bg-muted/50"
@@ -63,14 +63,8 @@ export function TopNavBar() {
                     item.color,
                     isActive && "ring-2 ring-offset-2 ring-primary"
                   )}>
-                    <Icon className={cn("h-6 w-6 transition-all", item.iconColor)} />
+                    <Icon className={cn("h-7 w-7 transition-all", item.iconColor)} />
                   </div>
-                  <span className={cn(
-                    "text-xs font-medium w-full truncate px-1",
-                     isActive ? "text-primary font-semibold" : "text-muted-foreground"
-                  )}>
-                    {t(item.labelKey)}
-                  </span>
                 </Link>
               </TooltipTrigger>
               <TooltipContent>
