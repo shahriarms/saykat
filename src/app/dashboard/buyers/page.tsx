@@ -209,7 +209,7 @@ export default function BuyersPage() {
     <>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h1 className="text-2xl font-semibold flex items-center gap-2">
+          <h1 className="text-2xl font-semibold flex items-center gap-2 relative z-10">
               <Users className="w-6 h-6" />
               {t('buyers_page_title')}
           </h1>
@@ -414,5 +414,3 @@ export default function BuyersPage() {
     </>
   );
 }
-
-    
