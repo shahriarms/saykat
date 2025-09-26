@@ -25,6 +25,7 @@ const tableCreationQueries = [
       "profitMargin" NUMERIC(5, 2) NOT NULL,
       "sellingPrice" NUMERIC(10, 2) NOT NULL,
       stock INTEGER NOT NULL,
+      "containerSize" INTEGER NOT NULL DEFAULT 0,
       "mainCategory" TEXT NOT NULL,
       category TEXT NOT NULL,
       "subCategory" TEXT NOT NULL

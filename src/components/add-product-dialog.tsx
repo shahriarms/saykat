@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -37,6 +38,7 @@ const productSchema = z.object({
   profitMargin: z.coerce.number().positive({ message: 'Profit margin must be a positive number.'}),
   sellingPrice: z.coerce.number().positive({ message: 'Selling price must be a positive number.'}),
   stock: z.coerce.number().min(0, { message: 'Stock must be a non-negative number.' }),
+  containerSize: z.coerce.number().min(0, { message: 'Container size must be a non-negative number.' }),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -62,12 +64,14 @@ export function AddProductDialog({ open, onOpenChange }: AddProductDialogProps) 
       profitMargin: 4,
       sellingPrice: undefined,
       stock: undefined,
+      containerSize: undefined,
     },
   });
 
   const mainCategory = useWatch({ control: form.control, name: 'mainCategory' });
   const buyingPrice = useWatch({ control: form.control, name: 'buyingPrice' });
   const profitMargin = useWatch({ control: form.control, name: 'profitMargin' });
+  const stock = useWatch({ control: form.control, name: 'stock' });
 
   useEffect(() => {
     const newMargin = mainCategory === 'Material' ? 4 : 15;
@@ -85,6 +89,10 @@ export function AddProductDialog({ open, onOpenChange }: AddProductDialogProps) 
       form.setValue('sellingPrice', 0);
     }
   }, [buyingPrice, profitMargin, form]);
+  
+  useEffect(() => {
+    form.setValue('containerSize', stock);
+  }, [stock, form]);
 
 
   const onSubmit = (data: ProductFormValues) => {
@@ -104,6 +112,7 @@ export function AddProductDialog({ open, onOpenChange }: AddProductDialogProps) 
         profitMargin: 4,
         sellingPrice: undefined,
         stock: undefined,
+        containerSize: undefined,
       });
     }
     onOpenChange(isOpen);

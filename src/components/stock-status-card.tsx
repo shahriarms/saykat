@@ -51,8 +51,7 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
     const enrichedProducts = products.map(p => {
       const totalSold = soldQuantities.get(p.id) || 0;
       const currentStock = parseFloat(String(p.stock)) || 0;
-      const totalEverAdded = currentStock + totalSold;
-      return { ...p, stock: currentStock, totalSold, totalEverAdded };
+      return { ...p, stock: currentStock, totalSold };
     });
 
     const productsForTab = enrichedProducts.filter(p => p.mainCategory === activeTab);
@@ -62,8 +61,8 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
 
     // Default sort by stock percentage (ascending)
     productsForTab.sort((a, b) => {
-        const stockPercentA = a.totalEverAdded > 0 ? (a.stock / a.totalEverAdded) * 100 : 0;
-        const stockPercentB = b.totalEverAdded > 0 ? (b.stock / b.totalEverAdded) * 100 : 0;
+        const stockPercentA = a.containerSize > 0 ? (a.stock / a.containerSize) * 100 : 0;
+        const stockPercentB = b.containerSize > 0 ? (b.stock / b.containerSize) * 100 : 0;
         return stockPercentA - stockPercentB;
     });
     
@@ -90,7 +89,7 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
   }
 
   const renderCarousel = (
-    productList: (Product & { totalSold: number, totalEverAdded: number })[]
+    productList: (Product & { totalSold: number })[]
   ) => {
     if (productList.length === 0) {
       return (
@@ -120,7 +119,8 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
                       <StockVolumeDisplay
                         productName={product.name}
                         dbStock={product.stock}
-                        maxStock={product.totalEverAdded}
+                        maxStock={product.containerSize}
+                        totalSold={product.totalSold}
                         unit={product.mainCategory === 'Material' ? 'kg' : 'pcs'}
                       />
                    </div>

@@ -17,10 +17,10 @@ interface StockVolumeDisplayProps {
 
 export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
   productName,
-  dbStock,
+  dbStock = 0,
   quantityInCart = 0,
   totalSold,
-  maxStock,
+  maxStock = 0,
   unit,
 }) => {
   

@@ -7,7 +7,7 @@ export interface Product {
   profitMargin: number;
   sellingPrice: number;
   stock: number;
-  totalEverAdded: number;
+  containerSize: number;
   mainCategory: 'Material' | 'Hardware';
   category: string;
   subCategory: string;

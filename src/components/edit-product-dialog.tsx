@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -37,6 +38,7 @@ const productSchema = z.object({
   profitMargin: z.coerce.number().positive({ message: 'Profit margin must be a positive number.'}),
   sellingPrice: z.coerce.number().positive({ message: 'Selling price must be a positive number.'}),
   stock: z.coerce.number().min(0, { message: 'Stock must be a non-negative number.' }),
+  containerSize: z.coerce.number().min(0, { message: 'Container size must be a non-negative number.' }),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -62,6 +64,7 @@ export function EditProductDialog({ open, onOpenChange, product }: EditProductDi
       profitMargin: product?.profitMargin || undefined,
       sellingPrice: product?.sellingPrice || undefined,
       stock: product?.stock || undefined,
+      containerSize: product?.containerSize || undefined,
     },
   });
 
@@ -80,6 +83,7 @@ export function EditProductDialog({ open, onOpenChange, product }: EditProductDi
       profitMargin: product?.profitMargin || undefined,
       sellingPrice: product?.sellingPrice || undefined,
       stock: product?.stock || undefined,
+      containerSize: product?.containerSize || undefined,
     });
   }, [product, form]);
 
@@ -96,7 +100,7 @@ export function EditProductDialog({ open, onOpenChange, product }: EditProductDi
   }, [buyingPrice, profitMargin, form]);
 
   const onSubmit = (data: ProductFormValues) => {
-    updateProduct(product.id, data);
+    updateProduct(product.id, data, false);
     onOpenChange(false);
   };
   
@@ -252,6 +256,19 @@ export function EditProductDialog({ open, onOpenChange, product }: EditProductDi
                     </FormItem>
                 )}
             />
+             <FormField
+                control={form.control}
+                name="containerSize"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Container Size ({mainCategory === 'Material' ? 'kg' : 'pcs'})</FormLabel>
+                    <FormControl>
+                      <Input type="number" min="0" inputMode="decimal" placeholder="100" {...field} value={field.value ?? ''}/>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             <DialogFooter className="col-span-2">
               <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
                 {t('cancel_button')}
