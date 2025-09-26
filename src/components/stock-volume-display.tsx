@@ -136,7 +136,7 @@ export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
              <p className="text-xs text-gray-500">
                 Size: {formatValue(maxStock)} {unit}
             </p>
-            <p className="text-sm font-semibold text-gray-700 h-8 flex items-start justify-center pt-1 text-center">
+            <p className="text-sm font-semibold text-gray-700 flex items-start justify-center pt-1 text-center min-h-[2.5rem]">
                 {productName}
             </p>
         </div>
