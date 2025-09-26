@@ -216,7 +216,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
             }
         } else {
             const sellingPrice = productData.buyingPrice + (productData.buyingPrice * productData.profitMargin / 100);
-            const newProduct = { ...productData, sellingPrice, id: `prod-${Date.now()}`, initialStock: productData.stock, containerSize: productData.stock };
+            const newProduct = { ...productData, sellingPrice, id: `prod-${Date.now()}`, stock: productData.stock, containerSize: productData.stock };
             const newProducts = [...products, newProduct];
             setProducts(newProducts);
             saveDataToLocalStorage('products', newProducts);
@@ -238,7 +238,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
                 ...p,
                 sellingPrice: p.buyingPrice + (p.buyingPrice * p.profitMargin / 100),
                 id: `prod-${Date.now()}-${Math.random()}`,
-                initialStock: p.stock,
+                stock: p.stock,
                 containerSize: p.stock
             }));
             const updatedProducts = [...products, ...newProducts];
@@ -823,3 +823,5 @@ export function useAppData() {
     }
     return context;
 }
+
+    
