@@ -297,6 +297,23 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
     const updateInvoiceItem = useCallback((itemId: string, itemUpdate: { [key: string]: any }) => {
         setDrafts(prev => prev.map((draft, index) => {
             if (index !== activeDraftIndex) return draft;
+
+            const product = products.find(p => p.id === itemId);
+            if (!product) return draft;
+
+            const availableStock = product.stock;
+            const newQuantity = parseFloat(String(itemUpdate.quantity));
+
+            if (itemUpdate.quantity !== undefined && newQuantity > availableStock) {
+                const unit = product.mainCategory === 'Material' ? 'kg' : 'pcs';
+                toast({
+                    variant: 'destructive',
+                    title: 'Stock Limit Exceeded',
+                    description: `Cannot add more than available stock: ${availableStock} ${unit}`
+                });
+                // We don't update and return the draft as is.
+                return draft;
+            }
     
             const newItems = draft.items.map(item => {
                 if (item.id === itemId) {
@@ -321,7 +338,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
             const { subtotal, changeAmount, paidAmount, dueAmount, totalProfit } = calculateTotals(newItems, draft.paidAmount, draft.cashReceived);
             return { ...draft, items: newItems, subtotal, changeAmount, paidAmount, dueAmount, totalProfit };
         }));
-    }, [activeDraftIndex]);
+    }, [activeDraftIndex, products, toast]);
 
     const removeInvoiceItem = useCallback((itemId: string) => {
         setDrafts(prev => prev.map((draft, index) => {
@@ -406,5 +423,3 @@ export function useInvoiceForm() {
     }
     return context;
 }
-
-    

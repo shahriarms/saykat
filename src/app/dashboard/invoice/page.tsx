@@ -30,9 +30,16 @@ import type { Product, Buyer } from '@/lib/types';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { StockVolumeDisplay } from '@/components/stock-volume-display';
 import { cn } from '@/lib/utils';
+import dynamic from 'next/dynamic';
+
+const Carousel = dynamic(() => import('@/components/ui/carousel').then(c => c.Carousel), { ssr: false });
+const CarouselContent = dynamic(() => import('@/components/ui/carousel').then(c => c.CarouselContent), { ssr: false });
+const CarouselItem = dynamic(() => import('@/components/ui/carousel').then(c => c.CarouselItem), { ssr: false });
+const CarouselNext = dynamic(() => import('@/components/ui/carousel').then(c => c.CarouselNext), { ssr: false });
+const CarouselPrevious = dynamic(() => import('@/components/ui/carousel').then(c => c.CarouselPrevious), { ssr: false });
+
 
 export default function InvoicePage() {
   const { addInvoice, updateInvoice, buyers, invoices: allInvoices } = useAppData();
@@ -69,6 +76,7 @@ export default function InvoicePage() {
   const invoiceItemProducts = useMemo(() => {
     if (!activeDraft) return [];
     
+    // Calculate total sold quantities from *committed* invoices
     const soldQuantities = new Map<string, number>();
     allInvoices.forEach(invoice => {
       invoice.items.forEach(item => {
@@ -76,19 +84,23 @@ export default function InvoicePage() {
         soldQuantities.set(item.id, (soldQuantities.get(item.id) || 0) + quantity);
       });
     });
-
+  
+    // Map through the items in the current draft to get their corresponding product data
     return activeDraft.items.map(item => {
         const product = products.find(p => p.id === item.id);
         if (!product) return null;
+  
+        const totalCommittedSold = soldQuantities.get(product.id) || 0;
+        const dbStock = parseFloat(String(product.stock)) || 0;
+        // TotalEverAdded is a more stable base than trying to calculate from current stock
+        const totalEverAdded = dbStock + totalCommittedSold;
 
-        const totalSold = soldQuantities.get(product.id) || 0;
-        const currentStock = parseFloat(String(product.stock)) || 0;
-        const totalEverAdded = currentStock + totalSold;
-        
+        // The live available stock for this item, CONSIDERING what's already in the cart
         const quantityInCart = parseFloat(String(item.quantity)) || 0;
-        const liveStock = currentStock - quantityInCart;
+        // The real-time stock is the database stock, not including what's in the current cart
+        const liveStock = dbStock;
 
-        return { ...product, stock: liveStock, totalSold, totalEverAdded };
+        return { ...product, stock: liveStock, totalSold: totalCommittedSold, totalEverAdded };
     }).filter((p): p is Product & { totalSold: number; totalEverAdded: number } => p !== null);
   }, [activeDraft, products, allInvoices]);
 
@@ -654,5 +666,3 @@ export default function InvoicePage() {
     </>
   );
 }
-
-    
