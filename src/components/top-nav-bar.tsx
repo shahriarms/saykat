@@ -52,14 +52,14 @@ export function TopNavBar() {
                   )}
                 >
                   <div className={cn(
-                    "flex items-center justify-center rounded-full w-14 h-14 transition-all duration-200 ease-in-out",
-                    "shadow-md border border-white/50",
+                    "flex items-center justify-center rounded-full w-16 h-16 transition-all duration-200 ease-in-out",
+                    "shadow-lg border border-white/50",
                     "group-hover:-translate-y-1",
                     "group-active:translate-y-px group-active:shadow-inner",
                     item.color,
                     isActive && "ring-2 ring-offset-2 ring-primary"
                   )}>
-                    <Icon className={cn("h-7 w-7 transition-all", item.iconColor)} />
+                    <Icon className={cn("h-8 w-8 text-white transition-all", isActive ? 'text-white' : item.iconColor)} />
                   </div>
                 </Link>
               </TooltipTrigger>
