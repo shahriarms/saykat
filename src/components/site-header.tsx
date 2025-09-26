@@ -98,7 +98,7 @@ export function SiteHeader() {
         </div>
         
         {/* Right Section: Clock and User Menu */}
-        <div className="flex flex-shrink-0 items-center justify-end gap-2 sm:gap-4">
+        <div className="flex flex-shrink-0 items-center justify-end gap-4">
             <div className="hidden sm:flex"><LiveClock /></div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
