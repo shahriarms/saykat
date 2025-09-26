@@ -262,7 +262,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
     
         if (isAdditive) {
             const stockToAdd = updatedData.stock || 0;
-            completeUpdateData = { ...updatedData, stock: stockToAdd };
+            const finalStock = productToUpdate.stock + stockToAdd;
+            completeUpdateData = { 
+                ...updatedData, 
+                stock: stockToAdd, // The service expects the value to add, not the final value.
+                initialStock: finalStock, 
+                containerSize: finalStock 
+            };
         } else {
             completeUpdateData = { ...updatedData };
         }
@@ -841,3 +847,5 @@ export function useAppData() {
     }
     return context;
 }
+
+    

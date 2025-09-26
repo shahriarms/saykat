@@ -108,10 +108,8 @@ class PostgresProductService {
         
         if (isAdditive) {
             const stockToAdd = updatedData.stock || 0;
-            const finalStock = (await this.getProductById(productId))!.stock + stockToAdd;
-            
             const result = await db.query(
-                'UPDATE products SET stock = stock + $1, "containerSize" = stock + $1, "initialStock" = stock + $1 WHERE id = $2 RETURNING *',
+                'UPDATE products SET stock = stock + $1, "initialStock" = stock + $1, "containerSize" = stock + $1 WHERE id = $2 RETURNING *',
                 [stockToAdd, productId]
             );
             return formatProduct(result.rows[0]);
@@ -164,3 +162,5 @@ class PostgresProductService {
 }
 
 export default PostgresProductService;
+
+    
