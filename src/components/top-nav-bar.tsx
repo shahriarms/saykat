@@ -38,7 +38,7 @@ export function TopNavBar() {
 
   return (
     <nav className="bg-muted/30 py-2">
-      <div className="flex justify-start sm:justify-center items-center gap-2 sm:gap-4 px-2 overflow-x-auto no-scrollbar mt-2">
+      <div className="flex justify-start sm:justify-center items-center gap-2 sm:gap-4 px-2 overflow-x-auto no-scrollbar">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
