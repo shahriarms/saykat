@@ -48,29 +48,22 @@ export function TopNavBar() {
                 <Link
                   href={item.href}
                   className={cn(
-                    "relative flex flex-col items-center justify-center gap-1.5 rounded-lg text-center transition-all duration-200 ease-in-out transform",
-                    "h-20 w-24", // Fixed size for consistency
-                    "bg-slate-100 border-slate-200 border-t border-l shadow-md", // Base 3D styles
-                    isActive 
-                      ? "bg-sky-100 text-sky-600 shadow-inner -translate-y-px" // Active State
-                      : "text-slate-500 hover:bg-slate-200 hover:-translate-y-px active:translate-y-px active:shadow-inner", // Inactive State
+                    "flex flex-col items-center justify-center gap-1.5 rounded-lg p-2 text-center transition-colors",
+                    "w-24 shrink-0",
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted"
                   )}
                 >
-                    <div className={cn(
-                        "p-2.5 rounded-full",
-                         isActive ? "bg-sky-200" : "bg-slate-200"
-                    )}>
-                        <Icon className={cn(
-                            "h-6 w-6 transition-colors",
-                             isActive ? "text-sky-700" : "text-slate-600"
-                        )} />
-                    </div>
-                    <span className={cn(
-                        "text-[11px] font-bold truncate transition-colors",
-                         isActive ? 'text-sky-800' : 'text-slate-600'
-                    )}>
-                        {t(item.labelKey)}
-                    </span>
+                  <div className={cn(
+                      "p-2.5 rounded-full transition-colors",
+                      isActive ? "bg-primary/20" : "bg-muted/80"
+                  )}>
+                      <Icon className="h-6 w-6" />
+                  </div>
+                  <span className="text-[11px] font-semibold truncate">
+                      {t(item.labelKey)}
+                  </span>
                 </Link>
               </TooltipTrigger>
               <TooltipContent>
