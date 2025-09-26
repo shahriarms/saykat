@@ -84,7 +84,7 @@ export function SiteHeader() {
             <Link href="/dashboard" className="flex flex-shrink-0 items-center gap-2">
                 <StockPilotLogo className="w-14 h-14 flex-shrink-0" />
             </Link>
-            <h1 className="text-lg font-bold sm:text-2xl">
+            <h1 className="text-xl font-bold sm:text-2xl">
                 <span className="text-foreground">Mahmud Engineering Shop</span>
             </h1>
         </div>
