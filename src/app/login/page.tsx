@@ -87,7 +87,7 @@ export default function LoginPage() {
       <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <Card className="w-full max-w-sm border-white/20 bg-card/60 shadow-lg backdrop-blur-lg transition-transform duration-300 ease-in-out hover:scale-[1.01] hover:shadow-xl">
           <CardHeader className="text-center">
-             <StockPilotLogo className="w-72 h-72 mx-auto" />
+             <StockPilotLogo className="w-24 h-24 mx-auto" />
             <CardTitle className="text-3xl font-bold tracking-tight">
               <span className="text-foreground">Mahmud Engineering Shop</span>
             </CardTitle>
@@ -159,5 +159,3 @@ export default function LoginPage() {
     </>
   );
 }
-
-    

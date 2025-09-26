@@ -34,12 +34,12 @@ const LiveClock = dynamic(() => import('./live-clock').then(mod => mod.LiveClock
 
 const RedeemAdminCodeDialog = dynamic(() => import('./redeem-admin-code-dialog').then(mod => mod.RedeemAdminCodeDialog), {
     ssr: false,
-    loading: () => <Loader2 className="h-5 w-5 animate-spin" />
+    loading: () => <div className="flex h-screen w-full items-center justify-center bg-background"><Loader2 className="h-8 w-8 animate-spin" /></div>
 });
 
 const ShowAdminCodeDialog = dynamic(() => import('./show-admin-code-dialog').then(mod => mod.ShowAdminCodeDialog), {
     ssr: false,
-    loading: () => <Loader2 className="h-5 w-5 animate-spin" />
+    loading: () => <div className="flex h-screen w-full items-center justify-center bg-background"><Loader2 className="h-8 w-8 animate-spin" /></div>
 });
 
 
