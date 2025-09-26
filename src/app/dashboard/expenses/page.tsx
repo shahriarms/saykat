@@ -210,25 +210,27 @@ export default function ExpensesPage() {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h1 className="text-2xl font-semibold flex items-center gap-2"><Receipt className="w-6 h-6"/> {t('expenses_page_title')}</h1>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-center gap-2">
             <DateRangePicker
               initialDateRange={localDateRange}
               onDateChange={setLocalDateRange}
               centralDateRange={centralDateRange}
             />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline"><Download className="mr-2 h-4 w-4"/> {t('export_button')}</Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => handleExport('csv')}>{t('export_as_csv')}</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExport('xlsx')}>{t('export_as_excel')}</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExport('pdf')}>{t('export_as_pdf')}</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Button onClick={handleAddNew}>
-              <PlusCircle className="mr-2 h-4 w-4" /> {t('add_expense_button')}
-            </Button>
+            <div className="flex items-center gap-2 w-full">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full sm:w-auto"><Download className="mr-2 h-4 w-4"/> {t('export_button')}</Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => handleExport('csv')}>{t('export_as_csv')}</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleExport('xlsx')}>{t('export_as_excel')}</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleExport('pdf')}>{t('export_as_pdf')}</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button onClick={handleAddNew} className="w-full sm:w-auto">
+                <PlusCircle className="mr-2 h-4 w-4" /> {t('add_expense_button')}
+              </Button>
+            </div>
           </div>
         </div>
 

@@ -68,7 +68,7 @@ export default function SettingsPage() {
                          <RadioGroup
                             value={settings.posPrinterType}
                             onValueChange={handlePosPrinterTypeChange}
-                            className="grid grid-cols-2 sm:grid-cols-3 gap-4"
+                            className="grid grid-cols-1 sm:grid-cols-3 gap-4"
                         >
                             <Label htmlFor="type-disabled" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary w-full cursor-pointer">
                                 <RadioGroupItem value="disabled" id="type-disabled" className="sr-only" />
@@ -88,7 +88,7 @@ export default function SettingsPage() {
                         </RadioGroup>
 
                         {settings.posPrinterType === 'tcp' && (
-                            <div className="grid sm:grid-cols-2 gap-4 pt-4 border-t">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t">
                                 <div className="space-y-2">
                                     <Label htmlFor="host">Printer IP Address</Label>
                                     <Input 

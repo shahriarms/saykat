@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
@@ -311,7 +310,7 @@ export default function BuyersDuePage() {
               centralDateRange={centralDateRange}
             />
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-1 flex flex-col">
             <CardHeader>
               <CardTitle>{t('buyers_with_due_title')}</CardTitle>
@@ -375,20 +374,20 @@ export default function BuyersDuePage() {
             </CardContent>
           </Card>
           
-          <Card className="lg:col-span-2 flex flex-col">
-              <CardHeader className="flex-row items-center justify-between no-print">
+          <Card className="lg:col-span-1 flex flex-col">
+              <CardHeader className="flex-col md:flex-row items-start md:items-center justify-between gap-2 no-print">
                   <div>
                       <CardTitle>{t('receive_payment_title')}</CardTitle>
                       <CardDescription>{t('receive_payment_description')}</CardDescription>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 w-full md:w-auto">
                     {user?.role === 'admin' && (
-                          <Button variant="destructive" onClick={handleDeleteClick} disabled={!selectedInvoice || isDeleting}>
+                          <Button variant="destructive" onClick={handleDeleteClick} disabled={!selectedInvoice || isDeleting} className="flex-1">
                               {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Trash2 className="mr-2 h-4 w-4"/>}
-                              Delete Invoice
+                              Delete
                           </Button>
                       )}
-                      <Button onClick={handlePrint} disabled={!selectedInvoice || isPrinting}>
+                      <Button onClick={handlePrint} disabled={!selectedInvoice || isPrinting} className="flex-1">
                           {isPrinting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>}
                           {t('print_invoice_button')}
                       </Button>

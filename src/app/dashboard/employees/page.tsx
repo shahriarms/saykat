@@ -159,7 +159,7 @@ export default function EmployeesPage() {
                     </div>
                 </div>
 
-                <div className="grid lg:grid-cols-3 gap-6 flex-1">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
                     <Card className="lg:col-span-1 flex flex-col">
                          <CardHeader>
                             <CardTitle>{t('employee_list_title')}</CardTitle>
@@ -191,25 +191,25 @@ export default function EmployeesPage() {
 
                     <Card className="lg:col-span-2 flex flex-col">
                         <CardHeader>
-                             <div className="flex justify-between items-start">
+                             <div className="flex flex-col md:flex-row justify-between items-start gap-2">
                                 <div>
                                     <CardTitle>Attendance for {selectedEmployee ? selectedEmployee.name : "..."}</CardTitle>
                                     <CardDescription>
                                         Viewing attendance for {format(month, 'MMMM yyyy')}
                                     </CardDescription>
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 w-full md:w-auto">
                                      <Popover>
                                         <PopoverTrigger asChild>
-                                            <Button variant="outline" size="sm"><CalendarIcon className="mr-2 h-4 w-4"/> {format(month, 'MMMM yyyy')}</Button>
+                                            <Button variant="outline" size="sm" className="flex-1 md:flex-none"><CalendarIcon className="mr-2 h-4 w-4"/> {format(month, 'MMMM yyyy')}</Button>
                                         </PopoverTrigger>
                                         <PopoverContent>
                                             <Calendar mode="single" month={month} onMonthChange={(m) => m && setMonth(m)} captionLayout="dropdown-buttons" fromYear={2020} toYear={new Date().getFullYear() + 5}/>
                                         </PopoverContent>
                                      </Popover>
-                                     <Button onClick={handlePrint} variant="outline" size="sm" disabled={!selectedEmployee || isPrinting}>
+                                     <Button onClick={handlePrint} variant="outline" size="sm" disabled={!selectedEmployee || isPrinting} className="flex-1 md:flex-none">
                                         {isPrinting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>} 
-                                        Print Report
+                                        Print
                                      </Button>
                                 </div>
                             </div>
