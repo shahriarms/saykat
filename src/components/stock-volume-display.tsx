@@ -9,19 +9,20 @@ import { ArrowRight } from 'lucide-react';
 interface StockVolumeDisplayProps {
   productName: string;
   dbStock: number;
-  quantityInCart: number;
+  quantityInCart?: number;
   totalSold: number;
   maxStock: number;
+  unit: string;
 }
 
 export const StockVolumeDisplay: React.FC<StockVolumeDisplayProps> = ({
   productName,
   dbStock,
-  quantityInCart,
+  quantityInCart = 0,
   totalSold,
   maxStock,
+  unit,
 }) => {
-  const unit = React.useMemo(() => (productName.toLowerCase().includes('kg') ? 'kg' : 'pcs'), [productName]);
   
   // The current available stock displayed to the user
   const currentStock = dbStock - quantityInCart;

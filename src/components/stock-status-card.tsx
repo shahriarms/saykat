@@ -119,7 +119,7 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
                    <div key={product.id} className="flex flex-col items-center justify-start h-full">
                       <StockVolumeDisplay
                         productName={product.name}
-                        currentStock={product.stock}
+                        dbStock={product.stock}
                         totalSold={product.totalSold}
                         maxStock={product.totalEverAdded}
                         unit={product.mainCategory === 'Material' ? 'kg' : 'pcs'}
