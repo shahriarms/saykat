@@ -36,7 +36,7 @@ const productSchema = z.object({
   buyingPrice: z.coerce.number().optional().default(0),
   profitMargin: z.coerce.number().positive({ message: 'Profit margin must be a positive number.'}),
   sellingPrice: z.coerce.number().positive({ message: 'Selling price must be a positive number.'}),
-  stock: z.coerce.number().nonnegative({ message: 'Stock must be a non-negative number.' }),
+  stock: z.coerce.number().min(0, { message: 'Stock must be a non-negative number.' }),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -207,7 +207,7 @@ export function EditProductDialog({ open, onOpenChange, product }: EditProductDi
                   <FormItem>
                     <FormLabel>{t('stock_label')} ({mainCategory === 'Material' ? 'kg' : 'pcs'})</FormLabel>
                     <FormControl>
-                      <Input type="text" inputMode="decimal" placeholder="100" {...field} value={field.value ?? ''}/>
+                      <Input type="number" min="0" inputMode="decimal" placeholder="100" {...field} value={field.value ?? ''}/>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
