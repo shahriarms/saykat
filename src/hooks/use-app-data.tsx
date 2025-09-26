@@ -216,7 +216,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
             }
         } else {
             const sellingPrice = productData.buyingPrice + (productData.buyingPrice * productData.profitMargin / 100);
-            const newProduct = { ...productData, sellingPrice, containerSize: productData.stock, id: `prod-${Date.now()}` };
+            const newProduct = { ...productData, sellingPrice, id: `prod-${Date.now()}`, initialStock: productData.stock, containerSize: productData.stock };
             const newProducts = [...products, newProduct];
             setProducts(newProducts);
             saveDataToLocalStorage('products', newProducts);
@@ -237,8 +237,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
             const newProducts = productsData.map(p => ({
                 ...p,
                 sellingPrice: p.buyingPrice + (p.buyingPrice * p.profitMargin / 100),
-                containerSize: p.stock,
-                id: `prod-${Date.now()}-${Math.random()}`
+                id: `prod-${Date.now()}-${Math.random()}`,
+                initialStock: p.stock,
+                containerSize: p.stock
             }));
             const updatedProducts = [...products, ...newProducts];
             setProducts(updatedProducts);
@@ -255,19 +256,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
         }
 
         const stockToAdd = updatedData.stock || 0;
-        let finalStock = stockToAdd;
-        let finalContainerSize = productToUpdate.containerSize;
-
+        let finalStock;
+        
         if (isAdditive) {
-            finalStock = productToUpdate.stock + stockToAdd;
-            finalContainerSize = finalStock;
+            finalStock = (productToUpdate.stock || 0) + stockToAdd;
+        } else {
+            finalStock = stockToAdd;
         }
 
         const completeUpdateData = {
             ...productToUpdate,
             ...updatedData,
             stock: finalStock,
-            containerSize: finalContainerSize,
+            containerSize: productToUpdate.containerSize, // Keep container size unchanged
         };
         
         if (isDbConnected) {
