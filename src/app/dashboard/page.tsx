@@ -198,23 +198,23 @@ export default function Dashboard() {
                         <button 
                             key={invoice.id} 
                             onClick={() => setSelectedInvoice(invoice)} 
-                            className="group bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 overflow-hidden"
+                            className="group bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 overflow-hidden flex flex-col"
                         >
-                           <div className="p-4 bg-white relative overflow-hidden">
+                           <div className="p-4 bg-white relative overflow-hidden flex-grow">
                                 <div className="absolute top-0 right-0 h-8 w-8 bg-gray-100" style={{clipPath: 'polygon(100% 0, 0 0, 100% 100%)'}}></div>
-                                <div className="flex justify-between items-center mb-2 flex-wrap gap-x-2">
-                                    <span className="font-bold text-base sm:text-lg text-gray-700">Inv #{invoice.id}</span>
+                                <div className="flex justify-between items-start gap-2 mb-2">
+                                    <span className="font-bold text-lg text-gray-700">Inv #{invoice.id}</span>
                                     <span className={cn(
-                                        "text-xs font-bold px-2 py-1 rounded-full",
+                                        "text-xs font-bold px-2 py-1 rounded-full flex-shrink-0",
                                         invoice.dueAmount > 0 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
                                     )}>
                                         {invoice.dueAmount > 0 ? 'DUE' : 'PAID'}
                                     </span>
                                 </div>
-                                <p className="text-left text-sm text-gray-600 truncate">{invoice.customerName}</p>
+                                <p className="text-left text-sm text-gray-600 min-h-[40px]">{invoice.customerName}</p>
                             </div>
-                            <div className="p-4 bg-gray-50/50 border-t border-dashed">
-                                <p className="text-left text-2xl sm:text-3xl font-bold font-mono text-gray-800">৳ {invoice.subtotal.toFixed(2)}</p>
+                            <div className="p-4 bg-gray-50/50 border-t border-dashed mt-auto">
+                                <p className="text-left text-3xl font-bold font-mono text-gray-800">৳ {invoice.subtotal.toFixed(2)}</p>
                             </div>
                             <div className="bg-gray-100 px-4 py-1.5">
                                 <p className="text-xs text-gray-500 text-center">{format(new Date(invoice.date), 'PP')}</p>
@@ -494,7 +494,7 @@ export default function Dashboard() {
       /> }
       { isDailyDueReportOpen && <DailyDueReportDialog
         open={isDailyDueReportOpen}
-        onOpen-Change={setDailyDueReportOpen}
+        onOpenChange={setDailyDueReportOpen}
         invoices={todayInvoices}
       /> }
       { isDailyUnitsSoldReportOpen && <DailyUnitsSoldReportDialog
