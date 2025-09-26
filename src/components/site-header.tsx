@@ -87,7 +87,7 @@ export function SiteHeader() {
               <StockPilotLogo className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0" />
           </Link>
           <h1
-            className="text-3xl font-bold tracking-tight whitespace-nowrap"
+            className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold tracking-tight whitespace-nowrap"
             style={{
               textShadow:
                 '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff',
