@@ -84,8 +84,14 @@ export function SiteHeader() {
             <Link href="/dashboard" className="flex flex-shrink-0 items-center gap-2">
                 <StockPilotLogo className="w-14 h-14 flex-shrink-0" />
             </Link>
-            <h1 className="text-lg font-bold sm:text-xl">
-                <span className="text-foreground">Mahmud Engineering Shop</span>
+            <h1
+              className="text-3xl font-bold tracking-tight"
+              style={{
+                textShadow:
+                  '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff',
+              }}
+            >
+              <span className="text-foreground">Mahmud Engineering Shop</span>
             </h1>
         </div>
         
