@@ -63,8 +63,8 @@ class PostgresProductService {
         const newProduct: Product = { 
             ...productData, 
             id: newId, 
-            initialStock: productData.stock, // Initial stock is the first stock amount
-            containerSize: productData.stock, // Container size is the initial stock
+            initialStock: productData.stock,
+            containerSize: productData.stock,
         };
 
         await db.query(
@@ -107,16 +107,13 @@ class PostgresProductService {
         const db = getPool();
         
         if (isAdditive) {
-            // New logic: When adding stock, update stock, initialStock, and containerSize
             const stockToAdd = updatedData.stock || 0;
-            const newTotalStock = updatedData.initialStock; // This is pre-calculated in the hook
             const result = await db.query(
-                'UPDATE products SET stock = $1, "initialStock" = $2, "containerSize" = $2 WHERE id = $3 RETURNING *',
-                [newTotalStock, newTotalStock, productId]
+                'UPDATE products SET stock = stock + $1, "containerSize" = stock + $1, "initialStock" = stock + $1 WHERE id = $2 RETURNING *',
+                [stockToAdd, productId]
             );
             return formatProduct(result.rows[0]);
         } else {
-            // This handles general edits (name, price, etc.) from the dialog, not additive stock updates
             const { name, sku, buyingPrice, profitMargin, sellingPrice, stock, containerSize, initialStock, mainCategory, category, subCategory } = updatedData;
             const result = await db.query(
                 `UPDATE products SET 
@@ -140,7 +137,6 @@ class PostgresProductService {
     
     static async updateMultipleStocks(updates: { id: string; stockChange: number }[], client?: PoolClient): Promise<void> {
         const db = getPool();
-        // If a client is passed, use it (for transactions). Otherwise, create a new one.
         const queryRunner = client || await db.connect();
 
         try {
@@ -151,7 +147,6 @@ class PostgresProductService {
                 );
             }
         } finally {
-            // Only release the client if it was created within this function
             if (!client) {
                 (queryRunner as PoolClient).release();
             }
