@@ -6,8 +6,9 @@ export interface Product {
   buyingPrice: number;
   profitMargin: number;
   sellingPrice: number;
-  stock: number;
-  containerSize: number;
+  stock: number; // This is now Remaining Stock
+  initialStock: number; // The stock added for the first time
+  containerSize: number; // This will be the same as initialStock and won't change
   mainCategory: 'Material' | 'Hardware';
   category: string;
   subCategory: string;

@@ -1,3 +1,4 @@
+
 // This file contains the PostgreSQL implementation for the ProductService.
 // It is only imported and used on the server-side when a POSTGRES_URL is available.
 import { Pool, PoolClient } from 'pg';
@@ -29,6 +30,7 @@ function formatProduct(row: any): Product {
         profitMargin: parseFloat(row.profitMargin) || 0,
         sellingPrice: parseFloat(row.sellingPrice) || 0,
         stock: parseInt(row.stock, 10) || 0,
+        initialStock: parseInt(row.initialStock, 10) || 0,
         containerSize: parseInt(row.containerSize, 10) || 0,
         mainCategory: row.mainCategory,
         category: row.category,
@@ -45,7 +47,7 @@ class PostgresProductService {
 
     static async getAllProducts(): Promise<Product[]> {
         const db = getPool();
-        const { rows } = await db.query('SELECT *, COALESCE("containerSize", stock) AS "containerSize" FROM products ORDER BY name ASC');
+        const { rows } = await db.query('SELECT *, COALESCE("initialStock", stock) AS "initialStock", COALESCE("containerSize", stock) AS "containerSize" FROM products ORDER BY name ASC');
         return rows.map(formatProduct);
     }
 
@@ -58,11 +60,16 @@ class PostgresProductService {
     static async addProduct(productData: Omit<Product, 'id'>): Promise<Product> {
         const db = getPool();
         const newId = `prod-${Date.now()}`;
-        const newProduct: Product = { ...productData, id: newId, containerSize: productData.stock };
+        const newProduct: Product = { 
+            ...productData, 
+            id: newId, 
+            initialStock: productData.stock, // Initial stock is the first stock amount
+            containerSize: productData.stock, // Container size is the initial stock
+        };
 
         await db.query(
-            'INSERT INTO products (id, name, sku, "buyingPrice", "profitMargin", "sellingPrice", stock, "containerSize", "mainCategory", category, "subCategory") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)',
-            [newProduct.id, newProduct.name, newProduct.sku, newProduct.buyingPrice, newProduct.profitMargin, newProduct.sellingPrice, newProduct.stock, newProduct.containerSize, newProduct.mainCategory, newProduct.category, newProduct.subCategory]
+            'INSERT INTO products (id, name, sku, "buyingPrice", "profitMargin", "sellingPrice", stock, "initialStock", "containerSize", "mainCategory", category, "subCategory") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
+            [newProduct.id, newProduct.name, newProduct.sku, newProduct.buyingPrice, newProduct.profitMargin, newProduct.sellingPrice, newProduct.stock, newProduct.initialStock, newProduct.containerSize, newProduct.mainCategory, newProduct.category, newProduct.subCategory]
         );
         return newProduct;
     }
@@ -74,10 +81,15 @@ class PostgresProductService {
             await client.query('BEGIN');
             const newProducts = await Promise.all(productsData.map(async p => {
                 const newId = `prod-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-                const newProduct: Product = { ...p, id: newId, containerSize: p.stock };
+                 const newProduct: Product = { 
+                    ...p, 
+                    id: newId,
+                    initialStock: p.stock,
+                    containerSize: p.stock
+                };
                 await client.query(
-                    'INSERT INTO products (id, name, sku, "buyingPrice", "profitMargin", "sellingPrice", stock, "containerSize", "mainCategory", category, "subCategory") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)',
-                    [newProduct.id, newProduct.name, newProduct.sku, newProduct.buyingPrice, newProduct.profitMargin, newProduct.sellingPrice, newProduct.stock, newProduct.containerSize, newProduct.mainCategory, newProduct.category, newProduct.subCategory]
+                    'INSERT INTO products (id, name, sku, "buyingPrice", "profitMargin", "sellingPrice", stock, "initialStock", "containerSize", "mainCategory", category, "subCategory") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
+                    [newProduct.id, newProduct.name, newProduct.sku, newProduct.buyingPrice, newProduct.profitMargin, newProduct.sellingPrice, newProduct.stock, newProduct.initialStock, newProduct.containerSize, newProduct.mainCategory, newProduct.category, newProduct.subCategory]
                 );
                 return newProduct;
             }));
@@ -102,7 +114,7 @@ class PostgresProductService {
             );
             return formatProduct(result.rows[0]);
         } else {
-            const { name, sku, buyingPrice, profitMargin, sellingPrice, stock, containerSize, mainCategory, category, subCategory } = updatedData;
+            const { name, sku, buyingPrice, profitMargin, sellingPrice, stock, containerSize, initialStock, mainCategory, category, subCategory } = updatedData;
             const result = await db.query(
                 `UPDATE products SET 
                     name = COALESCE($1, name), 
@@ -112,11 +124,12 @@ class PostgresProductService {
                     "sellingPrice" = COALESCE($5, "sellingPrice"), 
                     stock = COALESCE($6, stock), 
                     "containerSize" = COALESCE($7, "containerSize"),
-                    "mainCategory" = COALESCE($8, "mainCategory"),
-                    category = COALESCE($9, category),
-                    "subCategory" = COALESCE($10, "subCategory")
-                 WHERE id = $11 RETURNING *`,
-                [name, sku, buyingPrice, profitMargin, sellingPrice, stock, containerSize, mainCategory, category, subCategory, productId]
+                    "initialStock" = COALESCE($8, "initialStock"),
+                    "mainCategory" = COALESCE($9, "mainCategory"),
+                    category = COALESCE($10, category),
+                    "subCategory" = COALESCE($11, "subCategory")
+                 WHERE id = $12 RETURNING *`,
+                [name, sku, buyingPrice, profitMargin, sellingPrice, stock, containerSize, initialStock, mainCategory, category, subCategory, productId]
             );
             return formatProduct(result.rows[0]);
         }

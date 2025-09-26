@@ -41,8 +41,8 @@ interface AppDataContextType {
     setCentralDateRange: (dateRange: DateRange | undefined) => void;
     
     // Product Functions
-    addProduct: (product: Omit<Product, 'id' | 'sellingPrice'>) => Promise<void>;
-    addMultipleProducts: (products: Omit<Product, 'id'|'sellingPrice'>[]) => Promise<void>;
+    addProduct: (product: Omit<Product, 'id' | 'sellingPrice' | 'initialStock'>) => Promise<void>;
+    addMultipleProducts: (products: Omit<Product, 'id'|'sellingPrice'|'initialStock'>[]) => Promise<void>;
     updateProduct: (productId: string, updatedData: Partial<Omit<Product, 'id' | 'sellingPrice'>>, isAdditive: boolean) => Promise<void>;
     deleteProduct: (productId: string) => Promise<void>;
     getProductById: (productId: string) => Product | undefined;
@@ -204,7 +204,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }, [settings, toast]);
 
 
-    const addProduct = useCallback(async (productData: Omit<Product, 'id' | 'sellingPrice'>) => {
+    const addProduct = useCallback(async (productData: Omit<Product, 'id' | 'sellingPrice' | 'initialStock'>) => {
         if (isDbConnected) {
             try {
                 await productActions.addProduct(productData);
@@ -220,7 +220,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
                 ...productData, 
                 sellingPrice, 
                 id: `prod-${Date.now()}`,
-                containerSize: productData.stock, // Set containerSize to initial stock
+                initialStock: productData.stock,
+                containerSize: productData.stock,
             };
             const newProducts = [...products, newProduct];
             setProducts(newProducts);
@@ -229,7 +230,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         }
     }, [isDbConnected, toast, loadAllData, products, saveDataToLocalStorage]);
 
-    const addMultipleProducts = useCallback(async (productsData: Omit<Product, 'id'|'sellingPrice'>[]) => {
+    const addMultipleProducts = useCallback(async (productsData: Omit<Product, 'id'|'sellingPrice'|'initialStock'>[]) => {
         if (isDbConnected) {
             try {
                 await productActions.addMultipleProducts(productsData);
@@ -243,6 +244,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
                 ...p,
                 sellingPrice: p.buyingPrice + (p.buyingPrice * p.profitMargin / 100),
                 id: `prod-${Date.now()}-${Math.random()}`,
+                initialStock: p.stock,
                 containerSize: p.stock,
             }));
             const updatedProducts = [...products, ...newProducts];
@@ -253,60 +255,50 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }, [isDbConnected, toast, loadAllData, products, saveDataToLocalStorage]);
 
     const updateProduct = useCallback(async (productId: string, updatedData: Partial<Omit<Product, 'id' | 'sellingPrice'>>, isAdditive: boolean) => {
-        const productToUpdate = products.find(p => p.id === productId);
-        if (!productToUpdate) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Product not found for update.' });
-            return;
-        }
-    
-        const stockToAdd = updatedData.stock || 0;
-        let finalStock;
-        
-        if (isAdditive) {
-            finalStock = productToUpdate.stock + stockToAdd;
-        } else {
-            // This is for full updates where stock value is absolute, like editing details without adding stock
-            finalStock = updatedData.stock ?? productToUpdate.stock;
-        }
-    
-        const completeUpdateData = {
-            ...productToUpdate,
-            ...updatedData,
-            stock: finalStock,
-            // When adding stock via `isAdditive`, containerSize remains unchanged.
-            // For other updates, use the new containerSize if provided, otherwise keep the old one.
-            containerSize: isAdditive ? productToUpdate.containerSize : (updatedData.containerSize ?? productToUpdate.containerSize),
-        };
-        
         if (isDbConnected) {
             try {
-                // We only pass the fields that can actually be updated in the DB
-                const dataForDb: Omit<Product, 'id'> = {
-                    name: completeUpdateData.name,
-                    sku: completeUpdateData.sku,
-                    buyingPrice: completeUpdateData.buyingPrice,
-                    profitMargin: completeUpdateData.profitMargin,
-                    sellingPrice: completeUpdateData.sellingPrice,
-                    stock: completeUpdateData.stock,
-                    containerSize: completeUpdateData.containerSize,
-                    mainCategory: completeUpdateData.mainCategory,
-                    category: completeUpdateData.category,
-                    subCategory: completeUpdateData.subCategory
-                };
-
-                await productActions.updateProduct(productId, dataForDb);
+                await productActions.updateProduct(productId, updatedData, isAdditive);
                 await loadAllData();
-                toast({ title: "Product Updated", description: `Details for ${completeUpdateData.name} have been updated.` });
+                toast({ title: "Product Updated", description: `Details for ${updatedData.name || 'product'} have been updated.` });
             } catch (error) {
                 console.error("Failed to update product:", error);
                 toast({ variant: 'destructive', title: 'Error', description: 'Failed to update product. Check DB connection.' });
             }
         } else {
+            const productToUpdate = products.find(p => p.id === productId);
+            if (!productToUpdate) return;
+    
+            let finalStock: number;
+            let finalContainerSize: number;
+            let finalInitialStock: number;
+            
+            if (isAdditive) {
+                const stockToAdd = updatedData.stock || 0;
+                finalStock = productToUpdate.stock + stockToAdd;
+                // Keep containerSize and initialStock the same when just adding stock
+                finalContainerSize = productToUpdate.containerSize;
+                finalInitialStock = productToUpdate.initialStock;
+            } else {
+                // This is for full updates (editing details)
+                finalStock = updatedData.stock ?? productToUpdate.stock;
+                finalContainerSize = updatedData.containerSize ?? productToUpdate.containerSize;
+                finalInitialStock = updatedData.initialStock ?? productToUpdate.initialStock;
+            }
+    
+            const completeUpdateData = {
+                ...productToUpdate,
+                ...updatedData,
+                stock: finalStock,
+                containerSize: finalContainerSize,
+                initialStock: finalInitialStock,
+            };
+    
             const sellingPrice = completeUpdateData.buyingPrice + (completeUpdateData.buyingPrice * completeUpdateData.profitMargin / 100);
             const newProducts = products.map(p => p.id === productId ? { ...completeUpdateData, sellingPrice } : p);
+            
             setProducts(newProducts);
             saveDataToLocalStorage('products', newProducts);
-            toast({ title: "Product Updated (Local)", description: `Details for ${completeUpdateData.name} updated locally.` });
+            toast({ title: "Product Updated (Local)", description: `Details updated locally.` });
         }
     }, [isDbConnected, toast, loadAllData, products, saveDataToLocalStorage]);
 
@@ -844,5 +836,3 @@ export function useAppData() {
     }
     return context;
 }
-
-    

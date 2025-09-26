@@ -40,13 +40,13 @@ export async function getProductById(productId: string): Promise<Product | undef
     return PostgresProductService.getProductById(productId);
 }
 
-export async function addProduct(productData: Omit<Product, 'id' | 'sellingPrice'>): Promise<Product> {
+export async function addProduct(productData: Omit<Product, 'id' | 'sellingPrice' | 'initialStock'>): Promise<Product> {
     if (!usePostgres) throw new Error("Database not connected.");
     const sellingPrice = productData.buyingPrice + (productData.buyingPrice * productData.profitMargin / 100);
     return PostgresProductService.addProduct({...productData, sellingPrice});
 }
 
-export async function addMultipleProducts(productsData: Omit<Product, 'id' | 'sellingPrice'>[]): Promise<Product[]> {
+export async function addMultipleProducts(productsData: Omit<Product, 'id' | 'sellingPrice' | 'initialStock'>[]): Promise<Product[]> {
     if (!usePostgres) throw new Error("Database not connected.");
      const productsWithSellingPrice = productsData.map(p => ({
         ...p,
@@ -55,10 +55,15 @@ export async function addMultipleProducts(productsData: Omit<Product, 'id' | 'se
     return PostgresProductService.addMultipleProducts(productsWithSellingPrice);
 }
 
-export async function updateProduct(productId: string, updatedData: Omit<Product, 'id' | 'sellingPrice'>): Promise<Product | null> {
+export async function updateProduct(productId: string, updatedData: Partial<Omit<Product, 'id' | 'sellingPrice'>>, isAdditive: boolean): Promise<Product | null> {
     if (!usePostgres) throw new Error("Database not connected.");
-    const sellingPrice = updatedData.buyingPrice + (updatedData.buyingPrice * updatedData.profitMargin / 100);
-    return PostgresProductService.updateProduct(productId, {...updatedData, sellingPrice});
+    
+    let finalData = { ...updatedData };
+    if (updatedData.buyingPrice !== undefined && updatedData.profitMargin !== undefined) {
+        finalData.sellingPrice = updatedData.buyingPrice + (updatedData.buyingPrice * updatedData.profitMargin / 100);
+    }
+    
+    return PostgresProductService.updateProduct(productId, finalData, isAdditive);
 }
 
 export async function updateMultipleStocks(updates: { id: string, stockChange: number }[]): Promise<void> {
