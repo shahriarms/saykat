@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/carousel';
 import { Product, Invoice } from '@/lib/types';
 import { StockVolumeDisplay } from './stock-volume-display';
-import { Weight, ThumbsUp } from 'lucide-react';
+import { Weight, Wrench } from 'lucide-react';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Search } from 'lucide-react';
@@ -149,7 +149,7 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
               <Weight className="mr-2 h-4 w-4" /> Material
             </TabsTrigger>
             <TabsTrigger value="Hardware">
-              <ThumbsUp className="mr-2 h-4 w-4" /> Hardware
+              <Wrench className="mr-2 h-4 w-4" /> Hardware
             </TabsTrigger>
           </TabsList>
           
