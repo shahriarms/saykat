@@ -262,13 +262,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     
         if (isAdditive) {
             const stockToAdd = updatedData.stock || 0;
-            const finalStock = productToUpdate.stock + stockToAdd;
-            completeUpdateData = { 
-                ...updatedData, 
-                stock: finalStock,
-                initialStock: finalStock, // New rule
-                containerSize: finalStock // New rule
-            };
+            completeUpdateData = { ...updatedData, stock: stockToAdd };
         } else {
             completeUpdateData = { ...updatedData };
         }
@@ -284,13 +278,26 @@ export function DataProvider({ children }: { children: ReactNode }) {
             }
         } else {
             // Local storage logic
-            const finalProductData = {
-                ...productToUpdate,
-                ...completeUpdateData,
-                sellingPrice: (completeUpdateData.buyingPrice !== undefined && completeUpdateData.profitMargin !== undefined) 
-                    ? completeUpdateData.buyingPrice + (completeUpdateData.buyingPrice * completeUpdateData.profitMargin / 100) 
-                    : productToUpdate.sellingPrice,
-            };
+            let finalProductData: Product;
+            if (isAdditive) {
+                const stockToAdd = updatedData.stock || 0;
+                const finalStock = productToUpdate.stock + stockToAdd;
+                 finalProductData = {
+                    ...productToUpdate,
+                    ...completeUpdateData,
+                    stock: finalStock,
+                    initialStock: finalStock,
+                    containerSize: finalStock,
+                };
+            } else {
+                finalProductData = {
+                    ...productToUpdate,
+                    ...completeUpdateData,
+                    sellingPrice: (completeUpdateData.buyingPrice !== undefined && completeUpdateData.profitMargin !== undefined) 
+                        ? completeUpdateData.buyingPrice + (completeUpdateData.buyingPrice * completeUpdateData.profitMargin / 100) 
+                        : productToUpdate.sellingPrice,
+                };
+            }
     
             const newProducts = products.map(p => p.id === productId ? finalProductData : p);
             
