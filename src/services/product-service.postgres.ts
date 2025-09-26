@@ -1,4 +1,3 @@
-
 // This file contains the PostgreSQL implementation for the ProductService.
 // It is only imported and used on the server-side when a POSTGRES_URL is available.
 import { Pool, PoolClient } from 'pg';
@@ -92,14 +91,35 @@ class PostgresProductService {
         }
     }
 
-    static async updateProduct(productId: string, updatedData: Omit<Product, 'id'>): Promise<Product | null> {
+    static async updateProduct(productId: string, updatedData: Partial<Omit<Product, 'id'>>, isAdditive: boolean): Promise<Product | null> {
         const db = getPool();
-        const { name, sku, buyingPrice, profitMargin, sellingPrice, stock, containerSize, mainCategory, category, subCategory } = updatedData;
-        const result = await db.query(
-            'UPDATE products SET name = $1, sku = $2, "buyingPrice" = $3, "profitMargin" = $4, "sellingPrice" = $5, stock = $6, "containerSize" = $7, "mainCategory" = $8, category = $9, "subCategory" = $10 WHERE id = $11 RETURNING *',
-            [name, sku, buyingPrice, profitMargin, sellingPrice, stock, containerSize, mainCategory, category, subCategory, productId]
-        );
-        return formatProduct(result.rows[0]);
+        
+        if (isAdditive) {
+            const stockToAdd = updatedData.stock || 0;
+            const result = await db.query(
+                'UPDATE products SET stock = stock + $1 WHERE id = $2 RETURNING *',
+                [stockToAdd, productId]
+            );
+            return formatProduct(result.rows[0]);
+        } else {
+            const { name, sku, buyingPrice, profitMargin, sellingPrice, stock, containerSize, mainCategory, category, subCategory } = updatedData;
+            const result = await db.query(
+                `UPDATE products SET 
+                    name = COALESCE($1, name), 
+                    sku = COALESCE($2, sku), 
+                    "buyingPrice" = COALESCE($3, "buyingPrice"), 
+                    "profitMargin" = COALESCE($4, "profitMargin"), 
+                    "sellingPrice" = COALESCE($5, "sellingPrice"), 
+                    stock = COALESCE($6, stock), 
+                    "containerSize" = COALESCE($7, "containerSize"),
+                    "mainCategory" = COALESCE($8, "mainCategory"),
+                    category = COALESCE($9, category),
+                    "subCategory" = COALESCE($10, "subCategory")
+                 WHERE id = $11 RETURNING *`,
+                [name, sku, buyingPrice, profitMargin, sellingPrice, stock, containerSize, mainCategory, category, subCategory, productId]
+            );
+            return formatProduct(result.rows[0]);
+        }
     }
     
     static async updateMultipleStocks(updates: { id: string; stockChange: number }[], client?: PoolClient): Promise<void> {
