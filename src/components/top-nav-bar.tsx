@@ -49,7 +49,7 @@ export function TopNavBar() {
                   href={item.href}
                   className={cn(
                     "flex flex-col items-center justify-center gap-1.5 rounded-lg p-2 text-center transition-colors",
-                    "w-24 shrink-0",
+                    "shrink-0 px-3",
                     isActive
                       ? "bg-primary/10 text-primary"
                       : "text-muted-foreground hover:bg-muted"
@@ -61,7 +61,7 @@ export function TopNavBar() {
                   )}>
                       <Icon className="h-6 w-6" />
                   </div>
-                  <span className="text-[11px] font-semibold truncate">
+                  <span className="text-[11px] font-semibold whitespace-nowrap">
                       {t(item.labelKey)}
                   </span>
                 </Link>
