@@ -93,21 +93,21 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
 
     return (
       <Carousel
-        opts={{}}
+        opts={{
+          align: "start",
+        }}
         className="w-full px-12"
       >
-        <CarouselContent className="flex flex-wrap -ml-1 h-[400px]">
+        <CarouselContent className="flex flex-wrap -ml-2">
           {productList.map(product => (
-            <CarouselItem key={product.id} className="basis-full md:basis-1/2 lg:basis-1/4 pl-1">
-              <div className="p-1 h-full flex items-center justify-center">
-                  <StockVolumeDisplay
-                    productName={product.name}
-                    currentStock={product.stock}
-                    totalSold={product.totalSold}
-                    maxStock={product.totalEverAdded}
-                    unit={product.mainCategory === 'Material' ? 'kg' : 'pcs'}
-                  />
-              </div>
+            <CarouselItem key={product.id} className="basis-full md:basis-1/2 lg:basis-1/4 p-2 flex flex-col items-center justify-center">
+                <StockVolumeDisplay
+                  productName={product.name}
+                  currentStock={product.stock}
+                  totalSold={product.totalSold}
+                  maxStock={product.totalEverAdded}
+                  unit={product.mainCategory === 'Material' ? 'kg' : 'pcs'}
+                />
             </CarouselItem>
           ))}
         </CarouselContent>
