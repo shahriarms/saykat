@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
@@ -178,6 +176,7 @@ export default function ExpensesPage() {
     };
 
     const handleExport = (fileType: 'csv' | 'xlsx' | 'pdf') => {
+        const filename = `expenses_report_${format(new Date(), 'yyyy-MM-dd')}`;
         if (fileType === 'pdf') {
             const doc = new jsPDF();
             doc.text(t('expense_report_title'), 14, 16);
@@ -191,7 +190,7 @@ export default function ExpensesPage() {
                     '৳ '+e.amount.toFixed(2),
                 ]),
             });
-            doc.save('expenses.pdf');
+            doc.save(`${filename}.pdf`);
         } else {
             const worksheet = XLSX.utils.json_to_sheet(filteredAndSortedExpenses.map(e => ({
                 [t('date_header')]: format(new Date(e.date), 'yyyy-MM-dd'),
@@ -202,7 +201,7 @@ export default function ExpensesPage() {
             })));
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, t('expenses_tab_title'));
-            XLSX.writeFile(workbook, `expenses.${fileType}`);
+            XLSX.writeFile(workbook, `${filename}.${fileType}`);
         }
     };
 

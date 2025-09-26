@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo } from 'react';
@@ -106,7 +105,7 @@ export function MonthlyUnitsSoldDialog({ open, onOpenChange, invoices, products,
             const matSheet = XLSX.utils.json_to_sheet(materialItems.map(item => ({ "Item Name": item.name, "Total Quantity Sold (kg)": item.totalQuantity })));
             XLSX.utils.book_append_sheet(wb, matSheet, "Material Items");
         }
-        XLSX.writeFile(wb, `units_sold_report.xlsx`);
+        XLSX.writeFile(wb, `units_sold_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
     };
 
     const handleExportPdf = () => {
@@ -138,7 +137,7 @@ export function MonthlyUnitsSoldDialog({ open, onOpenChange, invoices, products,
             });
         }
         
-        doc.save(`units_sold_report.pdf`);
+        doc.save(`units_sold_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
     };
     
   return (

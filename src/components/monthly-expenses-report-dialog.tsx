@@ -66,7 +66,7 @@ export function MonthlyExpensesDialog({ open, onOpenChange, expenses, dateRange 
         })));
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Expenses Report");
-        XLSX.writeFile(workbook, `expenses_report.xlsx`);
+        XLSX.writeFile(workbook, `expenses_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
     };
 
     const handleExportPdf = () => {
@@ -82,7 +82,7 @@ export function MonthlyExpensesDialog({ open, onOpenChange, expenses, dateRange 
             ]),
             startY: 22,
         });
-        doc.save(`expenses_report.pdf`);
+        doc.save(`expenses_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
     };
 
     const totalExpenses = useMemo(() => reportData.reduce((sum, item) => sum + item.amount, 0), [reportData]);
@@ -142,5 +142,3 @@ export function MonthlyExpensesDialog({ open, onOpenChange, expenses, dateRange 
     </Dialog>
   );
 }
-
-    

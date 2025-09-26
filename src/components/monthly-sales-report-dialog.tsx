@@ -90,7 +90,7 @@ export function MonthlySalesDialog({ open, onOpenChange, invoices, dateRange }: 
 
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Sales Report");
-        XLSX.writeFile(workbook, `sales_report.xlsx`);
+        XLSX.writeFile(workbook, `sales_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
     };
 
     const handleExportPdf = () => {
@@ -106,7 +106,7 @@ export function MonthlySalesDialog({ open, onOpenChange, invoices, dateRange }: 
             footStyles: { fontStyle: 'bold' },
             startY: 22,
         });
-        doc.save(`sales_report.pdf`);
+        doc.save(`sales_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
     };
 
 

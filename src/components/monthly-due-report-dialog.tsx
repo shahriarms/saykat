@@ -77,7 +77,7 @@ export function MonthlyDueDialog({ open, onOpenChange, invoices, dateRange }: Mo
 
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Due Invoices Report");
-        XLSX.writeFile(workbook, `due_report.xlsx`);
+        XLSX.writeFile(workbook, `due_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
     };
 
     const handleExportPdf = () => {
@@ -97,7 +97,7 @@ export function MonthlyDueDialog({ open, onOpenChange, invoices, dateRange }: Mo
             footStyles: { fontStyle: 'bold' },
             startY: 22,
         });
-        doc.save(`due_report.pdf`);
+        doc.save(`due_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
     };
 
   return (

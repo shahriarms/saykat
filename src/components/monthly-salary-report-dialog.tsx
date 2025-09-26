@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo } from 'react';
@@ -83,7 +82,7 @@ export function MonthlySalaryReportDialog({ open, onOpenChange, salaryPayments, 
         })));
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Salary Payments Report");
-        XLSX.writeFile(workbook, `salary_payments_report.xlsx`);
+        XLSX.writeFile(workbook, `salary_payments_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
     };
 
     const handleExportPdf = () => {
@@ -99,7 +98,7 @@ export function MonthlySalaryReportDialog({ open, onOpenChange, salaryPayments, 
             ]),
             startY: 22,
         });
-        doc.save(`salary_payments_report.pdf`);
+        doc.save(`salary_payments_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
     };
 
     const totalPaid = useMemo(() => reportData.reduce((sum, item) => sum + (item.amount || 0), 0), [reportData]);

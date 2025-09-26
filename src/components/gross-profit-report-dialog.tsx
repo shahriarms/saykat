@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo } from 'react';
@@ -113,7 +112,7 @@ export function GrossProfitReportDialog({ open, onOpenChange, invoices, isRangeR
             finalY = (doc as any).lastAutoTable.finalY + 10;
         });
 
-        doc.save(`gross_profit_report.pdf`);
+        doc.save(`gross_profit_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
     };
 
   return (

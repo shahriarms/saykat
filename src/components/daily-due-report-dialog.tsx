@@ -54,7 +54,7 @@ export function DailyDueReportDialog({ open, onOpenChange, invoices }: DailyDueR
         })));
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Today's Due Invoices");
-        XLSX.writeFile(workbook, `todays_due_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+        XLSX.writeFile(workbook, `todays_due_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
     };
 
     const handleExportPdf = () => {
@@ -71,7 +71,7 @@ export function DailyDueReportDialog({ open, onOpenChange, invoices }: DailyDueR
             ]),
             startY: 22,
         });
-        doc.save(`todays_due_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+        doc.save(`todays_due_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
     };
 
     const totalDue = useMemo(() => reportData.reduce((sum, item) => sum + item.dueAmount, 0), [reportData]);

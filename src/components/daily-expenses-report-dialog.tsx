@@ -50,7 +50,7 @@ export function DailyExpensesReportDialog({ open, onOpenChange, expenses }: Dail
         })));
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Today's Expenses");
-        XLSX.writeFile(workbook, `todays_expenses_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+        XLSX.writeFile(workbook, `todays_expenses_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
     };
 
     const handleExportPdf = () => {
@@ -66,7 +66,7 @@ export function DailyExpensesReportDialog({ open, onOpenChange, expenses }: Dail
             ]),
             startY: 22,
         });
-        doc.save(`todays_expenses_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+        doc.save(`todays_expenses_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
     };
 
     const totalExpenses = useMemo(() => reportData.reduce((sum, item) => sum + item.amount, 0), [reportData]);
@@ -126,5 +126,3 @@ export function DailyExpensesReportDialog({ open, onOpenChange, expenses }: Dail
     </Dialog>
   );
 }
-
-    

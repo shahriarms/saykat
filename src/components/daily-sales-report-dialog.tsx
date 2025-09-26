@@ -64,7 +64,7 @@ export function DailySalesDialog({ open, onOpenChange, invoices }: DailySalesDia
         const worksheet = XLSX.utils.json_to_sheet(flattenedData);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Today's Sales");
-        XLSX.writeFile(workbook, `todays_sales_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+        XLSX.writeFile(workbook, `todays_sales_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
     };
 
     const handleExportPdf = () => {
@@ -100,7 +100,7 @@ export function DailySalesDialog({ open, onOpenChange, invoices }: DailySalesDia
             finalY = (doc as any).lastAutoTable.finalY + 10;
         });
 
-        doc.save(`todays_sales_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+        doc.save(`todays_sales_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
     };
 
     const totalSales = useMemo(() => sortedInvoices.reduce((sum, inv) => sum + inv.subtotal, 0), [sortedInvoices]);

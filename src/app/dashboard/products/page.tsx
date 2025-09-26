@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useState, useMemo, useRef } from 'react';
@@ -47,6 +45,7 @@ import * as XLSX from 'xlsx';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from '@/hooks/use-translation';
 import dynamic from 'next/dynamic';
+import { format } from 'date-fns';
 
 const AddProductDialog = dynamic(() => import('@/components/add-product-dialog').then(mod => mod.AddProductDialog), {
     ssr: false,
@@ -91,6 +90,7 @@ export default function ProductsPage() {
 
 
   const handleDownload = () => {
+    const filename = `stock_report_${activeTab}_${format(new Date(), 'yyyy-MM-dd')}.csv`;
     const headers = ["Main Category,Category,Sub-Category,SKU,Name,Buying Price,Profit Margin,Selling Price,Stock\n"];
     const csvContent = filteredProducts
       .map((p) => `${p.mainCategory},${p.category},${p.subCategory},${p.sku},"${p.name.replace(/"/g, '""')}",${p.buyingPrice},${p.profitMargin},${p.sellingPrice},${p.stock}`)
@@ -100,7 +100,7 @@ export default function ProductsPage() {
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `stock_report_${activeTab}.csv`);
+    link.setAttribute("download", filename);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
