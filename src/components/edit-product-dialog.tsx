@@ -27,6 +27,7 @@ import type { Product } from '@/lib/types';
 import { useEffect } from 'react';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { useTranslation } from '@/hooks/use-translation';
+import { FormDescription } from './ui/form';
 
 const productSchema = z.object({
   name: z.string().min(2, { message: 'Product name must be at least 2 characters.' }),
@@ -54,38 +55,28 @@ export function EditProductDialog({ open, onOpenChange, product }: EditProductDi
   const { t } = useTranslation();
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
-    defaultValues: {
-      name: product?.name || '',
-      sku: product?.sku || '',
-      mainCategory: product?.mainCategory || 'Material',
-      category: product?.category || '',
-      subCategory: product?.subCategory || '',
-      buyingPrice: product?.buyingPrice || undefined,
-      profitMargin: product?.profitMargin || undefined,
-      sellingPrice: product?.sellingPrice || undefined,
-      stock: product?.stock || undefined,
-      containerSize: product?.containerSize || undefined,
-    },
+    defaultValues: {}, // Will be reset by useEffect
   });
 
-  const mainCategory = useWatch({ control: form.control, name: 'mainCategory' });
   const buyingPrice = useWatch({ control: form.control, name: 'buyingPrice' });
   const profitMargin = useWatch({ control: form.control, name: 'profitMargin' });
 
   useEffect(() => {
-    form.reset({
-      name: product?.name || '',
-      sku: product?.sku || '',
-      mainCategory: product?.mainCategory || 'Material',
-      category: product?.category || '',
-      subCategory: product?.subCategory || '',
-      buyingPrice: product?.buyingPrice || undefined,
-      profitMargin: product?.profitMargin || undefined,
-      sellingPrice: product?.sellingPrice || undefined,
-      stock: product?.stock || undefined,
-      containerSize: product?.containerSize || undefined,
-    });
-  }, [product, form]);
+    if (product) {
+      form.reset({
+        name: product.name,
+        sku: product.sku,
+        mainCategory: product.mainCategory,
+        category: product.category,
+        subCategory: product.subCategory,
+        buyingPrice: product.buyingPrice,
+        profitMargin: product.profitMargin,
+        sellingPrice: product.sellingPrice,
+        stock: undefined, // "Stock to Add" should be empty initially
+        containerSize: product.containerSize,
+      });
+    }
+  }, [product, form, open]); // Depend on `open` to reset form when dialog reopens
 
   useEffect(() => {
     const bp = parseFloat(String(buyingPrice)) || 0;
@@ -100,7 +91,9 @@ export function EditProductDialog({ open, onOpenChange, product }: EditProductDi
   }, [buyingPrice, profitMargin, form]);
 
   const onSubmit = (data: ProductFormValues) => {
-    updateProduct(product.id, data, false);
+    // Here, 'data.stock' is the "Stock to Add". We pass it to the update function.
+    // The `isAdditive: true` flag tells the hook to add this to the current remaining stock.
+    updateProduct(product.id, { ...data, stock: data.stock || 0 }, true);
     onOpenChange(false);
   };
   
@@ -110,6 +103,8 @@ export function EditProductDialog({ open, onOpenChange, product }: EditProductDi
     }
     onOpenChange(isOpen);
   };
+
+  if (!product) return null;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -209,10 +204,13 @@ export function EditProductDialog({ open, onOpenChange, product }: EditProductDi
                 name="stock"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('stock_label')} ({mainCategory === 'Material' ? 'kg' : 'pcs'})</FormLabel>
+                    <FormLabel>Stock to Add ({product.mainCategory === 'Material' ? 'kg' : 'pcs'})</FormLabel>
                     <FormControl>
-                      <Input type="number" min="0" inputMode="decimal" placeholder="100" {...field} value={field.value ?? ''}/>
+                      <Input type="number" min="0" inputMode="decimal" placeholder="0" {...field} value={field.value ?? ''}/>
                     </FormControl>
+                    <FormDescription>
+                      Current Remaining Stock: {product.stock}
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -256,19 +254,6 @@ export function EditProductDialog({ open, onOpenChange, product }: EditProductDi
                     </FormItem>
                 )}
             />
-             <FormField
-                control={form.control}
-                name="containerSize"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Container Size ({mainCategory === 'Material' ? 'kg' : 'pcs'})</FormLabel>
-                    <FormControl>
-                      <Input type="number" min="0" inputMode="decimal" placeholder="100" {...field} value={field.value ?? ''}/>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             <DialogFooter className="col-span-2">
               <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
                 {t('cancel_button')}

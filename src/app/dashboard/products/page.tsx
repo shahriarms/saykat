@@ -91,7 +91,7 @@ export default function ProductsPage() {
 
   const handleDownload = () => {
     const filename = `stock_report_${activeTab}_${format(new Date(), 'yyyy-MM-dd')}.csv`;
-    const headers = ["Main Category,Category,Sub-Category,SKU,Name,Buying Price,Profit Margin,Selling Price,Stock\n"];
+    const headers = ["Main Category,Category,Sub-Category,SKU,Name,Buying Price,Profit Margin,Selling Price,Remaining Stock\n"];
     const csvContent = filteredProducts
       .map((p) => `${p.mainCategory},${p.category},${p.subCategory},${p.sku},"${p.name.replace(/"/g, '""')}",${p.buyingPrice},${p.profitMargin},${p.sellingPrice},${p.stock}`)
       .join("\n");
@@ -149,6 +149,7 @@ export default function ProductsPage() {
           buyingPrice: parseFloat(String(row['Buying Price'] || 0)),
           profitMargin: parseFloat(String(row['Profit Margin'] || 0)),
           stock: parseInt(String(row['Stock'] || 0), 10),
+          containerSize: parseInt(String(row['Container Size'] || 0), 10),
           mainCategory: (row['Main Category'] === 'Hardware' ? 'Hardware' : 'Material') as 'Material' | 'Hardware',
           category: String(row['Category'] || ''),
           subCategory: String(row['Sub-Category'] || ''),
@@ -266,7 +267,7 @@ export default function ProductsPage() {
                         <TableHead>{t('name_header')}</TableHead>
                         <TableHead className="hidden md:table-cell">{t('category_header')}</TableHead>
                         <TableHead className="text-right hidden sm:table-cell">{t('selling_price_header')}</TableHead>
-                        <TableHead className="text-right">{t('stock_header')}</TableHead>
+                        <TableHead className="text-right">Remaining Stock</TableHead>
                         <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
                     </TableHeader>

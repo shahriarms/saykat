@@ -91,7 +91,10 @@ export function AddProductDialog({ open, onOpenChange }: AddProductDialogProps) 
   }, [buyingPrice, profitMargin, form]);
   
   useEffect(() => {
-    form.setValue('containerSize', stock);
+    // When adding a new product, the initial stock is the container size.
+    if(stock !== undefined) {
+      form.setValue('containerSize', stock);
+    }
   }, [stock, form]);
 
 
