@@ -418,11 +418,11 @@ export default function InvoicePage() {
                     </Button>
                 </CardHeader>
                 <CardContent className='p-0 flex-1 flex flex-col'>
-                    <ScrollArea className="flex-1">
-                        <Table>
+                    <div className="overflow-x-auto">
+                        <Table className="min-w-[600px] whitespace-nowrap">
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Item</TableHead>
+                                    <TableHead className="w-1/3">Item</TableHead>
                                     <TableHead>Stock</TableHead>
                                     <TableHead>Qty</TableHead>
                                     <TableHead>Price</TableHead>
@@ -438,22 +438,22 @@ export default function InvoicePage() {
                                     return (
                                     <TableRow key={item.id}>
                                         <TableCell>
-                                          <div className="max-w-[200px] overflow-x-auto whitespace-nowrap no-scrollbar py-1">
-                                              <p className="font-medium break-words">{item.name}</p>
-                                              <div className='text-xs text-muted-foreground flex flex-col items-start'>
-                                                  <span>Sug: ৳{item.originalPrice.toFixed(2)}</span>
-                                                  {showProfit && (
-                                                      <>
-                                                          <span>Buy: ৳{item.buyingPrice.toFixed(2)}</span>
-                                                          <span className={cn(item.profitMargin < 0 ? 'text-red-500' : 'text-green-600')}>
-                                                              Profit: {item.profitMargin.toFixed(1)}% (৳{item.profitAmount.toFixed(2)})
-                                                          </span>
-                                                      </>
-                                                  )}
-                                              </div>
+                                          <div className="font-medium break-words max-w-[200px] whitespace-normal">
+                                            {item.name}
+                                          </div>
+                                          <div className='text-xs text-muted-foreground flex flex-col items-start'>
+                                              <span>Sug: ৳{item.originalPrice.toFixed(2)}</span>
+                                              {showProfit && (
+                                                  <>
+                                                      <span>Buy: ৳{item.buyingPrice.toFixed(2)}</span>
+                                                      <span className={cn(item.profitMargin < 0 ? 'text-red-500' : 'text-green-600')}>
+                                                          Profit: {item.profitMargin.toFixed(1)}% (৳{item.profitAmount.toFixed(2)})
+                                                      </span>
+                                                  </>
+                                              )}
                                           </div>
                                         </TableCell>
-                                        <TableCell className="pr-8">
+                                        <TableCell>
                                             {product && (
                                                 <div className="w-16">
                                                      <StockVolumeDisplay
@@ -487,7 +487,7 @@ export default function InvoicePage() {
                                 )}
                             </TableBody>
                         </Table>
-                    </ScrollArea>
+                    </div>
                 </CardContent>
                 <CardFooter className="flex-col items-stretch space-y-2 pt-4">
                     <div className="w-full md:w-80 ml-auto space-y-2">
