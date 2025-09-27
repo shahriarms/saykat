@@ -74,6 +74,7 @@ export function MonthlySalaryReportDialog({ open, onOpenChange, salaryPayments, 
     }, [salaryPayments, employees]);
 
     const handleExportExcel = () => {
+        const filename = `salary_payments_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
         const worksheet = XLSX.utils.json_to_sheet(reportData.map(item => ({
             "Date": item.date,
             "Employee Name": item.employeeName,
@@ -82,10 +83,11 @@ export function MonthlySalaryReportDialog({ open, onOpenChange, salaryPayments, 
         })));
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Salary Payments Report");
-        XLSX.writeFile(workbook, `salary_payments_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+        XLSX.writeFile(workbook, filename);
     };
 
     const handleExportPdf = () => {
+        const filename = `salary_payments_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
         const doc = new jsPDF();
         doc.text(rangeTitle, 14, 16);
         (doc as any).autoTable({
@@ -98,7 +100,7 @@ export function MonthlySalaryReportDialog({ open, onOpenChange, salaryPayments, 
             ]),
             startY: 22,
         });
-        doc.save(`salary_payments_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+        doc.save(filename);
     };
 
     const totalPaid = useMemo(() => reportData.reduce((sum, item) => sum + (item.amount || 0), 0), [reportData]);

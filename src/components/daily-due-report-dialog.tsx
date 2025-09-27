@@ -45,6 +45,7 @@ export function DailyDueReportDialog({ open, onOpenChange, invoices }: DailyDueR
     }, [invoices]);
 
     const handleExportExcel = () => {
+        const filename = `todays_due_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
         const worksheet = XLSX.utils.json_to_sheet(reportData.map(item => ({
             "Invoice ID": String(item.id),
             "Customer Name": item.customerName,
@@ -54,10 +55,11 @@ export function DailyDueReportDialog({ open, onOpenChange, invoices }: DailyDueR
         })));
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Today's Due Invoices");
-        XLSX.writeFile(workbook, `todays_due_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+        XLSX.writeFile(workbook, filename);
     };
 
     const handleExportPdf = () => {
+        const filename = `todays_due_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
         const doc = new jsPDF();
         doc.text(`Today's Due Invoices - ${format(new Date(), 'PPP')}`, 14, 16);
         (doc as any).autoTable({
@@ -71,7 +73,7 @@ export function DailyDueReportDialog({ open, onOpenChange, invoices }: DailyDueR
             ]),
             startY: 22,
         });
-        doc.save(`todays_due_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+        doc.save(filename);
     };
 
     const totalDue = useMemo(() => reportData.reduce((sum, item) => sum + item.dueAmount, 0), [reportData]);

@@ -79,6 +79,7 @@ export function MonthlySalesDialog({ open, onOpenChange, invoices, dateRange }: 
     const totalSales = useMemo(() => reportData.reduce((sum, item) => sum + item.totalSales, 0), [reportData]);
 
     const handleExportExcel = () => {
+        const filename = `sales_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
         const worksheet = XLSX.utils.json_to_sheet(reportData.map(item => ({
             "Date": item.date,
             "Total Sales": item.totalSales,
@@ -90,10 +91,11 @@ export function MonthlySalesDialog({ open, onOpenChange, invoices, dateRange }: 
 
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Sales Report");
-        XLSX.writeFile(workbook, `sales_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+        XLSX.writeFile(workbook, filename);
     };
 
     const handleExportPdf = () => {
+        const filename = `sales_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
         const doc = new jsPDF();
         doc.text(rangeTitle, 14, 16);
         (doc as any).autoTable({
@@ -106,7 +108,7 @@ export function MonthlySalesDialog({ open, onOpenChange, invoices, dateRange }: 
             footStyles: { fontStyle: 'bold' },
             startY: 22,
         });
-        doc.save(`sales_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+        doc.save(filename);
     };
 
 

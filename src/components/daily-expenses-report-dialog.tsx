@@ -42,6 +42,7 @@ export function DailyExpensesReportDialog({ open, onOpenChange, expenses }: Dail
     }, [expenses]);
 
     const handleExportExcel = () => {
+        const filename = `todays_expenses_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
         const worksheet = XLSX.utils.json_to_sheet(reportData.map(item => ({
             "Time": format(new Date(item.date), 'p'),
             "Category": item.mainCategory,
@@ -50,10 +51,11 @@ export function DailyExpensesReportDialog({ open, onOpenChange, expenses }: Dail
         })));
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Today's Expenses");
-        XLSX.writeFile(workbook, `todays_expenses_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+        XLSX.writeFile(workbook, filename);
     };
 
     const handleExportPdf = () => {
+        const filename = `todays_expenses_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
         const doc = new jsPDF();
         doc.text(`Today's Expenses Report - ${format(new Date(), 'PPP')}`, 14, 16);
         (doc as any).autoTable({
@@ -66,7 +68,7 @@ export function DailyExpensesReportDialog({ open, onOpenChange, expenses }: Dail
             ]),
             startY: 22,
         });
-        doc.save(`todays_expenses_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+        doc.save(filename);
     };
 
     const totalExpenses = useMemo(() => reportData.reduce((sum, item) => sum + item.amount, 0), [reportData]);

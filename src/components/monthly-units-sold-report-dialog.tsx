@@ -96,6 +96,7 @@ export function MonthlyUnitsSoldDialog({ open, onOpenChange, invoices, products,
     }, [invoices, products]);
 
     const handleExportExcel = () => {
+        const filename = `units_sold_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
         const wb = XLSX.utils.book_new();
         if (hardwareItems.length > 0) {
             const hwSheet = XLSX.utils.json_to_sheet(hardwareItems.map(item => ({ "Item Name": item.name, "Total Quantity Sold (pcs)": item.totalQuantity })));
@@ -105,10 +106,11 @@ export function MonthlyUnitsSoldDialog({ open, onOpenChange, invoices, products,
             const matSheet = XLSX.utils.json_to_sheet(materialItems.map(item => ({ "Item Name": item.name, "Total Quantity Sold (kg)": item.totalQuantity })));
             XLSX.utils.book_append_sheet(wb, matSheet, "Material Items");
         }
-        XLSX.writeFile(wb, `units_sold_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+        XLSX.writeFile(wb, filename);
     };
 
     const handleExportPdf = () => {
+        const filename = `units_sold_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
         const doc = new jsPDF();
         doc.text(rangeTitle, 14, 16);
         let startY = 22;
@@ -137,7 +139,7 @@ export function MonthlyUnitsSoldDialog({ open, onOpenChange, invoices, products,
             });
         }
         
-        doc.save(`units_sold_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+        doc.save(filename);
     };
     
   return (

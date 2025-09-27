@@ -64,6 +64,7 @@ export function GrossProfitReportDialog({ open, onOpenChange, invoices, isRangeR
 
 
     const handleExportExcel = () => {
+        const filename = `gross_profit_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
         const flattenedData = sortedInvoices.flatMap(invoice => 
             invoice.items.map(item => ({
                 "Invoice No": String(invoice.id),
@@ -80,10 +81,11 @@ export function GrossProfitReportDialog({ open, onOpenChange, invoices, isRangeR
         const worksheet = XLSX.utils.json_to_sheet(flattenedData);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Gross Profit Report");
-        XLSX.writeFile(workbook, `gross_profit_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+        XLSX.writeFile(workbook, filename);
     };
 
     const handleExportPdf = () => {
+        const filename = `gross_profit_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
         const doc = new jsPDF();
         doc.text(rangeTitle, 14, 16);
         
@@ -112,7 +114,7 @@ export function GrossProfitReportDialog({ open, onOpenChange, invoices, isRangeR
             finalY = (doc as any).lastAutoTable.finalY + 10;
         });
 
-        doc.save(`gross_profit_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+        doc.save(filename);
     };
 
   return (

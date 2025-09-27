@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo } from 'react';
@@ -45,6 +44,7 @@ export function DailySalesDialog({ open, onOpenChange, invoices }: DailySalesDia
     }, [invoices]);
 
     const handleExportExcel = () => {
+        const filename = `todays_sales_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
         const flattenedData = sortedInvoices.flatMap(invoice => 
             invoice.items.map(item => {
                 const price = parseFloat(String(item.price)) || 0;
@@ -64,10 +64,11 @@ export function DailySalesDialog({ open, onOpenChange, invoices }: DailySalesDia
         const worksheet = XLSX.utils.json_to_sheet(flattenedData);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Today's Sales");
-        XLSX.writeFile(workbook, `todays_sales_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+        XLSX.writeFile(workbook, filename);
     };
 
     const handleExportPdf = () => {
+        const filename = `todays_sales_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
         const doc = new jsPDF();
         doc.text(`Today's Sales Report - ${format(new Date(), 'PPP')}`, 14, 16);
         
@@ -100,7 +101,7 @@ export function DailySalesDialog({ open, onOpenChange, invoices }: DailySalesDia
             finalY = (doc as any).lastAutoTable.finalY + 10;
         });
 
-        doc.save(`todays_sales_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+        doc.save(filename);
     };
 
     const totalSales = useMemo(() => sortedInvoices.reduce((sum, inv) => sum + inv.subtotal, 0), [sortedInvoices]);

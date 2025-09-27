@@ -63,6 +63,7 @@ export function MonthlyDueDialog({ open, onOpenChange, invoices, dateRange }: Mo
     const totalDue = useMemo(() => reportData.reduce((sum, item) => sum + item.dueAmount, 0), [reportData]);
 
     const handleExportExcel = () => {
+        const filename = `due_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
         const worksheet = XLSX.utils.json_to_sheet(reportData.map(item => ({
             "Date": format(new Date(item.date), 'PP'),
             "Invoice ID": String(item.id),
@@ -77,10 +78,11 @@ export function MonthlyDueDialog({ open, onOpenChange, invoices, dateRange }: Mo
 
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Due Invoices Report");
-        XLSX.writeFile(workbook, `due_report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+        XLSX.writeFile(workbook, filename);
     };
 
     const handleExportPdf = () => {
+        const filename = `due_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
         const doc = new jsPDF();
         doc.text(rangeTitle, 14, 16);
         (doc as any).autoTable({
@@ -97,7 +99,7 @@ export function MonthlyDueDialog({ open, onOpenChange, invoices, dateRange }: Mo
             footStyles: { fontStyle: 'bold' },
             startY: 22,
         });
-        doc.save(`due_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+        doc.save(filename);
     };
 
   return (
