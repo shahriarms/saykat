@@ -169,6 +169,10 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
             <style>
                 {`
                     @media print {
+                        .invoice-container {
+                            width: ${isPos ? '80mm' : '100%'} !important;
+                            max-width: ${isPos ? '80mm' : '100%'} !important;
+                        }
                         @page {
                             size: ${isPos ? '80mm auto' : 'A4'};
                             margin: 0;
@@ -176,7 +180,7 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
                     }
                 `}
             </style>
-            <div style={memoStyles}>
+            <div style={memoStyles} className="invoice-container">
                  <div style={sealContainerStyles}>
                     <svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
                         <defs>
