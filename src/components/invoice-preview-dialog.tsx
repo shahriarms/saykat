@@ -74,9 +74,13 @@ export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePre
             };
 
             window.addEventListener('afterprint', handleAfterPrint);
-            window.print();
+
+            const timer = setTimeout(() => {
+                window.print();
+            }, 100);
             
             return () => {
+                clearTimeout(timer);
                 window.removeEventListener('afterprint', handleAfterPrint);
                 if (document.title !== originalTitle) {
                   document.title = originalTitle;

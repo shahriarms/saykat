@@ -79,54 +79,60 @@ export default function InvoicePage() {
 
     const originalTitle = document.title;
     document.title = `invoice-${invoiceToPrint.id}`;
-    
+
     const afterPrintAction = async () => {
-        try {
-          let newInvoiceId: number | null;
-          if(invoiceToPrint.originalInvoiceId) {
-            newInvoiceId = await updateInvoice(invoiceToPrint.originalInvoiceId, invoiceToPrint);
-          } else {
-            newInvoiceId = await addInvoice(invoiceToPrint);
-          }
-  
-          if (newInvoiceId) {
-            toast({
-              title: `Invoice #${newInvoiceId} Saved`,
-              description: `The invoice has been successfully ${invoiceToPrint.originalInvoiceId ? 'updated' : 'saved'}.`,
-            });
-          }
-        } catch (error: any) {
-          console.error("Failed to save invoice after printing:", error);
+      try {
+        let newInvoiceId: number | null;
+        if (invoiceToPrint.originalInvoiceId) {
+          newInvoiceId = await updateInvoice(invoiceToPrint.originalInvoiceId, invoiceToPrint);
+        } else {
+          newInvoiceId = await addInvoice(invoiceToPrint);
+        }
+
+        if (newInvoiceId) {
           toast({
-            variant: 'destructive',
-            title: 'Error Saving Invoice',
-            description: error.message || 'The invoice was printed, but failed to save.',
-          });
-        } finally {
-          setInvoiceToPrint(null);
-          setIsProcessing(false);
-          resetActiveDraft();
-          toast({
-            title: "Memo Ready",
-            description: "A new, empty memo is ready for you.",
+            title: `Invoice #${newInvoiceId} Saved`,
+            description: `The invoice has been successfully ${invoiceToPrint.originalInvoiceId ? 'updated' : 'saved'}.`,
           });
         }
-    }
-      
-    const handleAfterPrint = () => {
-        document.title = originalTitle;
-        setIsProcessing(true);
-        afterPrintAction();
+      } catch (error: any) {
+        console.error("Failed to save invoice after printing:", error);
+        toast({
+          variant: 'destructive',
+          title: 'Error Saving Invoice',
+          description: error.message || 'The invoice was printed, but failed to save.',
+        });
+      } finally {
+        setInvoiceToPrint(null);
+        setIsProcessing(false);
+        resetActiveDraft();
+        toast({
+          title: "Memo Ready",
+          description: "A new, empty memo is ready for you.",
+        });
+      }
     };
-    
+
+    const handleAfterPrint = () => {
+      document.title = originalTitle;
+      window.removeEventListener('afterprint', handleAfterPrint);
+      setIsProcessing(true);
+      afterPrintAction();
+    };
+
     window.addEventListener('afterprint', handleAfterPrint);
-    window.print();
-    
+
+    // Use a timeout to ensure the title is updated before the print dialog opens
+    const timer = setTimeout(() => {
+        window.print();
+    }, 100);
+
     return () => {
-        window.removeEventListener('afterprint', handleAfterPrint);
-        if (document.title !== originalTitle) {
-          document.title = originalTitle; // Ensure title is restored on cleanup
-        }
+      clearTimeout(timer);
+      window.removeEventListener('afterprint', handleAfterPrint);
+      if (document.title !== originalTitle) {
+        document.title = originalTitle;
+      }
     };
   }, [invoiceToPrint, addInvoice, updateInvoice, resetActiveDraft, toast]);
   

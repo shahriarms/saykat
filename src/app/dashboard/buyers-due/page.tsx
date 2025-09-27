@@ -148,9 +148,13 @@ export default function BuyersDuePage() {
             };
 
             window.addEventListener('afterprint', handleAfterPrint);
-            window.print();
+
+            const timer = setTimeout(() => {
+                window.print();
+            }, 100);
             
             return () => {
+                clearTimeout(timer);
                 window.removeEventListener('afterprint', handleAfterPrint);
                  if (document.title !== originalTitle) {
                     document.title = originalTitle;
@@ -274,9 +278,13 @@ export default function BuyersDuePage() {
         };
 
         window.addEventListener('afterprint', handleAfterPrint);
-        window.print();
+        
+        const timer = setTimeout(() => {
+            window.print();
+        }, 100);
         
         return () => {
+            clearTimeout(timer);
             window.removeEventListener('afterprint', handleAfterPrint);
             if (document.title !== originalTitle) {
               document.title = originalTitle;

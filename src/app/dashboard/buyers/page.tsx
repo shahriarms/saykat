@@ -122,12 +122,16 @@ export default function BuyersPage() {
         window.addEventListener('afterprint', handleAfterPrint);
         
         // Use a timeout to allow the state to update before triggering print
-        setTimeout(() => {
+        const timer = setTimeout(() => {
             window.print();
         }, 100);
         
         return () => {
+             clearTimeout(timer);
              window.removeEventListener('afterprint', handleAfterPrint);
+             if (document.title !== originalTitle) {
+                document.title = originalTitle;
+             }
         }
     }
   }, [invoiceToPrint]);
