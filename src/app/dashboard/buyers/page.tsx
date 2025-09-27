@@ -106,26 +106,30 @@ export default function BuyersPage() {
       }
     } else {
       setInvoiceToPrint(selectedInvoice);
-      // Use a timeout to allow the state to update before printing
-      setTimeout(() => {
-        const originalTitle = document.title;
-        document.title = `invoice-${selectedInvoice.id}`;
-        window.print();
-        document.title = originalTitle;
-      }, 100);
     }
   };
   
   useEffect(() => {
-    const handleAfterPrint = () => {
-      if (invoiceToPrint) {
-        setInvoiceToPrint(null);
-      }
-    };
-    window.addEventListener('afterprint', handleAfterPrint);
-    return () => {
-      window.removeEventListener('afterprint', handleAfterPrint);
-    };
+    if (invoiceToPrint) {
+        const originalTitle = document.title;
+        document.title = `invoice-${invoiceToPrint.id}`;
+        
+        const handleAfterPrint = () => {
+            document.title = originalTitle;
+            setInvoiceToPrint(null);
+            window.removeEventListener('afterprint', handleAfterPrint);
+        };
+        window.addEventListener('afterprint', handleAfterPrint);
+        
+        // Use a timeout to allow the state to update before triggering print
+        setTimeout(() => {
+            window.print();
+        }, 100);
+        
+        return () => {
+             window.removeEventListener('afterprint', handleAfterPrint);
+        }
+    }
   }, [invoiceToPrint]);
   
   const handleDeleteClick = () => {

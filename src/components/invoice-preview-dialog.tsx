@@ -64,25 +64,19 @@ export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePre
   
     useEffect(() => {
         if (invoiceToPrint) {
-            setIsPrinting(true);
             const originalTitle = document.title;
             document.title = `invoice-${invoiceToPrint.id}`;
             
             const handleAfterPrint = () => {
                 document.title = originalTitle;
                 setInvoiceToPrint(null);
-                setIsPrinting(false);
                 window.removeEventListener('afterprint', handleAfterPrint);
             };
 
             window.addEventListener('afterprint', handleAfterPrint);
-            
-            const timer = setTimeout(() => {
-                window.print();
-            }, 100); 
+            window.print();
             
             return () => {
-                clearTimeout(timer);
                 window.removeEventListener('afterprint', handleAfterPrint);
                 if (document.title !== originalTitle) {
                   document.title = originalTitle;

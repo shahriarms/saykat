@@ -75,13 +75,12 @@ export default function InvoicePage() {
   const buyerInputRef = useRef<HTMLInputElement>(null);
   
   useEffect(() => {
-    const handleAfterPrint = async () => {
-      if (!invoiceToPrint) return;
-      
-      const originalTitle = document.title;
-      document.title = 'StockPilot'; // Reset title
-      
-      const afterPrintAction = async () => {
+    if (!invoiceToPrint) return;
+
+    const originalTitle = document.title;
+    document.title = `invoice-${invoiceToPrint.id}`;
+    
+    const afterPrintAction = async () => {
         try {
           let newInvoiceId: number | null;
           if(invoiceToPrint.originalInvoiceId) {
@@ -112,43 +111,24 @@ export default function InvoicePage() {
             description: "A new, empty memo is ready for you.",
           });
         }
-      }
+    }
       
-      setIsProcessing(true);
-      await afterPrintAction();
+    const handleAfterPrint = () => {
+        document.title = originalTitle;
+        setIsProcessing(true);
+        afterPrintAction();
     };
-
-    const handlePrintCancel = () => {
-        if (invoiceToPrint) {
-            setIsProcessing(false);
-            setInvoiceToPrint(null);
-            document.title = 'StockPilot';
+    
+    window.addEventListener('afterprint', handleAfterPrint);
+    window.print();
+    
+    return () => {
+        window.removeEventListener('afterprint', handleAfterPrint);
+        if (document.title !== originalTitle) {
+          document.title = originalTitle; // Ensure title is restored on cleanup
         }
     };
-    
-    let printCancelTimer: NodeJS.Timeout | null = null;
-
-    const onBeforePrint = () => {
-        if(printCancelTimer) clearTimeout(printCancelTimer);
-    }
-
-    const onAfterPrint = () => {
-        handleAfterPrint();
-    };
-
-    window.addEventListener('beforeprint', onBeforePrint);
-    window.addEventListener('afterprint', onAfterPrint);
-    
-    if(invoiceToPrint) {
-        printCancelTimer = setTimeout(handlePrintCancel, 3000);
-    }
-
-    return () => {
-      window.removeEventListener('beforeprint', onBeforePrint);
-      window.removeEventListener('afterprint', onAfterPrint);
-      if(printCancelTimer) clearTimeout(printCancelTimer);
-    };
-  }, [invoiceToPrint, addInvoice, updateInvoice, resetActiveDraft, toast, t]);
+  }, [invoiceToPrint, addInvoice, updateInvoice, resetActiveDraft, toast]);
   
   const { id: draftId, customerName, customerAddress, customerPhone, paidAmount, subtotal, items, cashReceived, changeAmount, dueAmount, originalInvoiceId } = activeDraft || {};
 
@@ -195,15 +175,7 @@ export default function InvoicePage() {
   
   const handlePrintConfirm = () => {
      if (!validateInvoice() || isProcessing || !activeDraft) return;
-     
-     const originalTitle = document.title;
-     document.title = `invoice-${activeDraft.id}`;
-
      setInvoiceToPrint(activeDraft);
-
-     setTimeout(() => {
-        window.print();
-     }, 100);
   };
 
   const [mainCategoryFilter, setMainCategoryFilter] = useState<'Material' | 'Hardware'>('Material');
@@ -461,7 +433,8 @@ export default function InvoicePage() {
                                                         dbStock={product.stock}
                                                         quantityInCart={quantityInCart}
                                                         totalSold={product.totalSold}
-                                                        maxStock={product.totalEverAdded}
+                                                        maxStock={product.containerSize}
+                                                        unit={product.mainCategory === 'Material' ? 'kg' : 'pcs'}
                                                     />
                                                 </div>
                                             )}
