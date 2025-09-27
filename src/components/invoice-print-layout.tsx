@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React from 'react';
@@ -23,7 +22,7 @@ interface InvoicePrintLayoutProps {
     previewMode?: boolean; // New prop for scaling in preview
 }
 
-export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, InvoicePrintLayoutProps>(
+export const InvoicePrintLayout = React.forwardRef<HTMLDivElement, InvoicePrintLayoutProps>(
   (props, ref) => {
     const {
         invoiceId,
@@ -64,13 +63,13 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
         color: '#000',
         fontFamily: isBn ? "'SolaimanLipi', 'Times New Roman', sans-serif" : "'Times New Roman', sans-serif",
         fontSize: '14px',
-        width: '100%',
+        width: isPos ? '80mm' : '100%',
         maxWidth: isPos ? '80mm' : '800px',
         margin: 'auto',
         padding: isPos ? '0.25rem' : '2rem',
         border: isPos ? 'none' : '2px dashed #ccc',
         boxSizing: 'border-box',
-        transform: scaleFactor,
+        transform: previewMode ? scaleFactor : undefined,
         transformOrigin: 'top',
     };
 
@@ -166,20 +165,6 @@ export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, In
 
     return (
         <div ref={ref}>
-            <style>
-                {`
-                    @media print {
-                        .invoice-container {
-                            width: ${isPos ? '80mm' : '100%'} !important;
-                            max-width: ${isPos ? '80mm' : '100%'} !important;
-                        }
-                        @page {
-                            size: ${isPos ? '80mm auto' : 'A4'};
-                            margin: 0;
-                        }
-                    }
-                `}
-            </style>
             <div style={memoStyles} className="invoice-container">
                  <div style={sealContainerStyles}>
                     <svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">

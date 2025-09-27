@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Dialog,
@@ -20,6 +20,7 @@ import { useSettings } from '@/hooks/use-settings';
 import { useAppData } from '@/hooks/use-app-data';
 import { useUser } from '@/hooks/use-user';
 import { useInvoiceForm } from '@/hooks/use-invoice-form';
+import { useReactToPrint } from 'react-to-print';
 
 interface InvoicePreviewDialogProps {
   open: boolean;
@@ -35,40 +36,31 @@ export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePre
     const router = useRouter();
 
     const [isPrinting, setIsPrinting] = useState(false);
-    const [invoiceToPrint, setInvoiceToPrint] = useState<Invoice | null>(null);
-    
-    const triggerPrint = useCallback((invoice: Invoice) => {
-        const originalTitle = document.title;
-        document.title = `invoice-${invoice.id}`;
-        
-        const handleAfterPrint = () => {
-            document.title = originalTitle;
-            setInvoiceToPrint(null);
-            window.removeEventListener('afterprint', handleAfterPrint);
-        };
-        window.addEventListener('afterprint', handleAfterPrint);
+    const printComponentRef = useRef(null);
 
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                window.print();
-            });
-        });
-    }, []);
+    const handlePosPrint = async () => {
+        if (!invoice) return;
+        setIsPrinting(true);
+        try {
+            await appPrintInvoice(invoice);
+        } catch (error: any) {
+            console.error(error.message);
+        } finally {
+            setIsPrinting(false);
+        }
+    };
 
-    const handlePrint = async () => {
-        if (!invoice || isPrinting) return;
-        
+    const handleStandardPrint = useReactToPrint({
+        content: () => printComponentRef.current,
+        documentTitle: `invoice-${invoice.id}`,
+        removeAfterPrint: true,
+    });
+
+    const handlePrint = () => {
         if (settings.printFormat === 'pos' && settings.posPrinterType !== 'disabled') {
-            setIsPrinting(true);
-            try {
-                await appPrintInvoice(invoice);
-            } catch (error: any) {
-                console.error(error.message);
-            } finally {
-                setIsPrinting(false);
-            }
+            handlePosPrint();
         } else {
-            setInvoiceToPrint(invoice);
+            handleStandardPrint();
         }
     };
 
@@ -79,13 +71,6 @@ export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePre
             router.push('/dashboard/invoice');
         }
     }
-  
-    useEffect(() => {
-        if (invoiceToPrint) {
-            triggerPrint(invoiceToPrint);
-        }
-    }, [invoiceToPrint, triggerPrint]);
-    
 
   return (
     <>
@@ -100,36 +85,20 @@ export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePre
             
             <ScrollArea className="h-[70vh] rounded-md border">
                 <div className="p-4 bg-muted/50">
-                     <div className="print:hidden">
-                        <InvoicePrintLayout 
-                            invoiceId={invoice.id}
-                            currentDate={new Date(invoice.date).toLocaleDateString()}
-                            customerName={invoice.customerName}
-                            customerAddress={invoice.customerAddress}
-                            customerPhone={invoice.customerPhone}
-                            invoiceItems={invoice.items}
-                            subtotal={invoice.subtotal}
-                            paidAmount={invoice.paidAmount}
-                            dueAmount={invoice.dueAmount}
-                            printFormat={settings.printFormat}
-                            locale={settings.locale}
-                        />
-                    </div>
-                     <div className="hidden print:block">
-                        <InvoicePrintLayout 
-                            invoiceId={invoice.id}
-                            currentDate={new Date(invoice.date).toLocaleDateString()}
-                            customerName={invoice.customerName}
-                            customerAddress={invoice.customerAddress}
-                            customerPhone={invoice.customerPhone}
-                            invoiceItems={invoice.items}
-                            subtotal={invoice.subtotal}
-                            paidAmount={invoice.paidAmount}
-                            dueAmount={invoice.dueAmount}
-                            printFormat={settings.printFormat}
-                            locale={settings.locale}
-                        />
-                    </div>
+                    <InvoicePrintLayout 
+                        ref={printComponentRef}
+                        invoiceId={invoice.id}
+                        currentDate={new Date(invoice.date).toLocaleDateString()}
+                        customerName={invoice.customerName}
+                        customerAddress={invoice.customerAddress}
+                        customerPhone={invoice.customerPhone}
+                        invoiceItems={invoice.items}
+                        subtotal={invoice.subtotal}
+                        paidAmount={invoice.paidAmount}
+                        dueAmount={invoice.dueAmount}
+                        printFormat={settings.printFormat}
+                        locale={settings.locale}
+                    />
                 </div>
             </ScrollArea>
 
@@ -153,23 +122,6 @@ export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePre
             </DialogFooter>
         </DialogContent>
         </Dialog>
-        {invoiceToPrint && (
-            <div className="print-source">
-                <InvoicePrintLayout
-                    invoiceId={invoiceToPrint.id}
-                    currentDate={new Date(invoiceToPrint.date).toLocaleDateString()}
-                    customerName={invoiceToPrint.customerName}
-                    customerAddress={invoiceToPrint.customerAddress}
-                    customerPhone={invoiceToPrint.customerPhone}
-                    invoiceItems={invoiceToPrint.items}
-                    subtotal={invoiceToPrint.subtotal}
-                    paidAmount={invoiceToPrint.paidAmount}
-                    dueAmount={invoiceToPrint.dueAmount}
-                    printFormat={settings.printFormat}
-                    locale={settings.locale}
-                />
-            </div>
-      )}
     </>
   );
 }

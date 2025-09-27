@@ -37,6 +37,7 @@ import { InvoicePrintLayout } from '@/components/invoice-print-layout';
 import { useSettings } from '@/hooks/use-settings';
 import type { DateRange } from 'react-day-picker';
 import { DateRangePicker } from '@/components/date-range-picker';
+import { useReactToPrint } from 'react-to-print';
 
 
 export default function BuyersDuePage() {
@@ -54,17 +55,61 @@ export default function BuyersDuePage() {
   
   const [isConfirmingPayment, setConfirmingPayment] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [lastSuccessfulPayment, setLastSuccessfulPayment] = useState<{payment: Payment, invoice: Invoice, buyer: Buyer} | null>(null);
   
   const [isDeleting, setIsDeleting] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
   
   const [isPrinting, setIsPrinting] = useState(false);
-  const [invoiceToPrint, setInvoiceToPrint] = useState<Invoice | null>(null);
   
   const [localDateRange, setLocalDateRange] = useState<DateRange | undefined>(centralDateRange);
 
   const numericPaymentAmount = useMemo(() => parseFloat(paymentAmount) || 0, [paymentAmount]);
+  const printPaymentRef = useRef(null);
+  const printInvoiceRef = useRef(null);
+
+
+  const handlePaymentPrint = useReactToPrint({
+      content: () => printPaymentRef.current,
+      documentTitle: selectedInvoice ? `payment-receipt-for-invoice-${selectedInvoice.id}` : 'payment-receipt',
+      removeAfterPrint: true,
+  });
+
+  const handleAfterPayment = () => {
+    toast({
+        title: t('payment_received_toast_title'),
+        description: t('payment_received_toast_description', { amount: numericPaymentAmount.toFixed(2), invoiceId: selectedInvoice!.id }),
+    });
+    setPaymentAmount('');
+    handlePaymentPrint();
+  }
+
+  const handleInvoicePosPrint = async () => {
+    if (!selectedInvoice) return;
+    setIsPrinting(true);
+    try {
+      await appPrintInvoice(selectedInvoice);
+    } catch (error: any) {
+      console.error(error.message);
+    } finally {
+      setIsPrinting(false);
+    }
+  };
+
+  const handleInvoiceStandardPrint = useReactToPrint({
+      content: () => printInvoiceRef.current,
+      documentTitle: selectedInvoice ? `invoice-${selectedInvoice.id}` : 'invoice',
+      removeAfterPrint: true,
+  });
+
+  const handlePrint = () => {
+    if (!selectedInvoice || isPrinting) return;
+    if (settings.printFormat === 'pos' && settings.posPrinterType !== 'disabled') {
+        handleInvoicePosPrint();
+    } else {
+        handleInvoiceStandardPrint();
+    }
+  };
+
 
   useEffect(() => {
     setLocalDateRange(centralDateRange);
@@ -125,42 +170,10 @@ export default function BuyersDuePage() {
     setIsProcessing(false);
 
     if (result) {
-        const { payment, updatedInvoice } = result;
-        toast({
-            title: t('payment_received_toast_title'),
-            description: t('payment_received_toast_description', { amount: payment.amount.toFixed(2), invoiceId: payment.invoiceId }),
-        });
-        
-        setLastSuccessfulPayment({ payment, invoice: updatedInvoice, buyer: selectedBuyer });
-        setPaymentAmount('');
+        handleAfterPayment();
     }
   };
   
-    const triggerPaymentPrint = useCallback((paymentInfo: {payment: Payment, invoice: Invoice, buyer: Buyer}) => {
-        const originalTitle = document.title;
-        document.title = `payment-receipt-for-invoice-${paymentInfo.invoice.id}`;
-        
-        const handleAfterPrint = () => {
-            document.title = originalTitle;
-            setLastSuccessfulPayment(null);
-            window.removeEventListener('afterprint', handleAfterPrint);
-        };
-
-        window.addEventListener('afterprint', handleAfterPrint);
-
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                window.print();
-            });
-        });
-    }, []);
-
-    useEffect(() => {
-        if (lastSuccessfulPayment) {
-            triggerPaymentPrint(lastSuccessfulPayment);
-        }
-    }, [lastSuccessfulPayment, triggerPaymentPrint]);
-
     const handleDeleteClick = () => {
         if (selectedInvoice && user?.role === 'admin') {
             setInvoiceToDelete(selectedInvoice);
@@ -222,10 +235,6 @@ export default function BuyersDuePage() {
 
   }, [dueInvoicesForSelectedBuyer, invoiceSearchTerm, selectedInvoice, numericPaymentAmount]);
 
-  const paymentHistoryForReceipt = useMemo(() => {
-    if (!lastSuccessfulPayment) return [];
-    return getPaymentsForInvoice(lastSuccessfulPayment.invoice.id);
-  }, [lastSuccessfulPayment, getPaymentsForInvoice]);
 
   const handleSelectBuyer = (buyer: Buyer) => {
     setSelectedBuyer(buyer);
@@ -246,48 +255,6 @@ export default function BuyersDuePage() {
     }
     return selectedInvoice.dueAmount;
   }, [selectedInvoice, numericPaymentAmount]);
-
-  const triggerInvoicePrint = useCallback((invoice: Invoice) => {
-      const originalTitle = document.title;
-      document.title = `invoice-${invoice.id}`;
-      
-      const handleAfterPrint = () => {
-          document.title = originalTitle;
-          setInvoiceToPrint(null);
-          window.removeEventListener('afterprint', handleAfterPrint);
-      };
-      window.addEventListener('afterprint', handleAfterPrint);
-
-      requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-              window.print();
-          });
-      });
-  }, []);
-
-  const handlePrint = async () => {
-    if (!selectedInvoice || isPrinting) return;
-    
-    if (settings.printFormat === 'pos' && settings.posPrinterType !== 'disabled') {
-      setIsPrinting(true);
-      try {
-        await appPrintInvoice(selectedInvoice);
-      } catch (error: any) {
-        console.error(error.message);
-      } finally {
-        setIsPrinting(false);
-      }
-    } else {
-      setInvoiceToPrint(selectedInvoice);
-    }
-  };
-
-  useEffect(() => {
-    if (invoiceToPrint) {
-        triggerInvoicePrint(invoiceToPrint);
-    }
-  }, [invoiceToPrint, triggerInvoicePrint]);
-
 
   return (
     <>
@@ -425,6 +392,7 @@ export default function BuyersDuePage() {
                             <ScrollArea className="flex-1 rounded-lg bg-background p-2 mt-2">
                                 <div className="w-full h-full overflow-x-auto">
                                     <PaymentReceipt
+                                        ref={printPaymentRef}
                                         buyer={selectedBuyer}
                                         invoice={selectedInvoice}
                                         paymentHistory={getPaymentsForInvoice(selectedInvoice.id)}
@@ -445,26 +413,19 @@ export default function BuyersDuePage() {
           </Card>
         </div>
       </div>
-      <div className="print-source">
-        {lastSuccessfulPayment && (
-            <PaymentReceipt
-                buyer={lastSuccessfulPayment.buyer}
-                invoice={lastSuccessfulPayment.invoice}
-                paymentHistory={paymentHistoryForReceipt}
-                newPaymentAmount={lastSuccessfulPayment.payment.amount}
-            />
-        )}
-        {invoiceToPrint && (
+      <div className="hidden">
+        {selectedInvoice && (
             <InvoicePrintLayout
-                invoiceId={invoiceToPrint.id}
-                currentDate={new Date(invoiceToPrint.date).toLocaleDateString()}
-                customerName={invoiceToPrint.customerName}
-                customerAddress={invoiceToPrint.customerAddress}
-                customerPhone={invoiceToPrint.customerPhone}
-                invoiceItems={invoiceToPrint.items}
-                subtotal={invoiceToPrint.subtotal}
-                paidAmount={invoiceToPrint.paidAmount}
-                dueAmount={invoiceToPrint.dueAmount}
+                ref={printInvoiceRef}
+                invoiceId={selectedInvoice.id}
+                currentDate={new Date(selectedInvoice.date).toLocaleDateString()}
+                customerName={selectedInvoice.customerName}
+                customerAddress={selectedInvoice.customerAddress}
+                customerPhone={selectedInvoice.customerPhone}
+                invoiceItems={selectedInvoice.items}
+                subtotal={selectedInvoice.subtotal}
+                paidAmount={selectedInvoice.paidAmount}
+                dueAmount={selectedInvoice.dueAmount}
                 printFormat={settings.printFormat}
                 locale={settings.locale}
             />

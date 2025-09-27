@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React from 'react';
@@ -24,8 +23,6 @@ interface PaymentReceiptProps {
 
 export const PaymentReceipt = React.memo(React.forwardRef<HTMLDivElement, PaymentReceiptProps>(
   ({ buyer, invoice, paymentHistory, newPaymentAmount, previewMode = false }, ref) => {
-    // The `invoice` prop is already the *updated* invoice from the server or local state.
-    // Its `paidAmount` includes the new payment. No need to add `newPaymentAmount` again.
     const totalPaid = invoice.paidAmount || 0;
     const currentDue = invoice.subtotal - totalPaid;
 

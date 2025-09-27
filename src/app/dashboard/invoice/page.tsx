@@ -32,6 +32,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Separator } from '@/components/ui/separator';
 import { StockVolumeDisplay } from '@/components/stock-volume-display';
 import { cn } from '@/lib/utils';
+import { useReactToPrint } from 'react-to-print';
 import dynamic from 'next/dynamic';
 
 const Carousel = dynamic(() => import('@/components/ui/carousel').then(c => c.Carousel), { ssr: false });
@@ -66,73 +67,54 @@ export default function InvoicePage() {
   
   const [draftToDelete, setDraftToDelete] = useState<DraftInvoice | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [invoiceToPrint, setInvoiceToPrint] = useState<DraftInvoice | null>(null);
   const [showProfit, setShowProfit] = useState(true);
 
   // Autocomplete state for buyers
   const [buyerSearch, setBuyerSearch] = useState('');
   const [isBuyerPopoverOpen, setBuyerPopoverOpen] = useState(false);
   const buyerInputRef = useRef<HTMLInputElement>(null);
-  
-  const triggerPrint = useCallback((draft: DraftInvoice) => {
-    const originalTitle = document.title;
-    document.title = `invoice-${draft.id}`;
+  const printComponentRef = useRef(null);
 
-    const afterPrintAction = async () => {
-      try {
-        let newInvoiceId: number | null;
-        if (draft.originalInvoiceId) {
-          newInvoiceId = await updateInvoice(draft.originalInvoiceId, draft);
-        } else {
-          newInvoiceId = await addInvoice(draft);
-        }
+  const handleAfterPrint = async () => {
+    if (!activeDraft) return;
+    try {
+      let newInvoiceId: number | null;
+      if (activeDraft.originalInvoiceId) {
+        newInvoiceId = await updateInvoice(activeDraft.originalInvoiceId, activeDraft);
+      } else {
+        newInvoiceId = await addInvoice(activeDraft);
+      }
 
-        if (newInvoiceId) {
-          toast({
-            title: `Invoice #${newInvoiceId} Saved`,
-            description: `The invoice has been successfully ${draft.originalInvoiceId ? 'updated' : 'saved'}.`,
-          });
-        }
-      } catch (error: any) {
-        console.error("Failed to save invoice after printing:", error);
+      if (newInvoiceId) {
         toast({
-          variant: 'destructive',
-          title: 'Error Saving Invoice',
-          description: error.message || 'The invoice was printed, but failed to save.',
-        });
-      } finally {
-        setInvoiceToPrint(null);
-        setIsProcessing(false);
-        resetActiveDraft();
-        toast({
-          title: "Memo Ready",
-          description: "A new, empty memo is ready for you.",
+          title: `Invoice #${newInvoiceId} Saved`,
+          description: `The invoice has been successfully ${activeDraft.originalInvoiceId ? 'updated' : 'saved'}.`,
         });
       }
-    };
-
-    const handleAfterPrint = () => {
-        document.title = originalTitle;
-        window.removeEventListener('afterprint', handleAfterPrint);
-        setIsProcessing(true);
-        afterPrintAction();
-    };
-
-    window.addEventListener('afterprint', handleAfterPrint);
-
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            window.print();
-        });
-    });
-
-  }, [addInvoice, updateInvoice, resetActiveDraft, toast]);
-
-  useEffect(() => {
-    if (invoiceToPrint) {
-        triggerPrint(invoiceToPrint);
+    } catch (error: any) {
+      console.error("Failed to save invoice after printing:", error);
+      toast({
+        variant: 'destructive',
+        title: 'Error Saving Invoice',
+        description: error.message || 'The invoice was printed, but failed to save.',
+      });
+    } finally {
+      setIsProcessing(false);
+      resetActiveDraft();
+      toast({
+        title: "Memo Ready",
+        description: "A new, empty memo is ready for you.",
+      });
     }
-  }, [invoiceToPrint, triggerPrint]);
+  };
+
+  const handlePrint = useReactToPrint({
+      content: () => printComponentRef.current,
+      documentTitle: activeDraft ? `invoice-${activeDraft.id}` : 'invoice',
+      onBeforeGetContent: () => setIsProcessing(true),
+      onAfterPrint: handleAfterPrint,
+      removeAfterPrint: true,
+  });
   
   const { id: draftId, customerName, customerAddress, customerPhone, paidAmount, subtotal, items, cashReceived, changeAmount, dueAmount, originalInvoiceId } = activeDraft || {};
 
@@ -179,7 +161,7 @@ export default function InvoicePage() {
   
   const handlePrintConfirm = () => {
      if (!validateInvoice() || isProcessing || !activeDraft) return;
-     setInvoiceToPrint(activeDraft);
+     handlePrint();
   };
 
   const [mainCategoryFilter, setMainCategoryFilter] = useState<'Material' | 'Hardware'>('Material');
@@ -581,6 +563,7 @@ export default function InvoicePage() {
                   <CardContent className="h-full min-h-[500px] flex items-center justify-center bg-muted/50 rounded-lg p-4">
                       <div className="w-full h-full overflow-x-auto flex justify-center items-center">
                           <InvoicePrintLayout 
+                              ref={printComponentRef}
                               invoiceId={draftId}
                               currentDate={new Date().toLocaleDateString()}
                               customerName={customerName}
@@ -601,24 +584,6 @@ export default function InvoicePage() {
         </div>
       </div>
       
-      {invoiceToPrint && (
-        <div className="print-source">
-            <InvoicePrintLayout
-                invoiceId={invoiceToPrint.id}
-                currentDate={new Date().toLocaleDateString()}
-                customerName={invoiceToPrint.customerName}
-                customerAddress={invoiceToPrint.customerAddress}
-                customerPhone={invoiceToPrint.customerPhone}
-                invoiceItems={invoiceToPrint.items}
-                subtotal={invoiceToPrint.subtotal}
-                paidAmount={invoiceToPrint.paidAmount || 0}
-                dueAmount={invoiceToPrint.dueAmount || 0}
-                printFormat={settings.printFormat}
-                locale={settings.locale}
-            />
-        </div>
-      )}
-
       <AlertDialog open={!!draftToDelete} onOpenChange={() => setDraftToDelete(null)}>
           <AlertDialogContent>
               <AlertDialogHeader>

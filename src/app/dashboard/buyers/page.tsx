@@ -37,6 +37,7 @@ import type { DateRange } from 'react-day-picker';
 import { DateRangePicker } from '@/components/date-range-picker';
 import { useInvoiceForm } from '@/hooks/use-invoice-form';
 import { useRouter } from 'next/navigation';
+import { useReactToPrint } from 'react-to-print';
 
 
 export default function BuyersPage() {
@@ -55,8 +56,36 @@ export default function BuyersPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
   const [localDateRange, setLocalDateRange] = useState<DateRange | undefined>(centralDateRange);
-  const [invoiceToPrint, setInvoiceToPrint] = useState<Invoice | null>(null);
   
+  const printComponentRef = useRef(null);
+
+  const handlePosPrint = async () => {
+    if (!selectedInvoice) return;
+    setIsPrinting(true);
+    try {
+      await appPrintInvoice(selectedInvoice);
+    } catch (error: any) {
+      console.error(error.message);
+    } finally {
+      setIsPrinting(false);
+    }
+  };
+
+  const handleStandardPrint = useReactToPrint({
+      content: () => printComponentRef.current,
+      documentTitle: selectedInvoice ? `invoice-${selectedInvoice.id}` : 'invoice',
+      removeAfterPrint: true,
+  });
+  
+  const handlePrint = () => {
+    if (!selectedInvoice || isPrinting) return;
+    if (settings.printFormat === 'pos' && settings.posPrinterType !== 'disabled') {
+      handlePosPrint();
+    } else {
+      handleStandardPrint();
+    }
+  };
+
   useEffect(() => {
     setLocalDateRange(centralDateRange);
   }, [centralDateRange]);
@@ -91,47 +120,6 @@ export default function BuyersPage() {
   const handleSelectInvoice = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
   }
-
-  const triggerPrint = useCallback((invoice: Invoice) => {
-      const originalTitle = document.title;
-      document.title = `invoice-${invoice.id}`;
-      
-      const handleAfterPrint = () => {
-          document.title = originalTitle;
-          setInvoiceToPrint(null);
-          window.removeEventListener('afterprint', handleAfterPrint);
-      };
-      window.addEventListener('afterprint', handleAfterPrint);
-      
-      requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-              window.print();
-          });
-      });
-  }, []);
-
-  const handlePrint = async () => {
-    if (!selectedInvoice || isPrinting) return;
-    
-    if (settings.printFormat === 'pos' && settings.posPrinterType !== 'disabled') {
-      setIsPrinting(true);
-      try {
-        await appPrintInvoice(selectedInvoice);
-      } catch (error: any) {
-        console.error(error.message);
-      } finally {
-        setIsPrinting(false);
-      }
-    } else {
-      setInvoiceToPrint(selectedInvoice);
-    }
-  };
-  
-  useEffect(() => {
-    if (invoiceToPrint) {
-        triggerPrint(invoiceToPrint);
-    }
-  }, [invoiceToPrint, triggerPrint]);
   
   const handleDeleteClick = () => {
     if (selectedInvoice && user?.role === 'admin') {
@@ -355,6 +343,7 @@ export default function BuyersPage() {
                   {selectedInvoice ? (
                     <div className="bg-muted/50 rounded-lg p-4">
                         <InvoicePrintLayout 
+                            ref={printComponentRef}
                             invoiceId={selectedInvoice.id}
                             currentDate={new Date(selectedInvoice.date).toLocaleDateString()}
                             customerName={selectedInvoice.customerName}
@@ -379,24 +368,6 @@ export default function BuyersPage() {
           </Card>
         </div>
       </div>
-
-      {invoiceToPrint && (
-        <div className="print-source">
-            <InvoicePrintLayout
-                invoiceId={invoiceToPrint.id}
-                currentDate={new Date(invoiceToPrint.date).toLocaleDateString()}
-                customerName={invoiceToPrint.customerName}
-                customerAddress={invoiceToPrint.customerAddress}
-                customerPhone={invoiceToPrint.customerPhone}
-                invoiceItems={invoiceToPrint.items}
-                subtotal={invoiceToPrint.subtotal}
-                paidAmount={invoiceToPrint.paidAmount}
-                dueAmount={invoiceToPrint.dueAmount}
-                printFormat={settings.printFormat}
-                locale={settings.locale}
-            />
-        </div>
-      )}
       
       <AlertDialog open={!!invoiceToDelete} onOpenChange={() => setInvoiceToDelete(null)}>
         <AlertDialogContent>
