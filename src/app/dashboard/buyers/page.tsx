@@ -92,6 +92,24 @@ export default function BuyersPage() {
     setSelectedInvoice(invoice);
   }
 
+  const triggerPrint = useCallback((invoice: Invoice) => {
+      const originalTitle = document.title;
+      document.title = `invoice-${invoice.id}`;
+      
+      const handleAfterPrint = () => {
+          document.title = originalTitle;
+          setInvoiceToPrint(null);
+          window.removeEventListener('afterprint', handleAfterPrint);
+      };
+      window.addEventListener('afterprint', handleAfterPrint);
+      
+      requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+              window.print();
+          });
+      });
+  }, []);
+
   const handlePrint = async () => {
     if (!selectedInvoice || isPrinting) return;
     
@@ -111,30 +129,9 @@ export default function BuyersPage() {
   
   useEffect(() => {
     if (invoiceToPrint) {
-        const originalTitle = document.title;
-        document.title = `invoice-${invoiceToPrint.id}`;
-        
-        const handleAfterPrint = () => {
-            document.title = originalTitle;
-            setInvoiceToPrint(null);
-            window.removeEventListener('afterprint', handleAfterPrint);
-        };
-        window.addEventListener('afterprint', handleAfterPrint);
-        
-        // Use a timeout to allow the state to update before triggering print
-        const timer = setTimeout(() => {
-            window.print();
-        }, 100);
-        
-        return () => {
-             clearTimeout(timer);
-             window.removeEventListener('afterprint', handleAfterPrint);
-             if (document.title !== originalTitle) {
-                document.title = originalTitle;
-             }
-        }
+        triggerPrint(invoiceToPrint);
     }
-  }, [invoiceToPrint]);
+  }, [invoiceToPrint, triggerPrint]);
   
   const handleDeleteClick = () => {
     if (selectedInvoice && user?.role === 'admin') {

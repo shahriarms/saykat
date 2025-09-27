@@ -1,7 +1,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { Employee } from '@/lib/types';
 import { format } from 'date-fns';
 import { numberToWords, numberToWordsBn } from '@/lib/utils';
@@ -22,9 +22,9 @@ export const SalaryReceipt = React.memo(React.forwardRef<HTMLDivElement, SalaryR
     const amountInWords = isBn ? numberToWordsBn(paymentAmount) : numberToWords(paymentAmount).replace("Dollars", "Taka");
 
     return (
-      <div ref={ref} className={cn("bg-white p-4 font-sans", isBn ? 'font-bangla' : '')}>
+      <div ref={ref} className={cn("bg-white p-4 font-sans print:p-0", isBn ? 'font-bangla' : '')}>
         <div 
-          className={cn("w-full max-w-4xl mx-auto border-4 border-dashed border-gray-400 p-8 relative print:p-6", isBn ? 'font-bangla' : '')}
+          className={cn("w-full max-w-4xl mx-auto border-4 border-dashed border-gray-400 p-8 relative", isBn ? 'font-bangla' : '')}
           style={{
             backgroundColor: '#fff',
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='0' y='20' font-family='sans-serif' font-size='30' fill='%23000000' fill-opacity='0.04'%3E৳%3C/text%3E%3Ctext x='50' y='70' font-family='sans-serif' font-size='30' fill='%23000000' fill-opacity='0.04'%3E৳%3C/text%3E%3C/svg%3E")`,

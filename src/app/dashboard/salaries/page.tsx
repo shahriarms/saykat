@@ -55,32 +55,30 @@ export default function SalariesPage() {
   useEffect(() => {
     setLocalDateRange(centralDateRange);
   }, [centralDateRange]);
+  
+  const triggerPrint = useCallback((paymentInfo: {payment: SalaryPayment, employee: Employee}) => {
+      const originalTitle = document.title;
+      document.title = `salary-receipt-for-${paymentInfo.employee.name}`;
+
+      const handleAfterPrint = () => {
+          document.title = originalTitle;
+          setPaymentToPrint(null);
+          window.removeEventListener('afterprint', handleAfterPrint);
+      };
+      window.addEventListener('afterprint', handleAfterPrint);
+
+      requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+              window.print();
+          });
+      });
+  }, []);
 
   useEffect(() => {
       if (paymentToPrint) {
-          const originalTitle = document.title;
-          document.title = `salary-receipt-for-${paymentToPrint.employee.name}`;
-
-          const handleAfterPrint = () => {
-              document.title = originalTitle;
-              setPaymentToPrint(null);
-              window.removeEventListener('afterprint', handleAfterPrint);
-          };
-          window.addEventListener('afterprint', handleAfterPrint);
-
-          const timer = setTimeout(() => {
-              window.print();
-          }, 100);
-
-          return () => {
-              clearTimeout(timer);
-              window.removeEventListener('afterprint', handleAfterPrint);
-              if (document.title !== originalTitle) {
-                document.title = originalTitle;
-              }
-          };
+          triggerPrint(paymentToPrint);
       }
-  }, [paymentToPrint]);
+  }, [paymentToPrint, triggerPrint]);
 
   const handleSelectEmployee = (employee: Employee) => {
     setSelectedEmployee(employee);

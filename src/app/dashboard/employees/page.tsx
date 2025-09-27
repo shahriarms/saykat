@@ -55,11 +55,9 @@ export default function EmployeesPage() {
     const [isPrinting, setIsPrinting] = useState(false);
     const [reportToPrint, setReportToPrint] = useState<any>(null);
 
-    useEffect(() => {
-      if (reportToPrint) {
-        setIsPrinting(true);
+    const triggerPrint = useCallback((reportData: any) => {
         const originalTitle = document.title;
-        document.title = `attendance-report-${selectedEmployee?.name}`;
+        document.title = `attendance-report-${reportData.employee.name}`;
         
         const handleAfterPrint = () => {
           document.title = originalTitle;
@@ -67,22 +65,21 @@ export default function EmployeesPage() {
           setIsPrinting(false);
           window.removeEventListener('afterprint', handleAfterPrint);
         };
-
         window.addEventListener('afterprint', handleAfterPrint);
-        
-        const timer = setTimeout(() => {
-          window.print();
-        }, 100);
 
-        return () => {
-          clearTimeout(timer);
-          window.removeEventListener('afterprint', handleAfterPrint);
-          if (document.title !== originalTitle) {
-            document.title = originalTitle;
-          }
-        };
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                window.print();
+            });
+        });
+    }, []);
+
+    useEffect(() => {
+      if (reportToPrint) {
+        setIsPrinting(true);
+        triggerPrint(reportToPrint);
       }
-    }, [reportToPrint, selectedEmployee]);
+    }, [reportToPrint, triggerPrint]);
 
     const handlePrint = () => {
       if (selectedEmployee) {

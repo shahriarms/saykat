@@ -74,25 +74,23 @@ export default function InvoicePage() {
   const [isBuyerPopoverOpen, setBuyerPopoverOpen] = useState(false);
   const buyerInputRef = useRef<HTMLInputElement>(null);
   
-  useEffect(() => {
-    if (!invoiceToPrint) return;
-
+  const triggerPrint = useCallback((draft: DraftInvoice) => {
     const originalTitle = document.title;
-    document.title = `invoice-${invoiceToPrint.id}`;
+    document.title = `invoice-${draft.id}`;
 
     const afterPrintAction = async () => {
       try {
         let newInvoiceId: number | null;
-        if (invoiceToPrint.originalInvoiceId) {
-          newInvoiceId = await updateInvoice(invoiceToPrint.originalInvoiceId, invoiceToPrint);
+        if (draft.originalInvoiceId) {
+          newInvoiceId = await updateInvoice(draft.originalInvoiceId, draft);
         } else {
-          newInvoiceId = await addInvoice(invoiceToPrint);
+          newInvoiceId = await addInvoice(draft);
         }
 
         if (newInvoiceId) {
           toast({
             title: `Invoice #${newInvoiceId} Saved`,
-            description: `The invoice has been successfully ${invoiceToPrint.originalInvoiceId ? 'updated' : 'saved'}.`,
+            description: `The invoice has been successfully ${draft.originalInvoiceId ? 'updated' : 'saved'}.`,
           });
         }
       } catch (error: any) {
@@ -114,27 +112,27 @@ export default function InvoicePage() {
     };
 
     const handleAfterPrint = () => {
-      document.title = originalTitle;
-      window.removeEventListener('afterprint', handleAfterPrint);
-      setIsProcessing(true);
-      afterPrintAction();
+        document.title = originalTitle;
+        window.removeEventListener('afterprint', handleAfterPrint);
+        setIsProcessing(true);
+        afterPrintAction();
     };
 
     window.addEventListener('afterprint', handleAfterPrint);
 
-    // Use a timeout to ensure the title is updated before the print dialog opens
-    const timer = setTimeout(() => {
-        window.print();
-    }, 100);
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            window.print();
+        });
+    });
 
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('afterprint', handleAfterPrint);
-      if (document.title !== originalTitle) {
-        document.title = originalTitle;
-      }
-    };
-  }, [invoiceToPrint, addInvoice, updateInvoice, resetActiveDraft, toast]);
+  }, [addInvoice, updateInvoice, resetActiveDraft, toast]);
+
+  useEffect(() => {
+    if (invoiceToPrint) {
+        triggerPrint(invoiceToPrint);
+    }
+  }, [invoiceToPrint, triggerPrint]);
   
   const { id: draftId, customerName, customerAddress, customerPhone, paidAmount, subtotal, items, cashReceived, changeAmount, dueAmount, originalInvoiceId } = activeDraft || {};
 

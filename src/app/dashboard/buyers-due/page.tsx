@@ -136,32 +136,30 @@ export default function BuyersDuePage() {
     }
   };
   
+    const triggerPaymentPrint = useCallback((paymentInfo: {payment: Payment, invoice: Invoice, buyer: Buyer}) => {
+        const originalTitle = document.title;
+        document.title = `payment-receipt-for-invoice-${paymentInfo.invoice.id}`;
+        
+        const handleAfterPrint = () => {
+            document.title = originalTitle;
+            setLastSuccessfulPayment(null);
+            window.removeEventListener('afterprint', handleAfterPrint);
+        };
+
+        window.addEventListener('afterprint', handleAfterPrint);
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                window.print();
+            });
+        });
+    }, []);
+
     useEffect(() => {
         if (lastSuccessfulPayment) {
-            const originalTitle = document.title;
-            document.title = `payment-receipt-for-invoice-${lastSuccessfulPayment.invoice.id}`;
-            
-            const handleAfterPrint = () => {
-                document.title = originalTitle;
-                setLastSuccessfulPayment(null);
-                 window.removeEventListener('afterprint', handleAfterPrint);
-            };
-
-            window.addEventListener('afterprint', handleAfterPrint);
-
-            const timer = setTimeout(() => {
-                window.print();
-            }, 100);
-            
-            return () => {
-                clearTimeout(timer);
-                window.removeEventListener('afterprint', handleAfterPrint);
-                 if (document.title !== originalTitle) {
-                    document.title = originalTitle;
-                 }
-            };
+            triggerPaymentPrint(lastSuccessfulPayment);
         }
-    }, [lastSuccessfulPayment]);
+    }, [lastSuccessfulPayment, triggerPaymentPrint]);
 
     const handleDeleteClick = () => {
         if (selectedInvoice && user?.role === 'admin') {
@@ -249,6 +247,24 @@ export default function BuyersDuePage() {
     return selectedInvoice.dueAmount;
   }, [selectedInvoice, numericPaymentAmount]);
 
+  const triggerInvoicePrint = useCallback((invoice: Invoice) => {
+      const originalTitle = document.title;
+      document.title = `invoice-${invoice.id}`;
+      
+      const handleAfterPrint = () => {
+          document.title = originalTitle;
+          setInvoiceToPrint(null);
+          window.removeEventListener('afterprint', handleAfterPrint);
+      };
+      window.addEventListener('afterprint', handleAfterPrint);
+
+      requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+              window.print();
+          });
+      });
+  }, []);
+
   const handlePrint = async () => {
     if (!selectedInvoice || isPrinting) return;
     
@@ -268,30 +284,9 @@ export default function BuyersDuePage() {
 
   useEffect(() => {
     if (invoiceToPrint) {
-        const originalTitle = document.title;
-        document.title = `invoice-${invoiceToPrint.id}`;
-        
-        const handleAfterPrint = () => {
-            document.title = originalTitle;
-            setInvoiceToPrint(null);
-            window.removeEventListener('afterprint', handleAfterPrint);
-        };
-
-        window.addEventListener('afterprint', handleAfterPrint);
-        
-        const timer = setTimeout(() => {
-            window.print();
-        }, 100);
-        
-        return () => {
-            clearTimeout(timer);
-            window.removeEventListener('afterprint', handleAfterPrint);
-            if (document.title !== originalTitle) {
-              document.title = originalTitle;
-            }
-        };
+        triggerInvoicePrint(invoiceToPrint);
     }
-}, [invoiceToPrint]);
+  }, [invoiceToPrint, triggerInvoicePrint]);
 
 
   return (

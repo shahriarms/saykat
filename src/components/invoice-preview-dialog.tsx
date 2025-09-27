@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Dialog,
@@ -36,6 +36,24 @@ export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePre
 
     const [isPrinting, setIsPrinting] = useState(false);
     const [invoiceToPrint, setInvoiceToPrint] = useState<Invoice | null>(null);
+    
+    const triggerPrint = useCallback((invoice: Invoice) => {
+        const originalTitle = document.title;
+        document.title = `invoice-${invoice.id}`;
+        
+        const handleAfterPrint = () => {
+            document.title = originalTitle;
+            setInvoiceToPrint(null);
+            window.removeEventListener('afterprint', handleAfterPrint);
+        };
+        window.addEventListener('afterprint', handleAfterPrint);
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                window.print();
+            });
+        });
+    }, []);
 
     const handlePrint = async () => {
         if (!invoice || isPrinting) return;
@@ -64,30 +82,9 @@ export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePre
   
     useEffect(() => {
         if (invoiceToPrint) {
-            const originalTitle = document.title;
-            document.title = `invoice-${invoiceToPrint.id}`;
-            
-            const handleAfterPrint = () => {
-                document.title = originalTitle;
-                setInvoiceToPrint(null);
-                window.removeEventListener('afterprint', handleAfterPrint);
-            };
-
-            window.addEventListener('afterprint', handleAfterPrint);
-
-            const timer = setTimeout(() => {
-                window.print();
-            }, 100);
-            
-            return () => {
-                clearTimeout(timer);
-                window.removeEventListener('afterprint', handleAfterPrint);
-                if (document.title !== originalTitle) {
-                  document.title = originalTitle;
-                }
-            };
+            triggerPrint(invoiceToPrint);
         }
-    }, [invoiceToPrint]);
+    }, [invoiceToPrint, triggerPrint]);
     
 
   return (
