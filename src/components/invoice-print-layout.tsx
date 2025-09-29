@@ -22,7 +22,7 @@ interface InvoicePrintLayoutProps {
     previewMode?: boolean; // New prop for scaling in preview
 }
 
-export const InvoicePrintLayout = React.forwardRef<HTMLDivElement, InvoicePrintLayoutProps>(
+export const InvoicePrintLayout = React.memo(React.forwardRef<HTMLDivElement, InvoicePrintLayoutProps>(
   (props, ref) => {
     const {
         invoiceId,
@@ -165,6 +165,17 @@ export const InvoicePrintLayout = React.forwardRef<HTMLDivElement, InvoicePrintL
 
     return (
         <div ref={ref}>
+             <style type="text/css" media="print">
+                {`
+                @page { 
+                    size: ${isPos ? '80mm' : 'A4'};
+                    margin: 0;
+                }
+                body {
+                    -webkit-print-color-adjust: exact;
+                }
+                `}
+            </style>
             <div style={memoStyles} className="invoice-container">
                  <div style={sealContainerStyles}>
                     <svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
