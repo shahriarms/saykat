@@ -7,8 +7,8 @@ export interface Product {
   profitMargin: number;
   sellingPrice: number;
   stock: number; // This is the remaining stock
-  initialStock: number; // The stock added for the first time
-  containerSize: number; // This will be the same as initialStock and won't change
+  totalEverAdded: number; // The total quantity of this product ever added to inventory
+  containerSize: number; // The size of a full container for this product
   mainCategory: 'Material' | 'Hardware';
   category: string;
   subCategory: string;

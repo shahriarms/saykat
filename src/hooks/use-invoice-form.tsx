@@ -36,7 +36,6 @@ export interface DraftInvoice {
 
 interface EnrichedProduct extends Product {
     totalSold: number;
-    totalEverAdded: number;
 }
 
 interface InvoiceFormContextType {
@@ -222,7 +221,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
         });
     }, [dbProducts, drafts, isAppDataLoading]);
 
-    const invoiceItemProducts = useMemo(() => {
+    const invoiceItemProducts = useMemo((): EnrichedProduct[] => {
         if (!activeDraft) return [];
     
         const soldQuantities = new Map<string, number>();
@@ -239,9 +238,8 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
       
             const totalCommittedSold = soldQuantities.get(product.id) || 0;
             const dbStock = parseFloat(String(product.stock)) || 0;
-            const totalEverAdded = dbStock + totalCommittedSold;
     
-            return { ...product, stock: dbStock, totalSold: totalCommittedSold, totalEverAdded };
+            return { ...product, stock: dbStock, totalSold: totalCommittedSold };
         }).filter((p): p is EnrichedProduct => p !== null);
     }, [activeDraft, dbProducts, allInvoices]);
 
@@ -353,7 +351,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
             const { subtotal, changeAmount, paidAmount, dueAmount, totalProfit } = calculateTotals(newItems, draft.paidAmount, draft.cashReceived);
             return { ...draft, items: newItems, subtotal, changeAmount, paidAmount, dueAmount, totalProfit };
         }));
-    }, [activeDraftIndex, toast, drafts, products]);
+    }, [activeDraftIndex, toast, drafts]);
     
     const updateInvoiceItem = useCallback((itemId: string, itemUpdate: { [key: string]: any }) => {
         setDrafts(prev => prev.map((draft, index) => {
@@ -413,12 +411,17 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
     }, [activeDraftIndex]);
 
     const resetActiveDraft = useCallback(() => {
-        setDrafts(prev => prev.map((draft, index) => {
-            if (index === activeDraftIndex) {
-                return createNewDraft(index, lastInvoiceId, isAppDataLoading);
+        setDrafts(prev => {
+            const draftsAfterRemoval = prev.filter((_, index) => index !== activeDraftIndex);
+            if (draftsAfterRemoval.length === 0) {
+                 setActiveDraftIndex(0);
+                 return [createNewDraft(0, lastInvoiceId, isAppDataLoading)];
             }
-            return draft;
-        }));
+            if(activeDraftIndex > 0) {
+                setActiveDraftIndex(prevIndex => prevIndex - 1);
+            }
+            return draftsAfterRemoval;
+        });
     }, [activeDraftIndex, lastInvoiceId, isAppDataLoading]);
 
     const loadInvoiceForEditing = useCallback((invoiceToEdit: Invoice) => {
@@ -430,7 +433,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
                 quantity: item.quantity,
                 price: item.price,
                 originalPrice: product?.sellingPrice || item.price,
-                buyingPrice: product?.buyingPrice || item.buyingPrice,
+                buyingPrice: item.buyingPrice || product?.buyingPrice || 0,
                 profitMargin: product?.profitMargin || 0,
                 profitAmount: item.profitAmount,
             }

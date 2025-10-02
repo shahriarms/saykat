@@ -41,9 +41,9 @@ interface AppDataContextType {
     setCentralDateRange: (dateRange: DateRange | undefined) => void;
     
     // Product Functions
-    addProduct: (product: Omit<Product, 'id' | 'sellingPrice'>) => Promise<void>;
-    addMultipleProducts: (products: Omit<Product, 'id'|'sellingPrice'>[]) => Promise<void>;
-    updateProduct: (productId: string, updatedData: Partial<Omit<Product, 'id' | 'sellingPrice'>>, isAdditive: boolean) => Promise<void>;
+    addProduct: (product: Omit<Product, 'id' | 'totalEverAdded'>) => Promise<void>;
+    addMultipleProducts: (products: Omit<Product, 'id' | 'totalEverAdded'>[]) => Promise<void>;
+    updateProduct: (productId: string, updatedData: Partial<Omit<Product, 'id'>>, isAdditive: boolean) => Promise<void>;
     deleteProduct: (productId: string) => Promise<void>;
     getProductById: (productId: string) => Product | undefined;
 
@@ -204,7 +204,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }, [settings, toast]);
 
 
-    const addProduct = useCallback(async (productData: Omit<Product, 'id' | 'sellingPrice'>) => {
+    const addProduct = useCallback(async (productData: Omit<Product, 'id' | 'totalEverAdded'>) => {
         if (isDbConnected) {
             try {
                 await productActions.addProduct(productData);
@@ -220,8 +220,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
                 ...productData, 
                 sellingPrice, 
                 id: `prod-${Date.now()}`,
-                initialStock: productData.stock,
-                containerSize: productData.stock,
+                totalEverAdded: productData.stock,
             };
             const newProducts = [...products, newProduct];
             setProducts(newProducts);
@@ -230,7 +229,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         }
     }, [isDbConnected, toast, loadAllData, products, saveDataToLocalStorage]);
 
-    const addMultipleProducts = useCallback(async (productsData: Omit<Product, 'id'|'sellingPrice'>[]) => {
+    const addMultipleProducts = useCallback(async (productsData: Omit<Product, 'id' | 'totalEverAdded'>[]) => {
         if (isDbConnected) {
             try {
                 await productActions.addMultipleProducts(productsData);
@@ -244,8 +243,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
                 ...p,
                 sellingPrice: p.buyingPrice + (p.buyingPrice * p.profitMargin / 100),
                 id: `prod-${Date.now()}-${Math.random()}`,
-                initialStock: p.stock,
-                containerSize: p.stock,
+                totalEverAdded: p.stock,
             }));
             const updatedProducts = [...products, ...newProducts];
             setProducts(updatedProducts);
@@ -254,20 +252,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
         }
     }, [isDbConnected, toast, loadAllData, products, saveDataToLocalStorage]);
 
-    const updateProduct = useCallback(async (productId: string, updatedData: Partial<Omit<Product, 'id' | 'sellingPrice'>>, isAdditive: boolean) => {
+    const updateProduct = useCallback(async (productId: string, updatedData: Partial<Omit<Product, 'id'>>, isAdditive: boolean) => {
         const productToUpdate = products.find(p => p.id === productId);
         if (!productToUpdate) return;
     
-        let completeUpdateData: Partial<Omit<Product, 'id' | 'sellingPrice'>>;
+        let completeUpdateData: Partial<Omit<Product, 'id'>>;
     
         if (isAdditive) {
             const stockToAdd = updatedData.stock || 0;
-            const finalStock = productToUpdate.stock + stockToAdd;
+            const newStock = productToUpdate.stock + stockToAdd;
             completeUpdateData = { 
                 ...updatedData, 
                 stock: stockToAdd, // The service expects the value to add, not the final value.
-                initialStock: finalStock, 
-                containerSize: finalStock 
+                totalEverAdded: (productToUpdate.totalEverAdded || productToUpdate.stock) + stockToAdd,
+                containerSize: newStock
             };
         } else {
             completeUpdateData = { ...updatedData };
@@ -287,13 +285,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
             let finalProductData: Product;
             if (isAdditive) {
                 const stockToAdd = updatedData.stock || 0;
-                const finalStock = productToUpdate.stock + stockToAdd;
+                const newStock = productToUpdate.stock + stockToAdd;
                  finalProductData = {
                     ...productToUpdate,
                     ...completeUpdateData,
-                    stock: finalStock,
-                    initialStock: finalStock,
-                    containerSize: finalStock,
+                    stock: newStock,
+                    totalEverAdded: (productToUpdate.totalEverAdded || productToUpdate.stock) + stockToAdd,
+                    containerSize: newStock,
                 };
             } else {
                 finalProductData = {
@@ -847,5 +845,3 @@ export function useAppData() {
     }
     return context;
 }
-
-    

@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Search } from 'lucide-react';
 import { Button } from './ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useInvoiceForm } from '@/hooks/use-invoice-form';
 
 interface StockStatusCardProps {
   products: Product[];
@@ -32,7 +33,8 @@ const chunk = <T,>(arr: T[], size: number): T[][] =>
   );
 
 
-export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
+export function StockStatusCard({ products: initialProducts, invoices }: StockStatusCardProps) {
+  const { drafts } = useInvoiceForm();
   const [activeTab, setActiveTab] = React.useState<'Material' | 'Hardware'>('Material');
   const [searchTerm, setSearchTerm] = React.useState('');
   const [categoryFilter, setCategoryFilter] = React.useState('');
@@ -40,21 +42,29 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
   const isMobile = useIsMobile();
 
   const { filteredProducts, categories, subCategories } = React.useMemo(() => {
-    const soldQuantities = new Map<string, number>();
-    invoices.forEach(invoice => {
-      invoice.items.forEach(item => {
+    // 1. Calculate quantities committed in all open drafts
+    const quantitiesInDrafts = new Map<string, number>();
+    drafts.forEach(draft => {
+      draft.items.forEach(item => {
         const quantity = parseFloat(String(item.quantity)) || 0;
-        soldQuantities.set(item.id, (soldQuantities.get(item.id) || 0) + quantity);
+        quantitiesInDrafts.set(item.id, (quantitiesInDrafts.get(item.id) || 0) + quantity);
       });
     });
 
-    const enrichedProducts = products.map(p => {
-      const totalSold = soldQuantities.get(p.id) || 0;
-      const currentStock = parseFloat(String(p.stock)) || 0;
-      return { ...p, stock: currentStock, totalSold };
+    // 2. Enrich products with live stock (DB stock - draft stock)
+    const liveProducts = initialProducts.map(p => {
+        const dbStock = parseFloat(String(p.stock)) || 0;
+        const draftStock = quantitiesInDrafts.get(p.id) || 0;
+        const liveStock = dbStock - draftStock;
+        return { 
+            ...p, 
+            stock: liveStock, // This is the real-time available stock
+            totalSold: (p.totalEverAdded || 0) - dbStock, // Approximate total sold
+        };
     });
 
-    const productsForTab = enrichedProducts.filter(p => p.mainCategory === activeTab);
+    // 3. Filter and sort
+    const productsForTab = liveProducts.filter(p => p.mainCategory === activeTab);
     const uniqueCategories = [...new Set(productsForTab.map(p => p.category).filter(Boolean))];
     const productsAfterCategoryFilter = categoryFilter ? productsForTab.filter(p => p.category === categoryFilter) : productsForTab;
     const uniqueSubCategories = [...new Set(productsAfterCategoryFilter.map(p => p.subCategory).filter(Boolean))];
@@ -80,7 +90,7 @@ export function StockStatusCard({ products, invoices }: StockStatusCardProps) {
       categories: uniqueCategories,
       subCategories: uniqueSubCategories,
     };
-  }, [products, invoices, activeTab, searchTerm, categoryFilter, subCategoryFilter]);
+  }, [initialProducts, drafts, activeTab, searchTerm, categoryFilter, subCategoryFilter]);
   
   const resetFilters = () => {
       setSearchTerm('');

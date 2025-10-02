@@ -30,7 +30,7 @@ function formatProduct(row: any): Product {
         profitMargin: parseFloat(row.profitMargin) || 0,
         sellingPrice: parseFloat(row.sellingPrice) || 0,
         stock: parseInt(row.stock, 10) || 0,
-        initialStock: parseInt(row.initialStock, 10) || 0,
+        totalEverAdded: parseInt(row.totalEverAdded, 10) || 0,
         containerSize: parseInt(row.containerSize, 10) || 0,
         mainCategory: row.mainCategory,
         category: row.category,
@@ -57,24 +57,23 @@ class PostgresProductService {
         return formatProduct(rows[0]);
     }
 
-    static async addProduct(productData: Omit<Product, 'id'>): Promise<Product> {
+    static async addProduct(productData: Omit<Product, 'id' | 'totalEverAdded'>): Promise<Product> {
         const db = getPool();
         const newId = `prod-${Date.now()}`;
         const newProduct: Product = { 
             ...productData, 
             id: newId, 
-            initialStock: productData.stock,
-            containerSize: productData.stock,
+            totalEverAdded: productData.stock,
         };
 
         await db.query(
-            'INSERT INTO products (id, name, sku, "buyingPrice", "profitMargin", "sellingPrice", stock, "initialStock", "containerSize", "mainCategory", category, "subCategory") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
-            [newProduct.id, newProduct.name, newProduct.sku, newProduct.buyingPrice, newProduct.profitMargin, newProduct.sellingPrice, newProduct.stock, newProduct.initialStock, newProduct.containerSize, newProduct.mainCategory, newProduct.category, newProduct.subCategory]
+            'INSERT INTO products (id, name, sku, "buyingPrice", "profitMargin", "sellingPrice", stock, "totalEverAdded", "containerSize", "mainCategory", category, "subCategory") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
+            [newProduct.id, newProduct.name, newProduct.sku, newProduct.buyingPrice, newProduct.profitMargin, newProduct.sellingPrice, newProduct.stock, newProduct.totalEverAdded, newProduct.containerSize, newProduct.mainCategory, newProduct.category, newProduct.subCategory]
         );
         return newProduct;
     }
     
-    static async addMultipleProducts(productsData: Omit<Product, 'id'>[]): Promise<Product[]> {
+    static async addMultipleProducts(productsData: Omit<Product, 'id' | 'totalEverAdded'>[]): Promise<Product[]> {
         const db = getPool();
         const client = await db.connect();
         try {
@@ -84,12 +83,11 @@ class PostgresProductService {
                  const newProduct: Product = { 
                     ...p, 
                     id: newId,
-                    initialStock: p.stock,
-                    containerSize: p.stock
+                    totalEverAdded: p.stock
                 };
                 await client.query(
-                    'INSERT INTO products (id, name, sku, "buyingPrice", "profitMargin", "sellingPrice", stock, "initialStock", "containerSize", "mainCategory", category, "subCategory") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
-                    [newProduct.id, newProduct.name, newProduct.sku, newProduct.buyingPrice, newProduct.profitMargin, newProduct.sellingPrice, newProduct.stock, newProduct.initialStock, newProduct.containerSize, newProduct.mainCategory, newProduct.category, newProduct.subCategory]
+                    'INSERT INTO products (id, name, sku, "buyingPrice", "profitMargin", "sellingPrice", stock, "totalEverAdded", "containerSize", "mainCategory", category, "subCategory") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
+                    [newProduct.id, newProduct.name, newProduct.sku, newProduct.buyingPrice, newProduct.profitMargin, newProduct.sellingPrice, newProduct.stock, newProduct.totalEverAdded, newProduct.containerSize, newProduct.mainCategory, newProduct.category, newProduct.subCategory]
                 );
                 return newProduct;
             }));
@@ -108,13 +106,18 @@ class PostgresProductService {
         
         if (isAdditive) {
             const stockToAdd = updatedData.stock || 0;
+            // When adding stock, we update the current stock and the total amount ever added. Container size is assumed to be the new total.
             const result = await db.query(
-                'UPDATE products SET stock = stock + $1, "initialStock" = stock + $1, "containerSize" = stock + $1 WHERE id = $2 RETURNING *',
+                `UPDATE products SET 
+                    stock = stock + $1, 
+                    "totalEverAdded" = "totalEverAdded" + $1, 
+                    "containerSize" = stock + $1 
+                 WHERE id = $2 RETURNING *`,
                 [stockToAdd, productId]
             );
             return formatProduct(result.rows[0]);
         } else {
-            const { name, sku, buyingPrice, profitMargin, sellingPrice, stock, containerSize, initialStock, mainCategory, category, subCategory } = updatedData;
+            const { name, sku, buyingPrice, profitMargin, sellingPrice, stock, containerSize, totalEverAdded, mainCategory, category, subCategory } = updatedData;
             const result = await db.query(
                 `UPDATE products SET 
                     name = COALESCE($1, name), 
@@ -124,12 +127,12 @@ class PostgresProductService {
                     "sellingPrice" = COALESCE($5, "sellingPrice"), 
                     stock = COALESCE($6, stock), 
                     "containerSize" = COALESCE($7, "containerSize"),
-                    "initialStock" = COALESCE($8, "initialStock"),
+                    "totalEverAdded" = COALESCE($8, "totalEverAdded"),
                     "mainCategory" = COALESCE($9, "mainCategory"),
                     category = COALESCE($10, category),
                     "subCategory" = COALESCE($11, "subCategory")
                  WHERE id = $12 RETURNING *`,
-                [name, sku, buyingPrice, profitMargin, sellingPrice, stock, containerSize, initialStock, mainCategory, category, subCategory, productId]
+                [name, sku, buyingPrice, profitMargin, sellingPrice, stock, containerSize, totalEverAdded, mainCategory, category, subCategory, productId]
             );
             return formatProduct(result.rows[0]);
         }
@@ -140,12 +143,17 @@ class PostgresProductService {
         const queryRunner = client || await db.connect();
 
         try {
+            if (!client) await queryRunner.query('BEGIN');
             for (const update of updates) {
                 await queryRunner.query(
                     'UPDATE products SET stock = stock + $1 WHERE id = $2',
                     [update.stockChange, update.id]
                 );
             }
+            if (!client) await queryRunner.query('COMMIT');
+        } catch (e) {
+            if (!client) await queryRunner.query('ROLLBACK');
+            throw e;
         } finally {
             if (!client) {
                 (queryRunner as PoolClient).release();
@@ -162,5 +170,3 @@ class PostgresProductService {
 }
 
 export default PostgresProductService;
-
-    
