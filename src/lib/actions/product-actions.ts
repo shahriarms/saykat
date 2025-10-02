@@ -40,13 +40,13 @@ export async function getProductById(productId: string): Promise<Product | undef
     return PostgresProductService.getProductById(productId);
 }
 
-export async function addProduct(productData: Omit<Product, 'id' | 'sellingPrice' | 'initialStock'>): Promise<Product> {
+export async function addProduct(productData: Omit<Product, 'id' | 'sellingPrice' | 'initialStock' | 'containerSize'>): Promise<Product> {
     if (!usePostgres) throw new Error("Database not connected.");
     const sellingPrice = productData.buyingPrice + (productData.buyingPrice * productData.profitMargin / 100);
     return PostgresProductService.addProduct({...productData, sellingPrice});
 }
 
-export async function addMultipleProducts(productsData: Omit<Product, 'id' | 'sellingPrice' | 'initialStock'>[]): Promise<Product[]> {
+export async function addMultipleProducts(productsData: Omit<Product, 'id' | 'sellingPrice' | 'initialStock' | 'containerSize'>[]): Promise<Product[]> {
     if (!usePostgres) throw new Error("Database not connected.");
      const productsWithSellingPrice = productsData.map(p => ({
         ...p,

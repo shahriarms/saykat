@@ -51,7 +51,7 @@ function formatRow(row: any) {
         }
 
         // Convert numeric strings to numbers
-        if (camelKey === 'subtotal' || camelKey === 'paidAmount' || camelKey === 'dueAmount' || camelKey === 'amount' || camelKey === 'salary' || camelKey === 'totalProfit' || camelKey === 'totalEverAdded') {
+        if (camelKey === 'subtotal' || camelKey === 'paidAmount' || camelKey === 'dueAmount' || camelKey === 'amount' || camelKey === 'salary' || camelKey === 'totalProfit' || camelKey === 'initialStock' || camelKey === 'containerSize') {
             newRow[camelKey] = parseFloat(row[key]);
         }
     }
@@ -382,7 +382,7 @@ class PostgresDataService {
                  await client.query(`TRUNCATE ${table} RESTART IDENTITY CASCADE`);
             }
 
-            if (data.products) for (const p of data.products) await client.query('INSERT INTO products (id, name, sku, "buyingPrice", "profitMargin", "sellingPrice", stock, "totalEverAdded", "mainCategory", category, "subCategory") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [p.id, p.name, p.sku, p.buyingPrice, p.profitMargin, p.sellingPrice, p.stock, p.totalEverAdded, p.mainCategory, p.category, p.subCategory]);
+            if (data.products) for (const p of data.products) await client.query('INSERT INTO products (id, name, sku, "buyingPrice", "profitMargin", "sellingPrice", stock, "initialStock", "containerSize", "mainCategory", category, "subCategory") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)', [p.id, p.name, p.sku, p.buyingPrice, p.profitMargin, p.sellingPrice, p.stock, p.initialStock, p.containerSize, p.mainCategory, p.category, p.subCategory]);
             if (data.employees) for (const e of data.employees) await client.query('INSERT INTO employees (id, name, phone, address, role, salary, joining_date) VALUES ($1, $2, $3, $4, $5, $6, $7)', [e.id, e.name, e.phone, e.address, e.role, e.salary, e.joiningDate]);
             if (data.expenses) for (const e of data.expenses) await client.query('INSERT INTO expenses (id, main_category, name, description, amount, date) VALUES ($1, $2, $3, $4, $5, $6)', [e.id, e.mainCategory, e.name, e.description, e.amount, e.date]);
             if (data.buyers) for (const b of data.buyers) await client.query('INSERT INTO buyers (id, name, address, phone, invoice_ids) VALUES ($1, $2, $3, $4, $5)', [b.id, b.name, b.address, b.phone, JSON.stringify(b.invoiceIds)]);

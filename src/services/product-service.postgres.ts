@@ -162,5 +162,3 @@ class PostgresProductService {
 }
 
 export default PostgresProductService;
-
-    
