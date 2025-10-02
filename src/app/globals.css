@@ -78,34 +78,17 @@
 /* Styles for browser printing */
 @media print {
   body {
-    background-color: #fff !important;
+    background: #fff !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-  
-  .no-print, body > *:not(.print-source) {
+
+  .no-print {
     display: none !important;
   }
-
+  
   .print-source {
     display: block !important;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: auto;
-    background: white;
-  }
-
-  .print-source .printable {
-    display: block !important;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-  }
-  
-  body > [data-radix-toast-viewport] {
-    display: none !important;
   }
 }
 
