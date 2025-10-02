@@ -12,7 +12,8 @@ services:
       POSTGRES_HOST: db
     command: npm run dev
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: always
 
   db:
