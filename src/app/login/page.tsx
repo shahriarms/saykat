@@ -46,7 +46,7 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password);
-      router.push('/dashboard');
+      // The onAuthStateChanged listener in useUser will handle the redirect
     } catch (error: any) {
       let errorMessage = "An unknown error occurred.";
       switch (error.code) {
@@ -54,10 +54,8 @@ export default function LoginPage() {
           errorMessage = "No account found with this email address.";
           break;
         case 'auth/wrong-password':
-          errorMessage = "Incorrect password. Please try again.";
-          break;
         case 'auth/invalid-credential':
-            errorMessage = "Invalid credentials. Please check your email and password.";
+            errorMessage = "Incorrect password or email. Please try again.";
             break;
         case 'auth/invalid-email':
             errorMessage = "Please enter a valid email address.";
