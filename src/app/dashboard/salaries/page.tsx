@@ -66,13 +66,16 @@ export default function SalariesPage() {
   }, [paymentToPrint]);
 
   useEffect(() => {
-    if (isPrintLayoutReady) {
-      const originalTitle = document.title;
-      document.title = `salary-receipt-${paymentToPrint?.employee.name}-${paymentToPrint?.payment.id}`;
-      window.print();
-      document.title = originalTitle;
-      setPrintLayoutReady(false);
-      setPaymentToPrint(null);
+    if (isPrintLayoutReady && paymentToPrint) {
+      const timer = setTimeout(() => {
+        const originalTitle = document.title;
+        document.title = `salary-receipt-${paymentToPrint.employee.name}-${paymentToPrint.payment.id}`;
+        window.print();
+        document.title = originalTitle;
+        setPrintLayoutReady(false);
+        setPaymentToPrint(null);
+      }, 100); // Small delay to ensure DOM update
+      return () => clearTimeout(timer);
     }
   }, [isPrintLayoutReady, paymentToPrint]);
 
@@ -430,3 +433,5 @@ export default function SalariesPage() {
     </>
   );
 }
+
+    

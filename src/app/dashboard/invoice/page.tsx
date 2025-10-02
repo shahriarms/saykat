@@ -117,13 +117,20 @@ export default function InvoicePage() {
   };
   
   useEffect(() => {
-    if (isPrintLayoutReady) {
-      const originalTitle = document.title;
-      document.title = `invoice-${activeDraft?.id}`;
-      window.print();
-      document.title = originalTitle;
-      setPrintLayoutReady(false);
-      handleSaveInvoice();
+    if (isPrintLayoutReady && activeDraft) {
+        const timer = setTimeout(() => {
+            const originalTitle = document.title;
+            document.title = `invoice-${activeDraft.id}`;
+            window.print();
+            document.title = originalTitle;
+            
+            // After printing, trigger the save
+            setPrintLayoutReady(false);
+            handleSaveInvoice();
+
+        }, 100); // A small timeout to ensure the DOM is updated before printing
+
+        return () => clearTimeout(timer);
     }
   }, [isPrintLayoutReady, activeDraft, handleSaveInvoice]);
   
@@ -633,3 +640,5 @@ export default function InvoicePage() {
     </>
   );
 }
+
+    

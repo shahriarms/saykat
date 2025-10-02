@@ -76,12 +76,15 @@ export default function BuyersPage() {
   };
   
   useEffect(() => {
-    if (isPrintLayoutReady) {
-      const originalTitle = document.title;
-      document.title = `invoice-${selectedInvoice?.id}`;
-      window.print();
-      document.title = originalTitle;
-      setPrintLayoutReady(false);
+    if (isPrintLayoutReady && selectedInvoice) {
+      const timer = setTimeout(() => {
+        const originalTitle = document.title;
+        document.title = `invoice-${selectedInvoice.id}`;
+        window.print();
+        document.title = originalTitle;
+        setPrintLayoutReady(false);
+      }, 100); // Small delay to ensure DOM update
+      return () => clearTimeout(timer);
     }
   }, [isPrintLayoutReady, selectedInvoice]);
   
@@ -419,3 +422,5 @@ export default function BuyersPage() {
     </>
   );
 }
+
+    

@@ -58,12 +58,15 @@ export default function EmployeesPage() {
     const [isPrintLayoutReady, setPrintLayoutReady] = useState(false);
 
     useEffect(() => {
-        if (isPrintLayoutReady) {
+        if (isPrintLayoutReady && selectedEmployee) {
+          const timer = setTimeout(() => {
             const originalTitle = document.title;
-            document.title = `attendance-report-${selectedEmployee?.name}-${format(month, 'MMMM-yyyy')}`;
+            document.title = `attendance-report-${selectedEmployee.name}-${format(month, 'MMMM-yyyy')}`;
             window.print();
             document.title = originalTitle;
             setPrintLayoutReady(false);
+          }, 100); // Small delay to ensure DOM update
+          return () => clearTimeout(timer);
         }
     }, [isPrintLayoutReady, selectedEmployee, month]);
 
@@ -276,3 +279,5 @@ export default function EmployeesPage() {
         </>
     );
 }
+
+    
