@@ -70,12 +70,18 @@ export default function BuyersDuePage() {
   useEffect(() => {
     if (isPrintLayoutReady) {
       const originalTitle = document.title;
-      document.title = `print-layout-${isPrintLayoutReady}`;
+      let filename = 'print-layout';
+      if (isPrintLayoutReady === 'invoice' && selectedInvoice) {
+        filename = `invoice-${selectedInvoice.id}`;
+      } else if (isPrintLayoutReady === 'payment-receipt' && selectedInvoice) {
+        filename = `payment-receipt-${selectedInvoice.id}`;
+      }
+      document.title = filename;
       window.print();
       document.title = originalTitle;
       setPrintLayoutReady(null);
     }
-  }, [isPrintLayoutReady]);
+  }, [isPrintLayoutReady, selectedInvoice]);
 
   const handleAfterPayment = () => {
     toast({
