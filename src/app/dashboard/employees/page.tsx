@@ -53,47 +53,47 @@ export default function EmployeesPage() {
     const [isEmployeeListDialogOpen, setEmployeeListDialogOpen] = useState(false);
     
     const [isPrinting, setIsPrinting] = useState(false);
-    const [reportToPrint, setReportToPrint] = useState<any>(null);
+    const printComponentRef = useRef<HTMLDivElement>(null);
 
-    const triggerPrint = useCallback((reportData: any) => {
-        const originalTitle = document.title;
-        document.title = `attendance-report-${reportData.employee.name}`;
+
+    const handlePrint = useCallback(() => {
+        if (!selectedEmployee || isPrinting) return;
         
-        const handleAfterPrint = () => {
-          document.title = originalTitle;
-          setReportToPrint(null);
-          setIsPrinting(false);
-          window.removeEventListener('afterprint', handleAfterPrint);
-        };
-        window.addEventListener('afterprint', handleAfterPrint);
-
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                window.print();
-            });
-        });
-    }, []);
-
-    useEffect(() => {
-      if (reportToPrint) {
+        const originalTitle = document.title;
+        document.title = `attendance-report-${selectedEmployee.name}-${format(month, 'MMMM-yyyy')}`;
+        
         setIsPrinting(true);
-        triggerPrint(reportToPrint);
-      }
-    }, [reportToPrint, triggerPrint]);
 
-    const handlePrint = () => {
-      if (selectedEmployee) {
-        setReportToPrint({
-            employee: selectedEmployee,
-            month: month,
-            attendanceData: monthlyAttendanceData.report
-        });
-      }
-    }
+        const handleAfterPrint = () => {
+            document.title = originalTitle;
+            setIsPrinting(false);
+            window.removeEventListener('afterprint', handleAfterPrint);
+            window.removeEventListener('beforeprint', handleBeforePrint);
+        };
+        
+        const handleBeforePrint = () => {
+            // This is intentionally left blank but is sometimes needed for the flow
+        };
+
+        window.addEventListener('beforeprint', handleBeforePrint);
+        window.addEventListener('afterprint', handleAfterPrint);
+        
+        // Use a timeout to ensure the state update has rendered before printing
+        setTimeout(() => {
+            window.print();
+        }, 50);
+
+    }, [selectedEmployee, month, isPrinting]);
     
     useEffect(() => {
         if (employees.length > 0 && !selectedEmployee) {
             setSelectedEmployee(employees[0]);
+        }
+         if (employees.length > 0 && selectedEmployee) {
+            const stillExists = employees.find(e => e.id === selectedEmployee.id);
+            if (!stillExists) {
+                setSelectedEmployee(employees[0]);
+            }
         }
     }, [employees, selectedEmployee]);
 
@@ -275,11 +275,12 @@ export default function EmployeesPage() {
             />}
             
              <div className="print-source">
-              {reportToPrint && (
+              {selectedEmployee && isPrinting && (
                 <EmployeeAttendanceReport
-                    employee={reportToPrint.employee}
-                    month={reportToPrint.month}
-                    attendanceData={reportToPrint.attendanceData}
+                    ref={printComponentRef}
+                    employee={selectedEmployee}
+                    month={month}
+                    attendanceData={monthlyAttendanceData.report}
                 />
               )}
             </div>

@@ -1,14 +1,15 @@
 
 import { useState, useEffect } from "react";
 
-const MOBILE_BREAKPOINT = 1024; 
+const MOBILE_BREAKPOINT = 768; 
 
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(true); // Default to true
+  // Initialize state to a value that is safe for server-side rendering
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    // This effect will only run on the client
     const checkIsMobile = () => {
-        // This will only run on the client
         setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
     }
     

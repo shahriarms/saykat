@@ -75,7 +75,7 @@ export default function InvoicePage() {
   const buyerInputRef = useRef<HTMLInputElement>(null);
   const printComponentRef = useRef(null);
 
-  const handleAfterPrint = () => {
+  const handleAfterPrint = useCallback(() => {
     if (!activeDraft) {
         setIsProcessing(false);
         return;
@@ -111,7 +111,7 @@ export default function InvoicePage() {
     }).finally(() => {
         setIsProcessing(false);
     });
-};
+}, [activeDraft, addInvoice, updateInvoice, resetActiveDraft, toast]);
 
 
   const handlePrint = useReactToPrint({
@@ -119,8 +119,7 @@ export default function InvoicePage() {
       documentTitle: activeDraft ? `invoice-${activeDraft.id}` : 'invoice',
       onBeforeGetContent: () => new Promise<void>((resolve) => {
         setIsProcessing(true);
-        // Timeout to allow state to update and re-render before getting content
-        setTimeout(() => resolve(), 50); 
+        resolve(); 
       }),
       onAfterPrint: handleAfterPrint,
       removeAfterPrint: true,

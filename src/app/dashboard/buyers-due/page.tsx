@@ -71,6 +71,15 @@ export default function BuyersDuePage() {
   const handlePaymentPrint = useReactToPrint({
       content: () => printPaymentRef.current,
       documentTitle: selectedInvoice ? `payment-receipt-for-invoice-${selectedInvoice.id}` : 'payment-receipt',
+      onBeforeGetContent: () => {
+        return new Promise<void>((resolve) => {
+          setIsProcessing(true);
+          resolve();
+        });
+      },
+      onAfterPrint: () => {
+        setIsProcessing(false);
+      },
       removeAfterPrint: true,
   });
 
@@ -98,6 +107,15 @@ export default function BuyersDuePage() {
   const handleInvoiceStandardPrint = useReactToPrint({
       content: () => printInvoiceRef.current,
       documentTitle: selectedInvoice ? `invoice-${selectedInvoice.id}` : 'invoice',
+      onBeforeGetContent: () => {
+        return new Promise<void>((resolve) => {
+          setIsPrinting(true);
+          resolve();
+        });
+      },
+      onAfterPrint: () => {
+        setIsPrinting(false);
+      },
       removeAfterPrint: true,
   });
 
@@ -165,13 +183,15 @@ export default function BuyersDuePage() {
       amount: numericPaymentAmount,
     };
 
-    const result = await addPayment(paymentPayload);
-
-    setIsProcessing(false);
-
-    if (result) {
+    addPayment(paymentPayload).then((result) => {
+      setIsProcessing(false);
+      if (result) {
         handleAfterPayment();
-    }
+      }
+    }).catch(err => {
+      setIsProcessing(false);
+      toast({ variant: 'destructive', title: 'Payment Failed', description: err.message });
+    })
   };
   
     const handleDeleteClick = () => {

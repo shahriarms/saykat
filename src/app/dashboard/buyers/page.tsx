@@ -74,6 +74,15 @@ export default function BuyersPage() {
   const handleStandardPrint = useReactToPrint({
       content: () => printComponentRef.current,
       documentTitle: selectedInvoice ? `invoice-${selectedInvoice.id}` : 'invoice',
+      onBeforeGetContent: () => {
+        return new Promise<void>((resolve) => {
+          setIsPrinting(true);
+          resolve();
+        });
+      },
+      onAfterPrint: () => {
+        setIsPrinting(false);
+      },
       removeAfterPrint: true,
   });
   
@@ -355,6 +364,7 @@ export default function BuyersPage() {
                             dueAmount={selectedInvoice.dueAmount}
                             printFormat={settings.printFormat}
                             locale={settings.locale}
+                            previewMode={true}
                         />
                     </div>
                   ) : (

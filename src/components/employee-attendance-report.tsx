@@ -1,8 +1,8 @@
 
 'use client';
 
-import React, { useCallback } from 'react';
-import type { Employee, Attendance } from '@/lib/types';
+import React from 'react';
+import type { Employee, AttendanceStatus } from '@/lib/types';
 import { format } from 'date-fns';
 import { useTranslation } from '@/hooks/use-translation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFoo
 
 interface AttendanceReportItem {
   date: Date;
-  status: Attendance['status'];
+  status: AttendanceStatus;
 }
 
 interface EmployeeAttendanceReportProps {
@@ -28,10 +28,10 @@ const EmployeeAttendanceReport = React.forwardRef<HTMLDivElement, EmployeeAttend
             acc[curr.status]++;
         }
         return acc;
-    }, { Present: 0, Absent: 0, Leave: 0 } as Record<Attendance['status'], number>);
+    }, { Present: 0, Absent: 0, Leave: 0 } as Record<AttendanceStatus, number>);
 
 
-    const getStatusClass = (status: Attendance['status']) => {
+    const getStatusClass = (status: AttendanceStatus) => {
         switch (status) {
             case 'Present': return 'text-green-600 font-bold';
             case 'Absent': return 'text-red-600 font-bold';

@@ -13,16 +13,23 @@ interface SalaryReceiptProps {
   employee: Employee;
   paymentAmount: number;
   paymentDate: Date;
+  isPreview?: boolean;
 }
 
 export const SalaryReceipt = React.memo(React.forwardRef<HTMLDivElement, SalaryReceiptProps>(
-  ({ employee, paymentAmount, paymentDate }, ref) => {
+  ({ employee, paymentAmount, paymentDate, isPreview = false }, ref) => {
     const { t, locale } = useTranslation();
     const isBn = locale === 'bn';
     const amountInWords = isBn ? numberToWordsBn(paymentAmount) : numberToWords(paymentAmount).replace("Dollars", "Taka");
+    
+    const containerClasses = cn(
+        "bg-white p-4 font-sans",
+        isPreview ? "scale-90" : "",
+        isBn ? 'font-bangla' : ''
+    );
 
     return (
-      <div ref={ref} className={cn("bg-white p-4 font-sans print:p-0", isBn ? 'font-bangla' : '')}>
+      <div ref={ref} className={containerClasses}>
         <div 
           className={cn("w-full max-w-4xl mx-auto border-4 border-dashed border-gray-400 p-8 relative", isBn ? 'font-bangla' : '')}
           style={{
