@@ -75,54 +75,51 @@ export default function InvoicePage() {
   const buyerInputRef = useRef<HTMLInputElement>(null);
   const printComponentRef = useRef(null);
 
-  const handleAfterPrint = useCallback(() => {
+  const handleSaveInvoice = useCallback(() => {
     if (!activeDraft) {
-        setIsProcessing(false);
-        return;
-    };
-
-    let savePromise: Promise<number | null>;
-
-    if (activeDraft.originalInvoiceId) {
-        savePromise = updateInvoice(activeDraft.originalInvoiceId, activeDraft);
-    } else {
-        savePromise = addInvoice(activeDraft);
+      setIsProcessing(false);
+      return;
     }
 
-    savePromise.then(newInvoiceId => {
-        if (newInvoiceId) {
-            toast({
-                title: `Invoice #${newInvoiceId} Saved`,
-                description: `The invoice has been successfully ${activeDraft.originalInvoiceId ? 'updated' : 'saved'}.`,
-            });
-        }
-        resetActiveDraft();
+    const saveAction = activeDraft.originalInvoiceId
+      ? updateInvoice(activeDraft.originalInvoiceId, activeDraft)
+      : addInvoice(activeDraft);
+
+    saveAction.then(newInvoiceId => {
+      if (newInvoiceId) {
         toast({
-            title: "Memo Ready",
-            description: "A new, empty memo is ready for you.",
+          title: `Invoice #${newInvoiceId} Saved`,
+          description: `The invoice has been successfully ${activeDraft.originalInvoiceId ? 'updated' : 'saved'}.`,
         });
+      }
+      resetActiveDraft();
+      toast({
+        title: "Memo Ready",
+        description: "A new, empty memo is ready for you.",
+      });
     }).catch(error => {
-        console.error("Failed to save invoice after printing:", error);
-        toast({
-            variant: 'destructive',
-            title: 'Error Saving Invoice',
-            description: error.message || 'The invoice was printed, but failed to save.',
-        });
+      console.error("Failed to save invoice after printing:", error);
+      toast({
+        variant: 'destructive',
+        title: 'Error Saving Invoice',
+        description: error.message || 'The invoice was printed, but failed to save.',
+      });
     }).finally(() => {
-        setIsProcessing(false);
+      setIsProcessing(false);
     });
-}, [activeDraft, addInvoice, updateInvoice, resetActiveDraft, toast]);
+  }, [activeDraft, addInvoice, updateInvoice, resetActiveDraft, toast]);
 
 
   const handlePrint = useReactToPrint({
-      content: () => printComponentRef.current,
-      documentTitle: activeDraft ? `invoice-${activeDraft.id}` : 'invoice',
-      onBeforeGetContent: () => new Promise<void>((resolve) => {
-        setIsProcessing(true);
-        resolve(); 
-      }),
-      onAfterPrint: handleAfterPrint,
-      removeAfterPrint: true,
+    content: () => printComponentRef.current,
+    documentTitle: activeDraft ? `invoice-${activeDraft.id}` : 'invoice',
+    onBeforePrint: () => {
+      setIsProcessing(true);
+    },
+    onAfterPrint: () => {
+      handleSaveInvoice();
+    },
+    removeAfterPrint: true,
   });
   
   const { id: draftId, customerName, customerAddress, customerPhone, paidAmount, subtotal, items, cashReceived, changeAmount, dueAmount, originalInvoiceId } = activeDraft || {};
@@ -611,3 +608,4 @@ export default function InvoicePage() {
     </>
   );
 }
+
