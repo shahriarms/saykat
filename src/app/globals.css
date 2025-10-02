@@ -83,10 +83,10 @@
     print-color-adjust: exact !important;
   }
   
-  .no-print, body > *:not(.print-source), body > .print-source > *:not(.printable) {
+  .no-print, body > *:not(.print-source) {
     display: none !important;
   }
-  
+
   .print-source {
     display: block !important;
     position: absolute;
@@ -97,7 +97,7 @@
     background: white;
   }
 
-  .printable {
+  .print-source .printable {
     display: block !important;
     width: 100%;
     margin: 0;

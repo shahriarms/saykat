@@ -68,7 +68,6 @@ export default function InvoicePage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showProfit, setShowProfit] = useState(true);
 
-  // Autocomplete state for buyers
   const [buyerSearch, setBuyerSearch] = useState('');
   const [isBuyerPopoverOpen, setBuyerPopoverOpen] = useState(false);
   const buyerInputRef = useRef<HTMLInputElement>(null);
@@ -596,7 +595,7 @@ export default function InvoicePage() {
       </div>
       
        <div className="print-source">
-        {isPrintLayoutReady && (
+        {isPrintLayoutReady && activeDraft && (
             <div className="printable">
                 <InvoicePrintLayout
                     ref={printComponentRef}

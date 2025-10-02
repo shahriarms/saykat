@@ -54,22 +54,23 @@ export default function EmployeesPage() {
     
     const [isPrinting, setIsPrinting] = useState(false);
     const printComponentRef = useRef<HTMLDivElement>(null);
+    
+    const [isPrintLayoutReady, setPrintLayoutReady] = useState(false);
 
-
-    const handlePrint = useCallback(() => {
-        if (!selectedEmployee || isPrinting) return;
-        
-        setIsPrinting(true);
-
-        setTimeout(() => {
+    useEffect(() => {
+        if (isPrintLayoutReady) {
             const originalTitle = document.title;
-            document.title = `attendance-report-${selectedEmployee.name}-${format(month, 'MMMM-yyyy')}`;
+            document.title = `attendance-report-${selectedEmployee?.name}-${format(month, 'MMMM-yyyy')}`;
             window.print();
             document.title = originalTitle;
-            setIsPrinting(false);
-        }, 50);
+            setPrintLayoutReady(false);
+        }
+    }, [isPrintLayoutReady, selectedEmployee, month]);
 
-    }, [selectedEmployee, month, isPrinting]);
+    const handlePrint = useCallback(() => {
+        if (!selectedEmployee) return;
+        setPrintLayoutReady(true);
+    }, [selectedEmployee]);
     
     useEffect(() => {
         if (employees.length > 0 && !selectedEmployee) {
@@ -261,7 +262,7 @@ export default function EmployeesPage() {
             />}
             
             <div className="print-source">
-                {isPrinting && selectedEmployee && (
+                {isPrintLayoutReady && selectedEmployee && (
                     <div className="printable">
                         <EmployeeAttendanceReport
                             ref={printComponentRef}

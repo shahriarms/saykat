@@ -20,49 +20,18 @@ import { useSettings } from '@/hooks/use-settings';
 import { useAppData } from '@/hooks/use-app-data';
 import { useUser } from '@/hooks/use-user';
 import { useInvoiceForm } from '@/hooks/use-invoice-form';
-import { useReactToPrint } from 'react-to-print';
 
 interface InvoicePreviewDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   invoice: Invoice;
+  onPrint: () => void;
 }
 
-export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePreviewDialogProps) {
-    const { settings } = useSettings();
-    const { printInvoice: appPrintInvoice } = useAppData();
+export function InvoicePreviewDialog({ open, onOpenChange, invoice, onPrint }: InvoicePreviewDialogProps) {
     const { user } = useUser();
     const { loadInvoiceForEditing } = useInvoiceForm();
     const router = useRouter();
-
-    const [isPrinting, setIsPrinting] = useState(false);
-    const printComponentRef = useRef(null);
-
-    const handlePosPrint = async () => {
-        if (!invoice) return;
-        setIsPrinting(true);
-        try {
-            await appPrintInvoice(invoice);
-        } catch (error: any) {
-            console.error(error.message);
-        } finally {
-            setIsPrinting(false);
-        }
-    };
-
-    const handleStandardPrint = useReactToPrint({
-        content: () => printComponentRef.current,
-        documentTitle: `invoice-${invoice.id}`,
-        removeAfterPrint: true,
-    });
-
-    const handlePrint = () => {
-        if (settings.printFormat === 'pos' && settings.posPrinterType !== 'disabled') {
-            handlePosPrint();
-        } else {
-            handleStandardPrint();
-        }
-    };
 
     const handleEdit = () => {
         if (user?.role === 'admin') {
@@ -75,7 +44,7 @@ export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePre
   return (
     <>
         <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-4xl no-print">
             <DialogHeader>
             <DialogTitle>Invoice #{invoice.id}</DialogTitle>
             <DialogDescription>
@@ -86,7 +55,6 @@ export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePre
             <ScrollArea className="h-[70vh] rounded-md border">
                 <div className="p-4 bg-muted/50">
                     <InvoicePrintLayout 
-                        ref={printComponentRef}
                         invoiceId={invoice.id}
                         currentDate={new Date(invoice.date).toLocaleDateString()}
                         customerName={invoice.customerName}
@@ -96,8 +64,7 @@ export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePre
                         subtotal={invoice.subtotal}
                         paidAmount={invoice.paidAmount}
                         dueAmount={invoice.dueAmount}
-                        printFormat={settings.printFormat}
-                        locale={settings.locale}
+                        previewMode={true}
                     />
                 </div>
             </ScrollArea>
@@ -114,8 +81,8 @@ export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePre
                     <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
                         Close
                     </Button>
-                    <Button onClick={handlePrint} disabled={isPrinting}>
-                        {isPrinting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Printer className="mr-2 h-4 w-4"/>}
+                    <Button onClick={onPrint}>
+                        <Printer className="mr-2 h-4 w-4"/>
                         Print
                     </Button>
                 </div>

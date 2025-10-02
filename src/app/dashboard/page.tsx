@@ -11,7 +11,7 @@ import {
 import { useAppData } from '@/hooks/use-app-data';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { DollarSign, ShoppingCart, TrendingUp, TrendingDown, Users, Package, HandCoins, Receipt, Loader2, BadgeIndianRupee, Container, Wallet, ThumbsUp, Weight, FileText } from 'lucide-react';
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, differenceInDays } from 'date-fns';
 import { useTranslation } from '@/hooks/use-translation';
@@ -33,10 +33,13 @@ import { MonthlyUnitsSoldDialog } from '@/components/monthly-units-sold-report-d
 import { MonthlySalaryReportDialog } from '@/components/monthly-salary-report-dialog';
 import { InvoicePreviewDialog } from '@/components/invoice-preview-dialog';
 import { StockStatusCard } from '@/components/stock-status-card';
+import { InvoicePrintLayout } from '@/components/invoice-print-layout';
+import { useSettings } from '@/hooks/use-settings';
 
 export default function Dashboard() {
   const { products, employees, getInvoicesForDateRange, getExpensesForDateRange, getSalaryPaymentsForDateRange, getGrossProfitForDateRange, invoices: allInvoices, getAttendanceForDate, centralDateRange, setCentralDateRange } = useAppData();
   const { t } = useTranslation();
+  const { settings } = useSettings();
   
   const [rangeInvoices, setRangeInvoices] = useState<Invoice[]>([]);
   const [rangeExpenses, setRangeExpenses] = useState<Expense[]>([]);
@@ -60,6 +63,19 @@ export default function Dashboard() {
   const [isRangeGrossProfitReportOpen, setRangeGrossProfitReportOpen] = useState(false);
   
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [invoiceToPrint, setInvoiceToPrint] = useState<Invoice | null>(null);
+  const printComponentRef = useRef(null);
+
+  useEffect(() => {
+    if (invoiceToPrint) {
+      const originalTitle = document.title;
+      document.title = `invoice-${invoiceToPrint.id}`;
+      window.print();
+      document.title = originalTitle;
+      setInvoiceToPrint(null);
+    }
+  }, [invoiceToPrint]);
+
 
   const recentMemos = useMemo(() => {
     return [...allInvoices]
@@ -175,7 +191,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-8 no-print">
         <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
           <div>
               <h1 className="text-2xl font-bold">{t('dashboard_sidebar')}</h1>
@@ -478,6 +494,27 @@ export default function Dashboard() {
         </div>
       </div>
 
+      <div className="print-source">
+        {invoiceToPrint && (
+          <div className="printable">
+            <InvoicePrintLayout
+                ref={printComponentRef}
+                invoiceId={invoiceToPrint.id}
+                currentDate={new Date(invoiceToPrint.date).toLocaleDateString()}
+                customerName={invoiceToPrint.customerName}
+                customerAddress={invoiceToPrint.customerAddress}
+                customerPhone={invoiceToPrint.customerPhone}
+                invoiceItems={invoiceToPrint.items}
+                subtotal={invoiceToPrint.subtotal}
+                paidAmount={invoiceToPrint.paidAmount}
+                dueAmount={invoiceToPrint.dueAmount}
+                printFormat={settings.printFormat}
+                locale={settings.locale}
+            />
+          </div>
+        )}
+      </div>
+
       { isDailySalesReportOpen && <DailySalesDialog
         open={isDailySalesReportOpen}
         onOpenChange={setDailySalesReportOpen}
@@ -555,9 +592,8 @@ export default function Dashboard() {
         invoice={selectedInvoice}
         open={!!selectedInvoice}
         onOpenChange={() => setSelectedInvoice(null)}
+        onPrint={() => setInvoiceToPrint(selectedInvoice)}
       />}
     </>
   );
 }
-
-    
