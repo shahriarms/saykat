@@ -327,10 +327,17 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
         const existingItem = currentDraft.items.find(item => item.id === product.id);
 
         if (existingItem) {
+             const currentQuantityInDraft = parseFloat(String(existingItem.quantity)) || 0;
+             const proposedQuantity = currentQuantityInDraft + 1;
+             
+             if (proposedQuantity > liveAvailableStock) {
+                 setStockError(`Cannot add more than available stock for "${product.name}". Available: ${liveAvailableStock}`);
+                 return;
+             }
+            // If item exists, just show a toast, don't auto-increment.
             toast({
-                variant: 'destructive',
                 title: "Item Already Added",
-                description: `"${product.name}" is already in the invoice. You can change its quantity.`,
+                description: `"${product.name}" is already in the invoice. You can change its quantity directly.`,
             });
             return;
         }
@@ -353,7 +360,7 @@ const useInvoiceFormData = (): InvoiceFormContextType => {
             const { subtotal, changeAmount, paidAmount, dueAmount, totalProfit } = calculateTotals(newItems, draft.paidAmount, draft.cashReceived);
             return { ...draft, items: newItems, subtotal, changeAmount, paidAmount, dueAmount, totalProfit };
         }));
-    }, [activeDraftIndex, toast, drafts, products]);
+    }, [activeDraftIndex, toast, drafts]);
     
     const updateInvoiceItem = useCallback((itemId: string, itemUpdate: { [key: string]: any }) => {
         setDrafts(prev => prev.map((draft, index) => {
