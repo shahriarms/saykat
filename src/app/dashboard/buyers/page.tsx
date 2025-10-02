@@ -37,7 +37,6 @@ import type { DateRange } from 'react-day-picker';
 import { DateRangePicker } from '@/components/date-range-picker';
 import { useInvoiceForm } from '@/hooks/use-invoice-form';
 import { useRouter } from 'next/navigation';
-import { useReactToPrint } from 'react-to-print';
 
 
 export default function BuyersPage() {
@@ -57,6 +56,7 @@ export default function BuyersPage() {
   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
   const [localDateRange, setLocalDateRange] = useState<DateRange | undefined>(centralDateRange);
   
+  const [isPrintLayoutReady, setPrintLayoutReady] = useState(false);
   const printComponentRef = useRef(null);
 
   const handlePosPrint = async () => {
@@ -70,21 +70,20 @@ export default function BuyersPage() {
       setIsPrinting(false);
     }
   };
-
-  const handleStandardPrint = useReactToPrint({
-      content: () => printComponentRef.current,
-      documentTitle: selectedInvoice ? `invoice-${selectedInvoice.id}` : 'invoice',
-      onBeforeGetContent: () => {
-        return new Promise<void>((resolve) => {
-          setIsPrinting(true);
-          resolve();
-        });
-      },
-      onAfterPrint: () => {
-        setIsPrinting(false);
-      },
-      removeAfterPrint: true,
-  });
+  
+  const handleStandardPrint = () => {
+      setPrintLayoutReady(true);
+  };
+  
+  useEffect(() => {
+    if (isPrintLayoutReady) {
+      const originalTitle = document.title;
+      document.title = `invoice-${selectedInvoice?.id}`;
+      window.print();
+      document.title = originalTitle;
+      setPrintLayoutReady(false);
+    }
+  }, [isPrintLayoutReady, selectedInvoice]);
   
   const handlePrint = () => {
     if (!selectedInvoice || isPrinting) return;
@@ -99,7 +98,6 @@ export default function BuyersPage() {
     setLocalDateRange(centralDateRange);
   }, [centralDateRange]);
   
-  // Effect to handle data refreshes and keep selected items up-to-date
   useEffect(() => {
     if (selectedBuyer) {
         const refreshedBuyer = buyers.find(b => b.id === selectedBuyer.id);
@@ -122,7 +120,7 @@ export default function BuyersPage() {
   
   const handleSelectBuyer = (buyer: Buyer) => {
     setSelectedBuyer(buyer);
-    setSelectedInvoice(null); // Reset invoice selection when buyer changes
+    setSelectedInvoice(null);
     setInvoiceSearchTerm('');
   };
   
@@ -148,7 +146,7 @@ export default function BuyersPage() {
       setIsDeleting(true);
       await deleteInvoice(invoiceToDelete.id);
       setInvoiceToDelete(null);
-      setSelectedInvoice(null); // Deselect after deletion
+      setSelectedInvoice(null);
       setIsDeleting(false);
     }
   };
@@ -209,7 +207,7 @@ export default function BuyersPage() {
 
   return (
     <>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 no-print">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h1 className="text-2xl font-semibold flex items-center gap-2 relative z-10">
               <Users className="w-6 h-6" />
@@ -379,6 +377,27 @@ export default function BuyersPage() {
         </div>
       </div>
       
+       <div className="print-source">
+        {isPrintLayoutReady && selectedInvoice && (
+          <div className="printable">
+            <InvoicePrintLayout
+                ref={printComponentRef}
+                invoiceId={selectedInvoice.id}
+                currentDate={new Date(selectedInvoice.date).toLocaleDateString()}
+                customerName={selectedInvoice.customerName}
+                customerAddress={selectedInvoice.customerAddress}
+                customerPhone={selectedInvoice.customerPhone}
+                invoiceItems={selectedInvoice.items}
+                subtotal={selectedInvoice.subtotal}
+                paidAmount={selectedInvoice.paidAmount}
+                dueAmount={selectedInvoice.dueAmount}
+                printFormat={settings.printFormat}
+                locale={settings.locale}
+            />
+          </div>
+        )}
+      </div>
+
       <AlertDialog open={!!invoiceToDelete} onOpenChange={() => setInvoiceToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

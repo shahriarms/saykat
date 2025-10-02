@@ -35,7 +35,6 @@ import { SalaryReceipt } from '@/components/salary-receipt';
 import type { DateRange } from 'react-day-picker';
 import { DateRangePicker } from '@/components/date-range-picker';
 import { cn } from '@/lib/utils';
-import { useReactToPrint } from 'react-to-print';
 
 export default function SalariesPage() {
   const { employees, getPaymentsForMonth, addSalaryPayment, deleteSalaryPayment, getDueSalaryForMonth, centralDateRange } = useAppData();
@@ -55,18 +54,28 @@ export default function SalariesPage() {
 
   const [paymentToDelete, setPaymentToDelete] = useState<SalaryPayment | null>(null);
   
+  const [isPrintLayoutReady, setPrintLayoutReady] = useState(false);
+
   useEffect(() => {
     setLocalDateRange(centralDateRange);
   }, [centralDateRange]);
   
-  const handlePrint = useReactToPrint({
-      content: () => printComponentRef.current,
-      documentTitle: paymentToPrint ? `salary-receipt-${paymentToPrint.employee.name}-${paymentToPrint.payment.id}` : 'salary-receipt',
-      onAfterPrint: () => {
-          setPaymentToPrint(null);
-      },
-      removeAfterPrint: true,
-  });
+  const handlePrint = useCallback(() => {
+    if (!paymentToPrint) return;
+    setPrintLayoutReady(true);
+  }, [paymentToPrint]);
+
+  useEffect(() => {
+    if (isPrintLayoutReady) {
+      const originalTitle = document.title;
+      document.title = `salary-receipt-${paymentToPrint?.employee.name}-${paymentToPrint?.payment.id}`;
+      window.print();
+      document.title = originalTitle;
+      setPrintLayoutReady(false);
+      setPaymentToPrint(null);
+    }
+  }, [isPrintLayoutReady, paymentToPrint]);
+
 
   useEffect(() => {
       if (paymentToPrint) {
@@ -359,17 +368,30 @@ export default function SalariesPage() {
              ) : (
                 <ScrollArea className="flex-1 rounded-lg bg-muted/20 p-2">
                     <SalaryReceipt 
-                        ref={printComponentRef}
                         employee={selectedEmployee}
                         paymentAmount={paymentToPrint?.payment.amount ?? numericPaymentAmount}
                         paymentDate={paymentToPrint ? new Date(paymentToPrint.payment.date) : new Date()}
-                        isPreview={!paymentToPrint}
+                        isPreview={true}
                     />
                 </ScrollArea>
              )}
           </CardContent>
         </Card>
       </div>
+    </div>
+
+    <div className="print-source">
+        {isPrintLayoutReady && paymentToPrint && (
+             <div className="printable">
+                <SalaryReceipt 
+                    ref={printComponentRef}
+                    employee={paymentToPrint.employee}
+                    paymentAmount={paymentToPrint.payment.amount}
+                    paymentDate={new Date(paymentToPrint.payment.date)}
+                    isPreview={false}
+                />
+             </div>
+        )}
     </div>
     
     <AlertDialog open={isConfirmingPayment} onOpenChange={setConfirmingPayment}>

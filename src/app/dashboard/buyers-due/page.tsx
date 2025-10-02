@@ -37,7 +37,6 @@ import { InvoicePrintLayout } from '@/components/invoice-print-layout';
 import { useSettings } from '@/hooks/use-settings';
 import type { DateRange } from 'react-day-picker';
 import { DateRangePicker } from '@/components/date-range-picker';
-import { useReactToPrint } from 'react-to-print';
 
 
 export default function BuyersDuePage() {
@@ -60,28 +59,23 @@ export default function BuyersDuePage() {
   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
   
   const [isPrinting, setIsPrinting] = useState(false);
-  
+  const [isPrintLayoutReady, setPrintLayoutReady] = useState<string | null>(null);
+
   const [localDateRange, setLocalDateRange] = useState<DateRange | undefined>(centralDateRange);
 
   const numericPaymentAmount = useMemo(() => parseFloat(paymentAmount) || 0, [paymentAmount]);
   const printPaymentRef = useRef(null);
   const printInvoiceRef = useRef(null);
-
-
-  const handlePaymentPrint = useReactToPrint({
-      content: () => printPaymentRef.current,
-      documentTitle: selectedInvoice ? `payment-receipt-for-invoice-${selectedInvoice.id}` : 'payment-receipt',
-      onBeforeGetContent: () => {
-        return new Promise<void>((resolve) => {
-          setIsProcessing(true);
-          resolve();
-        });
-      },
-      onAfterPrint: () => {
-        setIsProcessing(false);
-      },
-      removeAfterPrint: true,
-  });
+  
+  useEffect(() => {
+    if (isPrintLayoutReady) {
+      const originalTitle = document.title;
+      document.title = `print-layout-${isPrintLayoutReady}`;
+      window.print();
+      document.title = originalTitle;
+      setPrintLayoutReady(null);
+    }
+  }, [isPrintLayoutReady]);
 
   const handleAfterPayment = () => {
     toast({
@@ -89,7 +83,7 @@ export default function BuyersDuePage() {
         description: t('payment_received_toast_description', { amount: numericPaymentAmount.toFixed(2), invoiceId: selectedInvoice!.id }),
     });
     setPaymentAmount('');
-    handlePaymentPrint();
+    setPrintLayoutReady('payment-receipt');
   }
 
   const handleInvoicePosPrint = async () => {
@@ -104,27 +98,12 @@ export default function BuyersDuePage() {
     }
   };
 
-  const handleInvoiceStandardPrint = useReactToPrint({
-      content: () => printInvoiceRef.current,
-      documentTitle: selectedInvoice ? `invoice-${selectedInvoice.id}` : 'invoice',
-      onBeforeGetContent: () => {
-        return new Promise<void>((resolve) => {
-          setIsPrinting(true);
-          resolve();
-        });
-      },
-      onAfterPrint: () => {
-        setIsPrinting(false);
-      },
-      removeAfterPrint: true,
-  });
-
   const handlePrint = () => {
     if (!selectedInvoice || isPrinting) return;
     if (settings.printFormat === 'pos' && settings.posPrinterType !== 'disabled') {
         handleInvoicePosPrint();
     } else {
-        handleInvoiceStandardPrint();
+        setPrintLayoutReady('invoice');
     }
   };
 
@@ -278,7 +257,7 @@ export default function BuyersDuePage() {
 
   return (
     <>
-      <div className="flex flex-col h-full gap-4">
+      <div className="flex flex-col h-full gap-4 no-print">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <h1 className="text-2xl font-semibold flex items-center gap-2">
             <HandCoins className="w-6 h-6" />
@@ -433,22 +412,35 @@ export default function BuyersDuePage() {
           </Card>
         </div>
       </div>
-      <div className="hidden">
-        {selectedInvoice && (
-            <InvoicePrintLayout
-                ref={printInvoiceRef}
-                invoiceId={selectedInvoice.id}
-                currentDate={new Date(selectedInvoice.date).toLocaleDateString()}
-                customerName={selectedInvoice.customerName}
-                customerAddress={selectedInvoice.customerAddress}
-                customerPhone={selectedInvoice.customerPhone}
-                invoiceItems={selectedInvoice.items}
-                subtotal={selectedInvoice.subtotal}
-                paidAmount={selectedInvoice.paidAmount}
-                dueAmount={selectedInvoice.dueAmount}
-                printFormat={settings.printFormat}
-                locale={settings.locale}
-            />
+      <div className="print-source">
+        {isPrintLayoutReady === 'invoice' && selectedInvoice && (
+            <div className="printable">
+                <InvoicePrintLayout
+                    ref={printInvoiceRef}
+                    invoiceId={selectedInvoice.id}
+                    currentDate={new Date(selectedInvoice.date).toLocaleDateString()}
+                    customerName={selectedInvoice.customerName}
+                    customerAddress={selectedInvoice.customerAddress}
+                    customerPhone={selectedInvoice.customerPhone}
+                    invoiceItems={selectedInvoice.items}
+                    subtotal={selectedInvoice.subtotal}
+                    paidAmount={selectedInvoice.paidAmount}
+                    dueAmount={selectedInvoice.dueAmount}
+                    printFormat={settings.printFormat}
+                    locale={settings.locale}
+                />
+            </div>
+        )}
+        {isPrintLayoutReady === 'payment-receipt' && selectedInvoice && selectedBuyer && (
+             <div className="printable">
+                <PaymentReceipt
+                    ref={printPaymentRef}
+                    buyer={selectedBuyer}
+                    invoice={selectedInvoice}
+                    paymentHistory={getPaymentsForInvoice(selectedInvoice.id)}
+                    newPaymentAmount={numericPaymentAmount}
+                />
+             </div>
         )}
       </div>
       <AlertDialog open={isConfirmingPayment} onOpenChange={setConfirmingPayment}>

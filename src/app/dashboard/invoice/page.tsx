@@ -32,7 +32,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Separator } from '@/components/ui/separator';
 import { StockVolumeDisplay } from '@/components/stock-volume-display';
 import { cn } from '@/lib/utils';
-import { useReactToPrint } from 'react-to-print';
 import dynamic from 'next/dynamic';
 
 const Carousel = dynamic(() => import('@/components/ui/carousel').then(c => c.Carousel), { ssr: false });
@@ -73,6 +72,8 @@ export default function InvoicePage() {
   const [buyerSearch, setBuyerSearch] = useState('');
   const [isBuyerPopoverOpen, setBuyerPopoverOpen] = useState(false);
   const buyerInputRef = useRef<HTMLInputElement>(null);
+  
+  const [isPrintLayoutReady, setPrintLayoutReady] = useState(false);
   const printComponentRef = useRef(null);
 
   const handleSaveInvoice = useCallback(() => {
@@ -81,11 +82,13 @@ export default function InvoicePage() {
       return;
     }
 
-    const saveAction = activeDraft.originalInvoiceId
+    setIsProcessing(true);
+
+    const savePromise = activeDraft.originalInvoiceId
       ? updateInvoice(activeDraft.originalInvoiceId, activeDraft)
       : addInvoice(activeDraft);
 
-    saveAction.then(newInvoiceId => {
+    savePromise.then(newInvoiceId => {
       if (newInvoiceId) {
         toast({
           title: `Invoice #${newInvoiceId} Saved`,
@@ -110,17 +113,20 @@ export default function InvoicePage() {
   }, [activeDraft, addInvoice, updateInvoice, resetActiveDraft, toast]);
 
 
-  const handlePrint = useReactToPrint({
-    content: () => printComponentRef.current,
-    documentTitle: activeDraft ? `invoice-${activeDraft.id}` : 'invoice',
-    onBeforePrint: () => {
-      setIsProcessing(true);
-    },
-    onAfterPrint: () => {
+  const handlePrint = () => {
+    setPrintLayoutReady(true);
+  };
+  
+  useEffect(() => {
+    if (isPrintLayoutReady) {
+      const originalTitle = document.title;
+      document.title = `invoice-${activeDraft?.id}`;
+      window.print();
+      document.title = originalTitle;
+      setPrintLayoutReady(false);
       handleSaveInvoice();
-    },
-    removeAfterPrint: true,
-  });
+    }
+  }, [isPrintLayoutReady, activeDraft, handleSaveInvoice]);
   
   const { id: draftId, customerName, customerAddress, customerPhone, paidAmount, subtotal, items, cashReceived, changeAmount, dueAmount, originalInvoiceId } = activeDraft || {};
 
@@ -569,7 +575,6 @@ export default function InvoicePage() {
                   <CardContent className="h-full min-h-[500px] flex items-center justify-center bg-muted/50 rounded-lg p-4">
                       <div className="w-full h-full overflow-x-auto flex justify-center items-center">
                           <InvoicePrintLayout 
-                              ref={printComponentRef}
                               invoiceId={draftId}
                               currentDate={new Date().toLocaleDateString()}
                               customerName={customerName}
@@ -590,6 +595,27 @@ export default function InvoicePage() {
         </div>
       </div>
       
+       <div className="print-source">
+        {isPrintLayoutReady && (
+            <div className="printable">
+                <InvoicePrintLayout
+                    ref={printComponentRef}
+                    invoiceId={draftId}
+                    currentDate={new Date().toLocaleDateString()}
+                    customerName={customerName}
+                    customerAddress={customerAddress}
+                    customerPhone={customerPhone}
+                    invoiceItems={items}
+                    subtotal={subtotal}
+                    paidAmount={paidAmount || 0}
+                    dueAmount={dueAmount || 0}
+                    printFormat={settings.printFormat}
+                    locale={settings.locale}
+                />
+            </div>
+        )}
+      </div>
+
       <AlertDialog open={!!draftToDelete} onOpenChange={() => setDraftToDelete(null)}>
           <AlertDialogContent>
               <AlertDialogHeader>
@@ -608,4 +634,3 @@ export default function InvoicePage() {
     </>
   );
 }
-

@@ -59,28 +59,14 @@ export default function EmployeesPage() {
     const handlePrint = useCallback(() => {
         if (!selectedEmployee || isPrinting) return;
         
-        const originalTitle = document.title;
-        document.title = `attendance-report-${selectedEmployee.name}-${format(month, 'MMMM-yyyy')}`;
-        
         setIsPrinting(true);
 
-        const handleAfterPrint = () => {
+        setTimeout(() => {
+            const originalTitle = document.title;
+            document.title = `attendance-report-${selectedEmployee.name}-${format(month, 'MMMM-yyyy')}`;
+            window.print();
             document.title = originalTitle;
             setIsPrinting(false);
-            window.removeEventListener('afterprint', handleAfterPrint);
-            window.removeEventListener('beforeprint', handleBeforePrint);
-        };
-        
-        const handleBeforePrint = () => {
-            // This is intentionally left blank but is sometimes needed for the flow
-        };
-
-        window.addEventListener('beforeprint', handleBeforePrint);
-        window.addEventListener('afterprint', handleAfterPrint);
-        
-        // Use a timeout to ensure the state update has rendered before printing
-        setTimeout(() => {
-            window.print();
         }, 50);
 
     }, [selectedEmployee, month, isPrinting]);
@@ -274,18 +260,18 @@ export default function EmployeesPage() {
                 onOpenChange={setEmployeeListDialogOpen}
             />}
             
-             <div className="print-source">
-              {selectedEmployee && isPrinting && (
-                <EmployeeAttendanceReport
-                    ref={printComponentRef}
-                    employee={selectedEmployee}
-                    month={month}
-                    attendanceData={monthlyAttendanceData.report}
-                />
-              )}
+            <div className="print-source">
+                {isPrinting && selectedEmployee && (
+                    <div className="printable">
+                        <EmployeeAttendanceReport
+                            ref={printComponentRef}
+                            employee={selectedEmployee}
+                            month={month}
+                            attendanceData={monthlyAttendanceData.report}
+                        />
+                    </div>
+                )}
             </div>
         </>
     );
 }
-
-    
