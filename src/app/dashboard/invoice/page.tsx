@@ -75,43 +75,53 @@ export default function InvoicePage() {
   const buyerInputRef = useRef<HTMLInputElement>(null);
   const printComponentRef = useRef(null);
 
-  const handleAfterPrint = async () => {
-    if (!activeDraft) return;
-    try {
-      let newInvoiceId: number | null;
-      if (activeDraft.originalInvoiceId) {
-        newInvoiceId = await updateInvoice(activeDraft.originalInvoiceId, activeDraft);
-      } else {
-        newInvoiceId = await addInvoice(activeDraft);
-      }
+  const handleAfterPrint = () => {
+    if (!activeDraft) {
+        setIsProcessing(false);
+        return;
+    };
 
-      if (newInvoiceId) {
-        toast({
-          title: `Invoice #${newInvoiceId} Saved`,
-          description: `The invoice has been successfully ${activeDraft.originalInvoiceId ? 'updated' : 'saved'}.`,
-        });
-      }
-    } catch (error: any) {
-      console.error("Failed to save invoice after printing:", error);
-      toast({
-        variant: 'destructive',
-        title: 'Error Saving Invoice',
-        description: error.message || 'The invoice was printed, but failed to save.',
-      });
-    } finally {
-      setIsProcessing(false);
-      resetActiveDraft();
-      toast({
-        title: "Memo Ready",
-        description: "A new, empty memo is ready for you.",
-      });
+    let savePromise: Promise<number | null>;
+
+    if (activeDraft.originalInvoiceId) {
+        savePromise = updateInvoice(activeDraft.originalInvoiceId, activeDraft);
+    } else {
+        savePromise = addInvoice(activeDraft);
     }
-  };
+
+    savePromise.then(newInvoiceId => {
+        if (newInvoiceId) {
+            toast({
+                title: `Invoice #${newInvoiceId} Saved`,
+                description: `The invoice has been successfully ${activeDraft.originalInvoiceId ? 'updated' : 'saved'}.`,
+            });
+        }
+        resetActiveDraft();
+        toast({
+            title: "Memo Ready",
+            description: "A new, empty memo is ready for you.",
+        });
+    }).catch(error => {
+        console.error("Failed to save invoice after printing:", error);
+        toast({
+            variant: 'destructive',
+            title: 'Error Saving Invoice',
+            description: error.message || 'The invoice was printed, but failed to save.',
+        });
+    }).finally(() => {
+        setIsProcessing(false);
+    });
+};
+
 
   const handlePrint = useReactToPrint({
       content: () => printComponentRef.current,
       documentTitle: activeDraft ? `invoice-${activeDraft.id}` : 'invoice',
-      onBeforeGetContent: () => setIsProcessing(true),
+      onBeforeGetContent: () => new Promise<void>((resolve) => {
+        setIsProcessing(true);
+        // Timeout to allow state to update and re-render before getting content
+        setTimeout(() => resolve(), 50); 
+      }),
       onAfterPrint: handleAfterPrint,
       removeAfterPrint: true,
   });
