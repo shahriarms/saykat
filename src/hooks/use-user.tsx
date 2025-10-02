@@ -7,6 +7,7 @@ import { getAuth, onAuthStateChanged, User as FirebaseUser } from 'firebase/auth
 import app from '@/lib/firebase/firebase';
 import { useRouter, usePathname } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { useAppData } from './use-app-data';
 
 type Role = 'admin' | 'employee';
 
@@ -32,6 +33,8 @@ const ADMIN_CODE_STORAGE_KEY = 'stockpilot-admin-code';
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+  const { isDbConnected } = useAppData();
+
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [adminCode, setAdminCode] = useState<string | null>(null);
@@ -40,6 +43,21 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const auth = getAuth(app);
 
   useEffect(() => {
+    // If we are not connected to the DB, we are in offline mode.
+    // Let's create a mock user to allow offline access.
+    if (!isDbConnected) {
+        setUser({
+            uid: 'offline-admin-user',
+            email: 'admin@offline.com',
+            role: 'admin',
+        });
+        setIsLoading(false);
+        if (pathname === '/login' || pathname === '/signup' || pathname === '/') {
+            router.replace('/dashboard');
+        }
+        return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
         const isUserAdmin = firebaseUser.email === ADMIN_EMAIL;
@@ -78,13 +96,24 @@ export function UserProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     });
 
-    return () => unsubscribe();
-  }, [auth, router, pathname]);
+    return () => {
+        if (isDbConnected) {
+            unsubscribe();
+        }
+    };
+  }, [auth, router, pathname, isDbConnected]);
 
 
   const logout = useCallback(async () => {
+    if (!isDbConnected) {
+        // In offline mode, "logging out" means we just clear the user state and go to login
+        setUser(null);
+        router.replace('/login');
+        toast({ title: 'Logged Out', description: 'You have been logged out of the offline session.' });
+        return;
+    }
     await auth.signOut();
-  }, [auth]);
+  }, [auth, isDbConnected, router, toast]);
 
   const generateAdminCode = useCallback(() => {
     if (user?.email === ADMIN_EMAIL) {
