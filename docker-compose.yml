@@ -10,7 +10,7 @@ services:
     environment:
       POSTGRES_URL: postgresql://user:password@db:5432/stockpilot_db
       POSTGRES_HOST: db
-    command: npm run dev
+    command: npm run start
     depends_on:
       db:
         condition: service_healthy
