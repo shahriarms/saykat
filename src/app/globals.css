@@ -83,6 +83,24 @@
     print-color-adjust: exact !important;
   }
 
+  body * {
+    visibility: hidden;
+  }
+
+  .printable, .printable * {
+    visibility: visible;
+  }
+
+  .printable {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 0;
+  }
+
   .no-print {
     display: none !important;
   }
