@@ -16,7 +16,8 @@ export const metadata: Metadata = {
   description: 'A modern PWA for inventory management.',
   manifest: '/manifest.webmanifest',
   icons: {
-    icon: '/icon.tsx',
+    icon: '/favicon.ico',
+    apple: '/icon-192.png',
   },
 };
 
