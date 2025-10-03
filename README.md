@@ -1,5 +1,4 @@
 
-
 # StockPilot - Inventory Management System
 
 StockPilot is a modern, responsive inventory management application designed to streamline stock, invoice, and expense tracking for small businesses. Built with Next.js, Firebase, and Tailwind CSS.
@@ -14,7 +13,6 @@ StockPilot is a modern, responsive inventory management application designed to 
 - **UI Components**: [ShadCN UI](https://ui.shadcn.com/)
 - **Authentication**: [Firebase Authentication](https://firebase.google.com/docs/auth)
 - **Database**: PostgreSQL (managed by Docker)
-- **Database GUI**: pgAdmin (managed by Docker)
 - **Containerization**: [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/)
 
 ---
@@ -55,6 +53,68 @@ You can now access your services:
 - **pgAdmin (Optional Database Tool)**: [http://localhost:8080](http://localhost:8080)
   - **Email**: `admin@stockpilot.com`
   - **Password**: `password`
+
+---
+
+## How to Build an Android App for Google Play Store
+
+You can package your web application into a real Android app (`.apk` or `.aab` file) that can be published on the Google Play Store. We will use a Google-created tool called **Bubblewrap**, which uses **Trusted Web Activity (TWA)** technology.
+
+This is the best method because **you don't need to change any of your existing code**.
+
+### Prerequisites for Building the Android App:
+
+1.  **Node.js**: Make sure you have Node.js installed. You can download it from [nodejs.org](https://nodejs.org/).
+2.  **Java Development Kit (JDK)**: You need JDK version 11 or newer.
+    *   **Check if you have it:** Open your terminal and run `java -version`.
+    *   **If you don't have it:** We recommend installing it via a manager like [NVM for Windows](https://github.com/coreybutler/nvm-windows) or using your system's package manager.
+3.  **Android SDK Command Line Tools**:
+    *   Download the "Command line tools only" from the [Android Studio download page](https://developer.android.com/studio#command-tools) (scroll to the bottom).
+    *   Create a folder named `Android` in your main user directory (e.g., `C:\Users\YourUser\Android`).
+    *   Extract the downloaded zip file into the `Android` folder. The path should look like `C:\Users\YourUser\Android\cmdline-tools`.
+
+### Step 1: Install Bubblewrap CLI
+
+Open your terminal and run this single command to install the Bubblewrap tool globally on your computer.
+
+```bash
+npm install -g @bubblewrap/cli
+```
+
+### Step 2: Initialize Your Android App Project
+
+Now, run the following command in your project's root directory. This command will ask you a series of questions to create the Android project files.
+
+```bash
+bubblewrap init --manifest https://your-live-app-url.com/manifest.webmanifest
+```
+
+**IMPORTANT**: Replace `https://your-live-app-url.com` with the actual public URL where your web app will be hosted. For local testing, you can temporarily use a placeholder like `https://example.com`, but you must change it to your live URL before publishing.
+
+The tool will ask you questions. For most of them, you can just press **Enter** to accept the default value. Here are the key ones:
+
+*   **Application ID:** `com.yourcompany.stockpilot` (use your own domain)
+*   **Display name:** `StockPilot`
+*   **Launcher name:** `StockPilot`
+*   **Signing key path:** Accept the default (`./android.keystore`).
+*   **Key password:** **Enter a secure password and remember it!** This is crucial for updating your app later.
+
+This will create a set of files and folders for your Android project in your current directory.
+
+### Step 3: Build the Android App
+
+This final command builds the app and creates the file you'll upload to the Google Play Store.
+
+```bash
+bubblewrap build
+```
+
+The process will take a few minutes. When it's done, you will find your app files inside a new folder. The most important one is:
+
+*   **`app-release-signed.aab`**: This is the Android App Bundle file you will upload to the Google Play Console to publish your app.
+*   **`app-release-signed.apk`**: This is an older format that you can use to directly install the app on an Android device for testing.
+
+**Congratulations!** You have successfully packaged your web application into a native Android app without changing a single line of your original code.
 
 ---
 
@@ -108,20 +168,9 @@ That's it! Now, whenever you log in to your PC, Docker will start automatically,
     -   **/src/app/login**: লগইন পেজের কোড এখানে থাকে।
     -   **/src/app/dashboard**: এটি লগইন করার পর মূল ড্যাশবোর্ড। এর ভেতরের প্রতিটি ফোল্ডার (যেমন `products`, `invoice`, `settings`) একেকটি সাব-পেজ তৈরি করে।
 -   **/src/components**: অ্যাপ্লিকেশনের সমস্ত পুনরায় ব্যবহারযোগ্য UI অংশ (যেমন বাটন, কার্ড, ডায়ালগ) এখানে থাকে।
-    -   **/src/components/ui**: `ShadCN` থেকে আসা বেসিক UI কম্পোনেন্টগুলো (যেমন `Button.tsx`, `Card.tsx`) এখানে থাকে।
-    -   অন্যান্য কম্পোনেন্ট (যেমন `site-header.tsx`, `add-product-dialog.tsx`) নির্দিষ্ট কাজ করার জন্য তৈরি করা হয়েছে।
 -   **/src/hooks**: এগুলো কাস্টম React হুক, যা বিভিন্ন কম্পোনেন্টে ডেটা এবং লজিক শেয়ার করার জন্য ব্যবহৃত হয়।
-    -   `use-app-data.tsx`: এটি অ্যাপ্লিকেশনের সমস্ত ডেটা (পণ্য, চালান, খরচ ইত্যাদি) লোড করে এবং সেগুলোকে পরিবর্তন (যোগ, সম্পাদনা, মোছা) করার ফাংশন সরবরাহ করে। এটি আপনার অ্যাপের ডেটা ম্যানেজমেন্টের মূল কেন্দ্র।
-    -   `use-user.tsx`: এটি ব্যবহারকারীর লগইন অবস্থা, ভূমিকা (অ্যাডমিন/কর্মচারী) এবং প্রোফাইল পরিচালনা করে।
-    -   `use-settings.tsx`: প্রিন্ট এবং ভাষা সংক্রান্ত সেটিংস পরিচালনা করে।
 -   **/src/lib**: এই ফোল্ডারে সহায়ক ফাংশন, ডেটা টাইপ এবং সার্ভার-সাইড লজিক থাকে।
-    -   `actions`: এখানে সার্ভার অ্যাকশন ফাইলগুলো থাকে, যা সরাসরি ক্লায়েন্ট থেকে সার্ভারে (এবং ডাটাবেসে) ডেটা পাঠানোর কাজ করে।
-    -   `firebase`: ফায়ারবেস কনফিগারেশন এবং প্রমাণীকরণ (authentication) পরিচালনা করে।
-    -   `i18n`: এখানে বাংলা এবং ইংরেজি ভাষার ফাইলগুলো (`bn.ts`, `en.ts`) থাকে।
-    -   `types.ts`: পুরো অ্যাপ্লিকেশনের জন্য ডেটা স্ট্রাকচার (যেমন `Product`, `Invoice`) নির্ধারণ করে।
 -   **/src/services**: এই ফোল্ডারে ডাটাবেসের সাথে সরাসরি যোগাযোগের লজিক থাকে।
-    -   `product-service.postgres.ts`: পণ্য সংক্রান্ত ডাটাবেস কোয়েরি (যেমন পণ্য আনা, যোগ করা, আপডেট করা) পরিচালনা করে।
-    -   `data-service.postgres.ts`: অন্যান্য সমস্ত ডেটা (চালান, ক্রেতা, খরচ) সংক্রান্ত ডাটাবেস কোয়েরি পরিচালনা করে।
 -   **/scripts**: `setup-db.ts` ফাইলটি Docker কন্টেইনার চালু হওয়ার পর ডাটাবেসে প্রয়োজনীয় টেবিল তৈরি করার জন্য ব্যবহৃত হয়।
 -   **docker-compose.yml**: এই ফাইলটি আপনার অ্যাপ্লিকেশন, ডাটাবেস (`PostgreSQL`), এবং ডাটাবেস ম্যানেজমেন্ট টুল (`pgAdmin`) একসাথে চালানোর জন্য Docker-কে নির্দেশনা দেয়।
 
@@ -137,30 +186,7 @@ That's it! Now, whenever you log in to your PC, Docker will start automatically,
 
 4.  **Service (`services/product-service.postgres.ts`)**: সার্ভিস ফাইলটি ডাটাবেসের সাথে সরাসরি যোগাযোগের জন্য দায়ী। এটি প্রয়োজনীয় SQL কোয়েরি (যেমন `INSERT`, `UPDATE`, `SELECT`) চালায়।
 
-5.  **ডেটা রিফ্রেশ**: ডাটাবেসে কোনো পরিবর্তন হওয়ার পর, `useAppData` হুক `loadAllData()` ফাংশন কল করে পুরো ডেটা আবার লোড করে এবং UI স্বয়ংক্রিয়ভাবে নতুন ডেটা দিয়ে রিফ্রেশ হয়ে যায়।
-
-এই আর্কিটেকচারের সুবিধা হলো, UI এবং ডাটাবেস লজিক সম্পূর্ণ আলাদা থাকে, যা কোডকে পরিষ্কার এবং সুরক্ষিত রাখে।
-
-### ৩. লগইন এবং ব্যবহারকারী ব্যবস্থাপনা (Login and User Management)
-
-অ্যাপ্লিকেশনটি ব্যবহারকারী সনাক্ত করার জন্য **Firebase Authentication** ব্যবহার করে।
-
-- **লগইন এবং সাইনআপ:** `src/app/login/page.tsx` এবং `src/app/signup/page.tsx` ফাইল দুটি ব্যবহারকারীকে লগইন বা নতুন অ্যাকাউন্ট তৈরি করতে দেয়। যখন একজন ব্যবহারকারী তার ইমেল এবং পাসওয়ার্ড দিয়ে লগইন করার চেষ্টা করে, তখন `signInWithEmailAndPassword` ফাংশনটি (যা Firebase থেকে আসে) কল করা হয়। Firebase তখন ইমেল এবং পাসওয়ার্ডটি যাচাই করে। সফল হলে, ব্যবহারকারীকে ড্যাশবোর্ডে পাঠানো হয়। ব্যর্থ হলে, একটি ত্রুটির বার্তা দেখানো হয়।
-
-- **ব্যবহারকারীর ভূমিকা (Admin/Employee):** `src/hooks/use-user.tsx` ফাইলে, `ADMIN_EMAIL` নামে একটি ভেরিয়েবল আছে। যদি কোনো ব্যবহারকারীর ইমেল এই ভেরিয়েবলের সাথে মিলে যায়, তবে তাকে 'admin' হিসেবে গণ্য করা হয়। অন্য সব ব্যবহারকারীকে 'employee' হিসেবে গণ্য করা হয়।
-
-- **অ্যাডমিন পরিবর্তন:** আপনি যদি অ্যাডমিন পরিবর্তন করতে চান, তবে আপনাকে শুধুমাত্র `src/hooks/use-user.tsx` ফাইলে `ADMIN_EMAIL` ভেরিয়েবলের মান পরিবর্তন করে আপনার নতুন অ্যাডমিনের ইমেল ঠিকানাটি সেখানে লিখতে হবে।
-
-### ৪. ফায়ারবেস কনফিগারেশন পরিবর্তন (Changing Firebase Configuration)
-
-আপনি যদি এই অ্যাপ্লিকেশনটি আপনার নিজের ফায়ারবেস প্রোজেক্টের সাথে সংযোগ করতে চান, তবে আপনাকে `src/lib/firebase/firebase.ts` ফাইলটি পরিবর্তন করতে হবে।
-
-- এই ফাইলে `firebaseConfig` নামে একটি অবজেক্ট রয়েছে।
-- আপনাকে আপনার Firebase প্রোজেক্টের সেটিংস থেকে `apiKey`, `authDomain`, `projectId` ইত্যাদি মানগুলো কপি করে এই `firebaseConfig` অবজেক্টে পেস্ট করতে হবে।
-- এটি করার পর, অ্যাপ্লিকেশনটি আপনার নতুন ফায়ারবেস প্রোজেক্ট ব্যবহার করা শুরু করবে।
-
 ---
-
 
 ## Database Management (ডেটাবেস পরিচালনা)
 
@@ -168,21 +194,11 @@ Your data is valuable. Here’s how to interact with, back up, and restore your 
 
 ### Accessing the Database via CLI (psql)
 
-For developers who prefer the command line, `psql` is a powerful tool for interacting with your PostgreSQL database. It is already included in your database container.
-
 To open an interactive `psql` session, run the following command in your terminal:
 
 ```bash
 docker exec -it stockpilot_db psql -U user -d stockpilot_db
 ```
-
-This command does the following:
-- `docker exec`: Executes a command inside a running container.
-- `-it`: Runs the command in interactive mode, connecting your terminal to the container's terminal.
-- `stockpilot_db`: The name of your database container.
-- `psql -U user -d stockpilot_db`: The command to run inside the container, which starts `psql` with username `user` connected to the `stockpilot_db` database.
-
-You will now have a `psql` prompt (e.g., `stockpilot_db=>`) where you can run SQL queries directly (e.g., `SELECT * FROM products;`). Type `\q` to exit.
 
 ### Backup and Restore
 
@@ -202,62 +218,36 @@ This is the easiest method for most users.
     - **Password**: `password`
 5.  Click **Save**. You should now see your `stockpilot_db` database in the sidebar.
 
-**Note:** You only need to do this once. Because we use a Docker volume (`pgadmin_data`) in `docker-compose.yml`, pgAdmin remembers this server connection even after you stop and restart the containers.
-
 **Backing Up with pgAdmin:**
 1.  In the pgAdmin browser, expand **Servers** -> **StockPilot Docker DB** -> **Databases**.
-2.  Right-click on the `stockpilot_db` database.
-3.  Select **Backup...**.
-4.  **Filename**: Choose a location on your computer and name the file (e.g., `stockpilot_backup_YYYY-MM-DD.sql`).
-5.  **Format**: Select **Plain**.
-6.  Click the **Backup** button. A `.sql` file will be saved to your specified location.
+2.  Right-click on the `stockpilot_db` database and select **Backup...**.
+3.  **Filename**: Choose a location and name the file.
+4.  **Format**: Select **Plain**.
+5.  Click **Backup**.
 
 **Restoring with pgAdmin:**
-**Important:** Restoring will overwrite the current database.
-1.  First, it's safest to drop and re-create the database. Right-click `stockpilot_db` and select **Delete/Drop**.
-2.  Then, right-click **Databases** -> **Create** -> **Database...** and create a new database named `stockpilot_db` (owner should be `user`).
-3.  Right-click on the newly created, empty `stockpilot_db`.
-4.  Select **Query Tool**.
-5.  Click the "Open File" icon in the Query Tool toolbar.
-6.  Find and select your `.sql` backup file. The SQL content will load into the editor.
-7.  Click the "Execute/Run" icon (the lightning bolt). The commands will run and restore your data.
+1.  First, drop and re-create the database to ensure it's clean.
+2.  Right-click on the new, empty `stockpilot_db` and select **Query Tool**.
+3.  Click the "Open File" icon, select your `.sql` backup file.
+4.  Click the "Execute/Run" icon.
 
 ---
 
 #### Option 2: Using Command Line (`pg_dump` & `psql`)
 
-This method is faster and great for automation. These commands should be run from your host machine's terminal.
-
 **Backing Up with CLI:**
-This single command connects to the running Docker container and executes `pg_dump` to create a backup file on your desktop.
-
 ```bash
-# Command structure:
-# docker exec -t <container_name> pg_dump -U <username> -d <database_name> > path/on/your/computer/backup.sql
-
 docker exec -t stockpilot_db pg_dump -U user -d stockpilot_db > backup.sql
 ```
-This will create a `backup.sql` file in your current directory.
+This creates a `backup.sql` file in your current directory.
 
 **Restoring with CLI:**
-This command pushes the `backup.sql` file into the `psql` command inside the Docker container, restoring the database.
-
-**First, drop the public schema to start fresh:**
+First, drop the public schema to start fresh:
 ```bash
 docker exec -t stockpilot_db psql -U user -d stockpilot_db -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
 ```
-
-**Then, run the restore command:**
+Then, run the restore command:
 ```bash
-# Command structure:
-# cat path/on/your/computer/backup.sql | docker exec -i <container_name> psql -U <username> -d <database_name>
-
 cat backup.sql | docker exec -i stockpilot_db psql -U user -d stockpilot_db
 ```
-Your database is now restored from the `backup.sql` file.
-
----
-*This README provides a comprehensive guide for the recommended Docker ecosystem, ensuring simplicity and reliability.*
-
-
-    
+Your database is now restored.
