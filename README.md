@@ -60,7 +60,13 @@ You can now access your services:
 
 You can package your web application into a real Android app (`.apk` or `.aab` file) that can be published on the Google Play Store. We will use a Google-created tool called **Bubblewrap**, which uses **Trusted Web Activity (TWA)** technology.
 
-This is the best method because **you don't need to change any of your existing code**.
+This is the best method because **you don't need to change any of your existing code**. The TWA acts as a secure, full-screen browser window for your web app, giving users a complete native app experience.
+
+### Why It Feels Like a Native App:
+- **No Browser UI**: The user will not see any address bar or browser menus. It runs full-screen, just like a native app.
+- **App Drawer Icon**: It appears in the phone's app drawer and home screen with its own icon.
+- **Play Store Distribution**: Users can find and install it directly from the Google Play Store.
+- **System Integration**: The app integrates with the Android system for notifications and appears in the task switcher.
 
 ### Prerequisites for Building the Android App:
 
@@ -251,3 +257,5 @@ Then, run the restore command:
 cat backup.sql | docker exec -i stockpilot_db psql -U user -d stockpilot_db
 ```
 Your database is now restored.
+
+  
