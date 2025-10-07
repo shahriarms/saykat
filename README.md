@@ -5,9 +5,9 @@
 StockPilot is a modern, responsive inventory management application designed to streamline stock, invoice, and expense tracking for small businesses. Built with Next.js, Firebase, and Tailwind CSS.
 
 ---
-## Project Summary for CV/Résumé
+## Project Summary 
 
-Here is a professional summary of the StockPilot project, suitable for inclusion in a CV or résumé to showcase your experience.
+Here is a professional summary of the StockPilot project, suitable for showcase your experience.
 
 **Project Title: StockPilot - Full-Stack Inventory Management System**
 
