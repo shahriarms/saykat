@@ -5,17 +5,32 @@
 StockPilot is a modern, responsive inventory management application designed to streamline stock, invoice, and expense tracking for small businesses. Built with Next.js, Firebase, and Tailwind CSS.
 
 ---
+## Project Summary for CV/Résumé
 
-## Technology Stack
+Here is a professional summary of the StockPilot project, suitable for inclusion in a CV or résumé to showcase your experience.
 
-- **Framework**: [Next.js](https://nextjs.org/) (with App Router)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **UI Components**: [ShadCN UI](https://ui.shadcn.com/)
-- **Authentication**: [Firebase Authentication](https://firebase.google.com/docs/auth)
-- **Database**: PostgreSQL (managed by Docker)
-- **Database GUI**: pgAdmin (managed by Docker)
-- **Containerization**: [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/)
+**Project Title: StockPilot - Full-Stack Inventory Management System**
+
+A comprehensive, containerized web application designed to provide small businesses with a robust platform for managing inventory, sales, expenses, and employee data. The system features a role-based authentication system, detailed analytics dashboards, and a multi-format printing engine, all running in an isolated and persistent Docker environment.
+
+**Key Responsibilities & Achievements:**
+
+*   **Architected and developed a full-stack application** using Next.js (App Router) and TypeScript, establishing a clean, scalable, and maintainable codebase.
+*   **Implemented a secure, role-based authentication system (Admin/Employee)** using Firebase Authentication, controlling access to critical features like editing, deleting, and generating administrative codes.
+*   **Designed and built a containerized ecosystem** with Docker and Docker Compose, orchestrating the Next.js application, a PostgreSQL database, and a pgAdmin GUI. This ensures seamless setup, portability, and data persistence using Docker Volumes.
+*   **Developed a comprehensive data management layer** with custom React hooks (`useAppData`) and Next.js Server Actions, providing a centralized and efficient way to handle all CRUD (Create, Read, Update, Delete) operations for products, invoices, buyers, and expenses.
+*   **Created a dynamic and interactive data visualization dashboard** featuring charts (via Recharts) and summary cards that provide real-time insights into sales, expenses, profit, and stock levels over custom date ranges.
+*   **Engineered a multi-format printing system** capable of generating both standard A4 invoices and 80mm thermal POS receipts, complete with a settings interface to configure printer type (TCP, USB) and connection details.
+*   **Implemented a multi-language interface** supporting both English and Bengali, using a custom translation hook (`useTranslation`) to manage internationalization (i18n).
+*   **Ensured a robust and error-free user experience** by implementing detailed validation, toast notifications for user feedback, and graceful handling of database connection states (online vs. local fallback).
+
+**Technologies Used:**
+
+*   **Frontend:** Next.js 15 (App Router), React, TypeScript, Tailwind CSS, ShadCN UI, Recharts
+*   **Backend:** Next.js (Server Actions), PostgreSQL
+*   **Authentication:** Firebase Authentication
+*   **Containerization:** Docker, Docker Compose
+*   **DevOps & Tooling:** Node.js, `tsx`, `pg` (node-postgres), `Zod` (validation)
 
 ---
 
@@ -258,6 +273,3 @@ Your database is now restored from the `backup.sql` file.
 
 ---
 *This README provides a comprehensive guide for the recommended Docker ecosystem, ensuring simplicity and reliability.*
-
-
-    
