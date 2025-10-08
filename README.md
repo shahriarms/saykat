@@ -148,23 +148,19 @@ Run the following command in your project's root directory:
 bubblewrap init --manifest https://your-live-app-url.com/manifest.webmanifest
 ```
 
-#### Important Note on the URL
+#### Important Note on the URL: Local Testing vs. Final App
 
-*   **For the Final App (Play Store):** You **must** use your public, live domain URL. The Trusted Web Activity (TWA) system works by verifying that you own the website domain via a file called `assetlinks.json`. This verification is only possible with a live URL, and it is required for your app to run in full-screen mode without a browser address bar.
+You can test the entire build process **without owning a domain**. Here’s how to handle the URL and other prompts for both scenarios:
 
-*   **For Local Testing (ডোমেইন ছাড়া পরীক্ষা):** If you don't have a domain yet and just want to test the build process, you can use a placeholder URL. **You can even use `http://localhost:3000` for testing on an Android emulator or a connected device if your development server is running.**
-    *   **Limitation:** When using `localhost` or a placeholder, the `assetlinks.json` verification will fail. As a result, the app will run with a browser address bar at the top and will not provide a true full-screen "native" experience. This is normal for testing.
-    *   **Before you build the final app for publishing**, you must update the `twa-manifest.json` file in your project with your real, live URL.
+| Prompt               | For Local Testing (ডোমেইন ছাড়া পরীক্ষা)                                                                    | For Final App (Play Store)                                                                                 |
+| -------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| **Manifest URL**     | Use your local server URL: `http://localhost:3000/manifest.webmanifest`                                   | **Must be your live, public domain:** `https://your-app.com/manifest.webmanifest`                          |
+| **Application ID**   | Use a placeholder ID: `com.example.stockpilot`                                                            | Use your domain in reverse: `com.yourdomain.stockpilot`                                                    |
+| **Display Name**     | `StockPilot` (or your desired name)                                                                       | `StockPilot` (or your final app name)                                                                      |
+| **Signing Key Path** | Accept the default (`./android.keystore`)                                                                 | Accept the default (`./android.keystore`)                                                                 |
+| **Key Password**     | **Enter a secure password and remember it!** This is still crucial for updating your test app.              | **Enter a secure password and remember it!** Losing this password means you can never update your app. |
 
-The `init` command will ask you a series of questions. For most of them, you can just press **Enter** to accept the default value. Here are the key ones:
-
-*   **Application ID:** Your app's unique identifier on the Play Store (e.g., `com.yourcompany.stockpilot`). Use your own domain in reverse.
-*   **Display name:** The name that appears on the phone (e.g., `StockPilot`).
-*   **Launcher name:** The short name under the app icon (e.g., `StockPilot`).
-*   **Signing key path:** Accept the default (`./android.keystore`).
-*   **Key password:** **Enter a secure password and remember it!** This is crucial for signing your app and updating it on the Play Store later. You will lose the ability to update your app if you lose this password.
-
-This process creates a set of files and folders for your Android project in your current directory.
+**Local Testing Limitation:** When you use `localhost`, the `assetlinks.json` verification will fail. As a result, the app will run with a browser address bar at the top and will not provide a true full-screen "native" experience. This is normal for testing purposes.
 
 ### Step 3: Build the Android App
 
