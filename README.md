@@ -325,5 +325,3 @@ Then, run the restore command:
 cat backup.sql | docker exec -i stockpilot_db psql -U user -d stockpilot_db
 ```
 Your database is now restored.
-
-    
