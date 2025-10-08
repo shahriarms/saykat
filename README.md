@@ -141,7 +141,7 @@ npm install -g @bubblewrap/cli
 
 ### Step 2: Initialize Your Android App Project
 
-This step creates the necessary files for your Android project based on your web app's manifest. Run the following command in your project's root directory:
+This step creates the necessary files for your Android project based on your web app's manifest. **First, ensure your web application is running via Docker.** Then, run the following command in your project's root directory:
 ```bash
 bubblewrap init --manifest http://localhost:3000/manifest.webmanifest
 ```
@@ -326,5 +326,3 @@ Then, run the restore command:
 cat backup.sql | docker exec -i stockpilot_db psql -U user -d stockpilot_db
 ```
 Your database is now restored.
-
-    
