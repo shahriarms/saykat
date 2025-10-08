@@ -17,7 +17,7 @@
   "monochromeIconUrl": null,
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
-    "path": "G:\\Mahmud Engineering Shop\\android.keystore",
+    "path": "./android.keystore",
     "alias": "android"
   },
   "appVersionCode": 1,
