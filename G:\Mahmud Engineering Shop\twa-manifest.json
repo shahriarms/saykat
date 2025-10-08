@@ -1,3 +1,4 @@
+
 {
   "packageId": "com.example.stockpilot",
   "host": "10.0.2.2:3000",
@@ -9,13 +10,12 @@
   "navigationColorDark": "#000000",
   "navigationDividerColor": "#000000",
   "navigationDividerColorDark": "#000000",
-
   "backgroundColor": "#F0F4F5",
   "enableNotifications": true,
   "startUrl": "/?standalone=true",
-  "iconUrl": "https://www.gstatic.com/images/branding/product/1x/google_cloud_48dp.png",
-  "maskableIconUrl": "G:\\Mahmud Engineering Shop\\public\\icon-512.png",
-  "monochromeIconUrl": "G:\\Mahmud Engineering Shop\\public\\icon-512.png",
+  "iconUrl": "http://localhost:3000/icon-512.png",
+  "maskableIconUrl": "http://localhost:3000/icon-512.png",
+  "monochromeIconUrl": "http://localhost:3000/icon-512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "./android.keystore",
