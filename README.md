@@ -141,26 +141,38 @@ npm install -g @bubblewrap/cli
 
 ### Step 2: Initialize Your Android App Project
 
-This step creates the necessary files for your Android project based on your web app's manifest.
-
-Run the following command in your project's root directory:
+This step creates the necessary files for your Android project based on your web app's manifest. Run the following command in your project's root directory:
 ```bash
-bubblewrap init --manifest https://your-live-app-url.com/manifest.webmanifest
+bubblewrap init --manifest http://localhost:3000/manifest.webmanifest
 ```
 
-#### Important Note on the URL: Local Testing vs. Final App
-
-You can test the entire build process **without owning a domain**. Here’s how to handle the URL and other prompts for both scenarios:
+**IMPORTANT**: The `init` command will ask you a series of questions. Use the values from the **"For Local Testing"** column below.
 
 | Prompt               | For Local Testing (ডোমেইন ছাড়া পরীক্ষা)                                                                    | For Final App (Play Store)                                                                                 |
 | -------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| **Manifest URL**     | Use your local server URL: `http://localhost:3000/manifest.webmanifest`                                   | **Must be your live, public domain:** `https://your-app.com/manifest.webmanifest`                          |
-| **Application ID**   | Use a placeholder ID: `com.example.stockpilot`                                                            | Use your domain in reverse: `com.yourdomain.stockpilot`                                                    |
+| **Domain**           | **`app.example.com`** (Use this exact placeholder)                                                            | **`your-app.com`** (Your real domain)                                                                    |
+| **Application ID**   | `com.example.stockpilot` (An ID for testing)                                                              | `com.yourdomain.stockpilot` (Your domain in reverse)                                                       |
 | **Display Name**     | `StockPilot` (or your desired name)                                                                       | `StockPilot` (or your final app name)                                                                      |
-| **Signing Key Path** | Accept the default (`./android.keystore`)                                                                 | Accept the default (`./android.keystore`)                                                                 |
+| **Signing Key Path** | Accept the default (`./android.keystore`)                                                                 | Accept the default (`./android.keystore`)                                                                  |
 | **Key Password**     | **Enter a secure password and remember it!** This is still crucial for updating your test app.              | **Enter a secure password and remember it!** Losing this password means you can never update your app. |
 
-**Local Testing Limitation:** When you use `localhost`, the `assetlinks.json` verification will fail. As a result, the app will run with a browser address bar at the top and will not provide a true full-screen "native" experience. This is normal for testing purposes.
+### Step 2.5: Point the App to Your Local Server (Important for Testing!)
+After the `init` command is done, it will create a file named `twa-manifest.json`. You must edit this file to make the app work with your local server.
+
+1. Open the `twa-manifest.json` file in your code editor.
+2. Find the line `"host": "app.example.com",` and change it to **`"host": "10.0.2.2:3000",`**.
+   - `10.0.2.2` is a special IP address that the Android Emulator uses to connect to your computer's `localhost`.
+3. Find the line `"startUrl": "/",` and change it to **`"startUrl": "/?standalone=true",`**.
+4. Find the `"assetStatements"` section and change the `site` to match the new host:
+   ```json
+    "relation": "delegate_permission/common.handle_all_urls",
+    "target": {
+      "namespace": "web",
+      "site": "http://10.0.2.2:3000"
+    }
+   ```
+5. Save the `twa-manifest.json` file.
+
 
 ### Step 3: Build the Android App
 
@@ -175,7 +187,8 @@ The process will take a few minutes. When it's done, you will find your app file
 *   **`app-release-signed.aab`**: This is the Android App Bundle file you will upload to the Google Play Console to publish your app.
 *   **`app-release-signed.apk`**: This is an older format that you can use to directly install the app on an Android device for testing.
 
-**Congratulations!** You have successfully packaged your web application into a native Android app without changing a single line of your original code.
+**Local Testing Limitation:** When you use `localhost` (via `10.0.2.2`), the `assetlinks.json` verification will fail. As a result, the app will run with a browser address bar at the top and will not provide a true full-screen "native" experience. This is normal for testing purposes.
+
 
 ---
 
