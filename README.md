@@ -107,8 +107,8 @@ Your computer needs to know where to find these tools. This is a critical step. 
     4.  For "Variable name", enter `ANDROID_HOME`.
     5.  For "Variable value", enter the path to your SDK folder: `C:\Users\YourUsername\Android\sdk`. (Replace `YourUsername` with your actual username).
     6.  Find the `Path` variable in the "System variables" list, select it, and click "Edit...".
-    7.  Click "New" and add the first new entry: `%ANDROID_HOME%\latest\bin`.
-    8.  Click "New" again and add the second new entry: `%ANDROID_HOME%\platform-tools`. You must add both.
+    7.  Click "New" and add the first new entry: `%ANDROID_HOME%\latest\bin`. This tells the system where to find the `sdkmanager` tool.
+    8.  Click "New" again and add the second new entry: `%ANDROID_HOME%\platform-tools`. You must add both. This is needed for other tools like `adb`.
     9.  Click "OK" on all windows to save.
     10. **Restart your terminal/PowerShell** for the changes to take effect. This is very important.
 
@@ -148,10 +148,13 @@ Run the following command in your project's root directory:
 bubblewrap init --manifest https://your-live-app-url.com/manifest.webmanifest
 ```
 
-**IMPORTANT: The URL must be your live, public domain.**
-You cannot use `localhost:3000` for the final version. The Trusted Web Activity (TWA) system works by verifying that you own the website domain. It does this by checking for a special file (`assetlinks.json`) that Bubblewrap helps you generate, which must be hosted on your live server. Since `localhost` is not a public address, Google cannot verify it, and the app will not run in full-screen mode.
+#### Important Note on the URL
 
-**For local testing only**, you can temporarily use a placeholder like `https://example.com`. However, **before you build the final app for publishing**, you must update the `twa-manifest.json` file in your project with your real, live URL.
+*   **For the Final App (Play Store):** You **must** use your public, live domain URL. The Trusted Web Activity (TWA) system works by verifying that you own the website domain via a file called `assetlinks.json`. This verification is only possible with a live URL, and it is required for your app to run in full-screen mode without a browser address bar.
+
+*   **For Local Testing (ডোমেইন ছাড়া পরীক্ষা):** If you don't have a domain yet and just want to test the build process, you can use a placeholder URL. **You can even use `http://localhost:3000` for testing on an Android emulator or a connected device if your development server is running.**
+    *   **Limitation:** When using `localhost` or a placeholder, the `assetlinks.json` verification will fail. As a result, the app will run with a browser address bar at the top and will not provide a true full-screen "native" experience. This is normal for testing.
+    *   **Before you build the final app for publishing**, you must update the `twa-manifest.json` file in your project with your real, live URL.
 
 The `init` command will ask you a series of questions. For most of them, you can just press **Enter** to accept the default value. Here are the key ones:
 
