@@ -9,6 +9,7 @@
   "navigationColorDark": "#000000",
   "navigationDividerColor": "#000000",
   "navigationDividerColorDark": "#000000",
+
   "backgroundColor": "#F0F4F5",
   "enableNotifications": true,
   "startUrl": "/?standalone=true",
