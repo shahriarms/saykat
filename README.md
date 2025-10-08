@@ -107,7 +107,7 @@ Your computer needs to know where to find these tools.
     4.  For "Variable name", enter `ANDROID_HOME`.
     5.  For "Variable value", enter the path to your SDK folder: `C:\Users\YourUsername\Android\sdk`. (Replace `YourUsername` with your actual username).
     6.  Find the `Path` variable in the "System variables" list, select it, and click "Edit...".
-    7.  Click "New" and add two new entries:
+    7.  Click "New" and add two new entries. You need to click "New" for each entry.
         *   `%ANDROID_HOME%\latest\bin`
         *   `%ANDROID_HOME%\platform-tools`
     8.  Click "OK" on all windows to save.
@@ -148,17 +148,17 @@ Now, run the following command in your project's root directory. This command wi
 bubblewrap init --manifest https://your-live-app-url.com/manifest.webmanifest
 ```
 
-**IMPORTANT**: Replace `https://your-live-app-url.com` with the actual public URL where your web app will be hosted. For local testing, you can temporarily use a placeholder like `https://example.com`, but you must change it to your live URL before publishing.
+**IMPORTANT**: Replace `https://your-live-app-url.com` with the actual public URL where your web app will be hosted. This is crucial because Google uses this URL to verify that you own the website, which allows the app to run in full-screen mode without the browser address bar. For local testing, you can temporarily use a placeholder like `https://example.com`, but you must change it to your live URL before building the final app for publishing.
 
 The tool will ask you questions. For most of them, you can just press **Enter** to accept the default value. Here are the key ones:
 
-*   **Application ID:** `com.yourcompany.stockpilot` (use your own domain)
-*   **Display name:** `StockPilot`
-*   **Launcher name:** `StockPilot`
+*   **Application ID:** This is your app's unique identifier on the Play Store (e.g., `com.yourcompany.stockpilot`). Use your own domain in reverse.
+*   **Display name:** The name that appears on the phone (e.g., `StockPilot`).
+*   **Launcher name:** The short name under the app icon (e.g., `StockPilot`).
 *   **Signing key path:** Accept the default (`./android.keystore`).
-*   **Key password:** **Enter a secure password and remember it!** This is crucial for updating your app later.
+*   **Key password:** **Enter a secure password and remember it!** This is crucial for signing your app and updating it on the Play Store later. You will lose the ability to update your app if you lose this password.
 
-This will create a set of files and folders for your Android project in your current directory.
+This process creates a set of files and folders for your Android project in your current directory.
 
 ### Step 3: Build the Android App
 
