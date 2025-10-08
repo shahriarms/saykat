@@ -97,8 +97,8 @@ This is the most crucial part of the setup. The `bubblewrap` tool needs these co
 
 Your final folder structure must be: `C:\Users\YourUsername\Android\sdk\latest`. Inside the `latest` folder, you should see files and folders like `bin`, `lib`, `NOTICE.txt`, etc.
 
-**Step 3.3: Set Environment Variables**
-Your computer needs to know where to find these tools.
+**Step 3.3: Set Environment Variables (পরিবেশ ভেরিয়েবল সেটআপ)**
+Your computer needs to know where to find these tools. This is a critical step. The `Path` variable tells your terminal where to look for command-line programs like `sdkmanager`.
 
 *   **For Windows:**
     1.  Search for "Edit the system environment variables" in the Start Menu and open it.
@@ -107,11 +107,10 @@ Your computer needs to know where to find these tools.
     4.  For "Variable name", enter `ANDROID_HOME`.
     5.  For "Variable value", enter the path to your SDK folder: `C:\Users\YourUsername\Android\sdk`. (Replace `YourUsername` with your actual username).
     6.  Find the `Path` variable in the "System variables" list, select it, and click "Edit...".
-    7.  Click "New" and add two new entries. You need to click "New" for each entry.
-        *   `%ANDROID_HOME%\latest\bin`
-        *   `%ANDROID_HOME%\platform-tools`
-    8.  Click "OK" on all windows to save.
-    9.  **Restart your terminal/PowerShell** for the changes to take effect.
+    7.  Click "New" and add the first new entry: `%ANDROID_HOME%\latest\bin`.
+    8.  Click "New" again and add the second new entry: `%ANDROID_HOME%\platform-tools`. You must add both.
+    9.  Click "OK" on all windows to save.
+    10. **Restart your terminal/PowerShell** for the changes to take effect. This is very important.
 
 *   **For macOS/Linux:**
     1.  Open your terminal.
@@ -142,17 +141,21 @@ npm install -g @bubblewrap/cli
 
 ### Step 2: Initialize Your Android App Project
 
-Now, run the following command in your project's root directory. This command will ask you a series of questions to create the Android project files.
+This step creates the necessary files for your Android project based on your web app's manifest.
 
+Run the following command in your project's root directory:
 ```bash
 bubblewrap init --manifest https://your-live-app-url.com/manifest.webmanifest
 ```
 
-**IMPORTANT**: Replace `https://your-live-app-url.com` with the actual public URL where your web app will be hosted. This is crucial because Google uses this URL to verify that you own the website, which allows the app to run in full-screen mode without the browser address bar. For local testing, you can temporarily use a placeholder like `https://example.com`, but you must change it to your live URL before building the final app for publishing.
+**IMPORTANT: The URL must be your live, public domain.**
+You cannot use `localhost:3000` for the final version. The Trusted Web Activity (TWA) system works by verifying that you own the website domain. It does this by checking for a special file (`assetlinks.json`) that Bubblewrap helps you generate, which must be hosted on your live server. Since `localhost` is not a public address, Google cannot verify it, and the app will not run in full-screen mode.
 
-The tool will ask you questions. For most of them, you can just press **Enter** to accept the default value. Here are the key ones:
+**For local testing only**, you can temporarily use a placeholder like `https://example.com`. However, **before you build the final app for publishing**, you must update the `twa-manifest.json` file in your project with your real, live URL.
 
-*   **Application ID:** This is your app's unique identifier on the Play Store (e.g., `com.yourcompany.stockpilot`). Use your own domain in reverse.
+The `init` command will ask you a series of questions. For most of them, you can just press **Enter** to accept the default value. Here are the key ones:
+
+*   **Application ID:** Your app's unique identifier on the Play Store (e.g., `com.yourcompany.stockpilot`). Use your own domain in reverse.
 *   **Display name:** The name that appears on the phone (e.g., `StockPilot`).
 *   **Launcher name:** The short name under the app icon (e.g., `StockPilot`).
 *   **Signing key path:** Accept the default (`./android.keystore`).
