@@ -83,9 +83,8 @@ You need JDK version 11 or newer.
 This is the most crucial part of the setup. The `bubblewrap` tool needs these command-line tools to build the Android app. Follow these steps carefully.
 
 **Step 3.1: Download the Tools**
-1.  Go to the [Android Studio download page](https://developer.android.com/studio#command-line-tools-only).
-2.  Scroll down to the section named **"Command line tools only"**.
-3.  Download the correct zip file for your operating system (Windows, Mac, or Linux).
+1.  Go to the [Android Studio download page](https://developer.android.com/studio#command-line-tools-only). This link will take you directly to the correct section.
+2.  Download the correct zip file for your operating system (Windows, Mac, or Linux).
 
 **Step 3.2: Create Folders and Extract**
 1.  Open your **User** folder. On Windows, this is typically `C:\Users\YourUsername`. On Mac/Linux, it's `/Users/YourUsername`.
