@@ -153,7 +153,7 @@ bubblewrap init --manifest http://localhost:3000/manifest.webmanifest
 | **Domain**           | **`app.example.com`** (Use this exact placeholder)                                                            | **`your-app.com`** (Your real domain)                                                                    |
 | **Application ID**   | `com.example.stockpilot` (An ID for testing)                                                              | `com.yourdomain.stockpilot` (Your domain in reverse)                                                       |
 | **Display Name**     | `StockPilot` (or your desired name)                                                                       | `StockPilot` (or your final app name)                                                                      |
-| **Icon URL**         | **`G:\Mahmud Engineering Shop\public\icon-512.png`** (Give the **local file path**, not a URL. Update the path to match your project location.) | Your live icon URL.                                                                                        |
+| **Icon URL**         | **`https://www.gstatic.com/images/branding/product/1x/google_cloud_48dp.png`** (Use this public URL to pass validation) | Your live icon URL.                                                                                        |
 | **Signing Key Path** | Accept the default (`./android.keystore`)                                                                 | Accept the default (`./android.keystore`)                                                                  |
 | **Key Password**     | **Enter a secure password and remember it!** This is still crucial for updating your test app.              | **Enter a secure password and remember it!** Losing this password means you can never update your app. |
 
@@ -172,7 +172,11 @@ After the `init` command is done, it will create a file named `twa-manifest.json
       "site": "http://10.0.2.2:3000"
     }
    ```
-5. Save the `twa-manifest.json` file.
+5. **Crucially**, find the `iconUrl` line and replace the public Google URL with the **local path** to your icon.
+   - Change `"iconUrl": "https://www.gstatic.com/...",` to **`"iconUrl": "G:\\Mahmud Engineering Shop\\public\\icon-512.png",`** (Update the path to match your exact project location).
+   - Also update `maskableIconUrl` and `monochromeIconUrl` with the same local path.
+
+6. Save the `twa-manifest.json` file.
 
 
 ### Step 3: Build the Android App
