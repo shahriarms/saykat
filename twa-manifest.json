@@ -1,0 +1,52 @@
+{
+  "packageId": "localhost_3000.twa",
+  "host": "10.0.2.2:3000",
+  "name": "StockPilot",
+  "launcherName": "StockPilot",
+  "display": "standalone",
+  "themeColor": "#79A3B1",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#F0F4F5",
+  "enableNotifications": true,
+  "startUrl": "/?standalone=true",
+  "iconUrl": "http://localhost:3000/icon-512.png",
+  "maskableIconUrl": "http://localhost:3000/icon-512.png",
+  "monochromeIconUrl": "http://localhost:3000/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "C:\\Users\\USER\\android.keystore",
+    "alias": "android"
+  },
+  "appVersionCode": 1,
+  "appVersionName": "1",
+  "fallbackType": "customtabs",
+  "features": {
+    "locationDelegation": {
+      "enabled": true
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "http://10.0.2.2:3000/",
+  "minSdkVersion": 19,
+  "orientation": "default",
+  "fingerprints": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "http://localhost:3000/manifest.webmanifest",
+  "assetStatements": [
+    {
+      "relation": "delegate_permission/common.handle_all_urls",
+      "target": {
+        "namespace": "web",
+        "site": "http://10.0.2.2:3000"
+      }
+    }
+  ]
+}
