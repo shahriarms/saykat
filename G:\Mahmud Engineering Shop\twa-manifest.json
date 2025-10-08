@@ -12,7 +12,7 @@
   "backgroundColor": "#F0F4F5",
   "enableNotifications": true,
   "startUrl": "/?standalone=true",
-  "iconUrl": "G:\\Mahmud Engineering Shop\\public\\icon-512.png",
+  "iconUrl": "https://www.gstatic.com/images/branding/product/1x/google_cloud_48dp.png",
   "maskableIconUrl": "G:\\Mahmud Engineering Shop\\public\\icon-512.png",
   "monochromeIconUrl": "G:\\Mahmud Engineering Shop\\public\\icon-512.png",
   "splashScreenFadeOutDuration": 300,
@@ -48,5 +48,10 @@
         "site": "http://10.0.2.2:3000"
       }
     }
-  ]
+  ],
+  "build": {
+    "gradleArgs": [
+      "-Pandroid.heapSize=1024m"
+    ]
+  }
 }

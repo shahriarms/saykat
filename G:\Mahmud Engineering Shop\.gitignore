@@ -1,53 +1,48 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Dependencies
+# dependencies
 /node_modules
 /.pnp
 .pnp.js
-.yarn/install-state.gz
 
-# Testing
+# testing
 /coverage
 
-# Next.js
+# next.js
 /.next/
 /out/
 
-# Production
+# production
 /build
 
-# Misc
+# misc
 .DS_Store
 *.pem
 
-# Local Env Files
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# Log files
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# vercel
+.vercel
 
-# Editor directories and files
-.idea
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+# typescript
+*.tsbuildinfo
+next-env.d.ts
 
-# Bubblewrap / Android build files (to be ignored)
+# Android signing key
+*.keystore
+
+# Bubblewrap temporary files
+/.bubblewrap/
 /app-release-signed.apk
 /app-release-signed.aab
-/app-release-unsigned.apk
-/app-release-unsigned.aab
-/assetlinks.json
-/.bubblewrap/
-android.keystore
-
-# Database and pgAdmin data volumes - these are managed by Docker
-postgres_data/
-pgadmin_data/
+/app-release-bundle.zip
+assetlinks.json
