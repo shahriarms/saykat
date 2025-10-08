@@ -153,6 +153,7 @@ bubblewrap init --manifest http://localhost:3000/manifest.webmanifest
 | **Domain**           | **`app.example.com`** (Use this exact placeholder)                                                            | **`your-app.com`** (Your real domain)                                                                    |
 | **Application ID**   | `com.example.stockpilot` (An ID for testing)                                                              | `com.yourdomain.stockpilot` (Your domain in reverse)                                                       |
 | **Display Name**     | `StockPilot` (or your desired name)                                                                       | `StockPilot` (or your final app name)                                                                      |
+| **Icon URL**         | **`http://localhost:3000/icon.ico`** (The dev server must be running!)                                       | Your live icon URL.                                                                                        |
 | **Signing Key Path** | Accept the default (`./android.keystore`)                                                                 | Accept the default (`./android.keystore`)                                                                  |
 | **Key Password**     | **Enter a secure password and remember it!** This is still crucial for updating your test app.              | **Enter a secure password and remember it!** Losing this password means you can never update your app. |
 
@@ -325,3 +326,5 @@ Then, run the restore command:
 cat backup.sql | docker exec -i stockpilot_db psql -U user -d stockpilot_db
 ```
 Your database is now restored.
+
+    

@@ -1,5 +1,5 @@
 {
-  "packageId": "localhost_3000.twa",
+  "packageId": "com.example.stockpilot",
   "host": "10.0.2.2:3000",
   "name": "StockPilot",
   "launcherName": "StockPilot",
@@ -12,12 +12,12 @@
   "backgroundColor": "#F0F4F5",
   "enableNotifications": true,
   "startUrl": "/?standalone=true",
-  "iconUrl": "http://localhost:3000/icon-512.png",
-  "maskableIconUrl": "http://localhost:3000/icon-512.png",
-  "monochromeIconUrl": "http://localhost:3000/icon-512.png",
+  "iconUrl": "http://localhost:3000/icon.ico",
+  "maskableIconUrl": "http://localhost:3000/icon.ico",
+  "monochromeIconUrl": "http://localhost:3000/icon.ico",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
-    "path": "C:\\Users\\USER\\android.keystore",
+    "path": "./android.keystore",
     "alias": "android"
   },
   "appVersionCode": 1,
@@ -50,3 +50,4 @@
     }
   ]
 }
+    
