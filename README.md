@@ -236,7 +236,7 @@ That's it! Now, whenever you log in to your PC, Docker will start automatically,
 
 ### ১. ফোল্ডারের গঠন (Folder Structure)
 
-আপনার প্রজেক্টটি কয়েকটি প্রধান ফোল্ডারে বিভক্ত:
+আপনার প্রজেক্টটি কয়েকটি প্রধান ফোল্ডারে বিভক্ত:
 
 -   **/src/app**: এটি আপনার অ্যাপ্লিকেশনের মূল কেন্দ্র। এখানকার প্রতিটি ফোল্ডার একটি ওয়েব পেজ বা রুটের প্রতিনিধিত্ব করে।
     -   **/src/app/login**: লগইন পেজের কোড এখানে থাকে।
@@ -325,3 +325,5 @@ Then, run the restore command:
 cat backup.sql | docker exec -i stockpilot_db psql -U user -d stockpilot_db
 ```
 Your database is now restored.
+
+    
