@@ -70,14 +70,68 @@ This is the best method because **you don't need to change any of your existing 
 
 ### Prerequisites for Building the Android App:
 
-1.  **Node.js**: Make sure you have Node.js installed. You can download it from [nodejs.org](https://nodejs.org/).
-2.  **Java Development Kit (JDK)**: You need JDK version 11 or newer.
-    *   **Check if you have it:** Open your terminal and run `java -version`.
-    *   **If you don't have it:** We recommend installing it via a manager like [NVM for Windows](https://github.com/coreybutler/nvm-windows) or using your system's package manager.
-3.  **Android SDK Command Line Tools**:
-    *   Download the "Command line tools only" from the [Android Studio download page](https://developer.android.com/studio#command-tools) (scroll to the bottom).
-    *   Create a folder named `Android` in your main user directory (e.g., `C:\Users\YourUser\Android`).
-    *   Extract the downloaded zip file into the `Android` folder. The path should look like `C:\Users\YourUser\Android\cmdline-tools`.
+#### 1. Node.js
+Make sure you have Node.js installed. You can download it from [nodejs.org](https://nodejs.org/).
+
+#### 2. Java Development Kit (JDK)
+You need JDK version 11 or newer.
+*   **Check if you have it:** Open your terminal and run `java -version`.
+*   **If you don't have it:** We recommend installing it via your system's package manager or downloading it from a provider like [Azul Zulu](https://www.azul.com/downloads/?version=java-11-lts&package=jdk).
+
+#### 3. Android SDK Command Line Tools (Very Important)
+
+This is the most crucial part of the setup. The `bubblewrap` tool needs these command-line tools to build the Android app. Follow these steps carefully.
+
+**Step 3.1: Download the Tools**
+1.  Go to the [Android Studio download page](https://developer.android.com/studio#command-line-tools-only).
+2.  Scroll down to the section named **"Command line tools only"**.
+3.  Download the correct zip file for your operating system (Windows, Mac, or Linux).
+
+**Step 3.2: Create Folders and Extract**
+1.  Open your **User** folder. On Windows, this is typically `C:\Users\YourUsername`. On Mac/Linux, it's `/Users/YourUsername`.
+2.  Inside your user folder, create a new folder named `Android`.
+3.  Inside the `Android` folder, create another new folder named `sdk`.
+    *   Your path should now look like: `C:\Users\YourUsername\Android\sdk`
+4.  Unzip the downloaded file. Inside, you will find a folder named `cmdline-tools`.
+5.  Move this `cmdline-tools` folder directly into the `sdk` folder you created.
+6.  **Crucially, rename the `cmdline-tools` folder to `latest`**.
+
+Your final folder structure must be: `C:\Users\YourUsername\Android\sdk\latest`. Inside the `latest` folder, you should see files and folders like `bin`, `lib`, `NOTICE.txt`, etc.
+
+**Step 3.3: Set Environment Variables**
+Your computer needs to know where to find these tools.
+
+*   **For Windows:**
+    1.  Search for "Edit the system environment variables" in the Start Menu and open it.
+    2.  Click the "Environment Variables..." button.
+    3.  Under "System variables", click "New...".
+    4.  For "Variable name", enter `ANDROID_HOME`.
+    5.  For "Variable value", enter the path to your SDK folder: `C:\Users\YourUsername\Android\sdk`. (Replace `YourUsername` with your actual username).
+    6.  Find the `Path` variable in the "System variables" list, select it, and click "Edit...".
+    7.  Click "New" and add two new entries:
+        *   `%ANDROID_HOME%\latest\bin`
+        *   `%ANDROID_HOME%\platform-tools`
+    8.  Click "OK" on all windows to save.
+    9.  **Restart your terminal/PowerShell** for the changes to take effect.
+
+*   **For macOS/Linux:**
+    1.  Open your terminal.
+    2.  Open your shell's configuration file (e.g., `~/.zshrc`, `~/.bashrc`, or `~/.bash_profile`) in a text editor. For example: `nano ~/.zshrc`
+    3.  Add the following lines to the end of the file:
+        ```bash
+        export ANDROID_HOME=$HOME/Android/sdk
+        export PATH=$PATH:$ANDROID_HOME/latest/bin
+        export PATH=$PATH:$ANDROID_HOME/platform-tools
+        ```
+    4.  Save the file and restart your terminal, or run `source ~/.zshrc` (or your respective config file).
+
+**Step 3.4: Install Platform Tools**
+With the environment variables set, open a **new terminal window** and run the following command. It will automatically download the necessary platform tools into your `sdk` folder.
+
+```bash
+sdkmanager "platform-tools" "platforms;android-34"
+```
+You may be asked to accept license agreements. Type `y` and press Enter.
 
 ### Step 1: Install Bubblewrap CLI
 
@@ -257,5 +311,3 @@ Then, run the restore command:
 cat backup.sql | docker exec -i stockpilot_db psql -U user -d stockpilot_db
 ```
 Your database is now restored.
-
-  
