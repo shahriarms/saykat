@@ -50,7 +50,7 @@ npm run db:setup
 
 You can now access your services:
 - **StockPilot Web App**: [http://localhost:3000](http://localhost:3000)
-- **pgAdmin (Optional Database Tool)**: [http://localhost:8080](http://localhost:8080)
+- **pgAdmin (Optional Database Tool)**: [http://localhost:5050](http://localhost:5050)
   - **Email**: `admin@stockpilot.com`
   - **Password**: `password`
 
@@ -107,8 +107,8 @@ Your computer needs to know where to find these tools. This is a critical step. 
     4.  For "Variable name", enter `ANDROID_HOME`.
     5.  For "Variable value", enter the path to your SDK folder: `C:\Users\YourUsername\Android\sdk`. (Replace `YourUsername` with your actual username).
     6.  Find the `Path` variable in the "System variables" list, select it, and click "Edit...".
-    7.  Click "New" and add the first new entry: `%ANDROID_HOME%\latest\bin`. This tells the system where to find the `sdkmanager` tool.
-    8.  Click "New" again and add the second new entry: `%ANDROID_HOME%\platform-tools`. You must add both. This is needed for other tools like `adb`.
+    7.  Now, you will add **two new entries**. Click "New" and add the first new entry: `%ANDROID_HOME%\latest\bin`. This tells the system where to find the `sdkmanager` tool.
+    8.  Click "New" **again** and add the second new entry: `%ANDROID_HOME%\platform-tools`. You must add both. This is needed for other tools like `adb`.
     9.  Click "OK" on all windows to save.
     10. **Restart your terminal/PowerShell** for the changes to take effect. This is very important.
 
@@ -141,7 +141,7 @@ npm install -g @bubblewrap/cli
 
 ### Step 2: Initialize Your Android App Project
 
-This step creates the necessary files for your Android project based on your web app's manifest. **First, ensure your web application is running via Docker.** Then, run the following command in your project's root directory:
+This step creates the necessary files for your Android project. **First, ensure your web application is running via Docker (`docker-compose up -d`).** Then, run the following command in your project's root directory:
 ```bash
 bubblewrap init --manifest http://localhost:3000/manifest.webmanifest
 ```
@@ -153,7 +153,7 @@ bubblewrap init --manifest http://localhost:3000/manifest.webmanifest
 | **Domain**           | **`app.example.com`** (Use this exact placeholder)                                                            | **`your-app.com`** (Your real domain)                                                                    |
 | **Application ID**   | `com.example.stockpilot` (An ID for testing)                                                              | `com.yourdomain.stockpilot` (Your domain in reverse)                                                       |
 | **Display Name**     | `StockPilot` (or your desired name)                                                                       | `StockPilot` (or your final app name)                                                                      |
-| **Icon URL**         | **`http://localhost:3000/icon.ico`** (The dev server must be running!)                                       | Your live icon URL.                                                                                        |
+| **Icon URL**         | **`G:\Mahmud Engineering Shop\public\icon-512.png`** (Give the **local file path**, not a URL. Update the path to match your project location.) | Your live icon URL.                                                                                        |
 | **Signing Key Path** | Accept the default (`./android.keystore`)                                                                 | Accept the default (`./android.keystore`)                                                                  |
 | **Key Password**     | **Enter a secure password and remember it!** This is still crucial for updating your test app.              | **Enter a secure password and remember it!** Losing this password means you can never update your app. |
 
@@ -282,7 +282,7 @@ docker exec -it stockpilot_db psql -U user -d stockpilot_db
 This is the easiest method for most users.
 
 **How to Connect to Your Database in pgAdmin (One-Time Setup Only)**:
-1.  Open pgAdmin at [http://localhost:8080](http://localhost:8080) and log in.
+1.  Open pgAdmin at [http://localhost:5050](http://localhost:5050) and log in.
 2.  Right-click on **Servers** -> **Create** -> **Server...**.
 3.  In the **General** tab, give it a name (e.g., `StockPilot Docker DB`).
 4.  Switch to the **Connection** tab and fill in the details:
